@@ -1,0 +1,20 @@
+1. tiller has a cluster-admin role (bad)
+
+2. the ui container binds to port 80 and I opened the security group wider than was advised (unknown implications)
+
+3. no rbac for ui container (bad)
+
+4. containers are allowed to hit the ec2 metadata api and (some) make use make use of its IAM instance policy (bad).
+
+5. tiller installed with an "insecure 'allow unauthenticated users' policy" and should instead be installed with the --tiller-tls-verify flag (bad) -- See https://docs.helm.sh/using_helm/#securing-your-helm-installation.
+
+6. Helm is installed via an unofficial/unverified snap publisher.
+
+7. There is no network policy engine installed (bad) -- See https://docs.aws.amazon.com/eks/latest/userguide/calico.html
+
+8. Luther users (admins) have system:masters group membership and whoever
+creates the cluster has (perma?) system:masters membership (could be better).
+
+9. Using TCP readiness/liveness checks for gRPC services instead of a real health check: https://kubernetes.io/blog/2018/10/01/health-checking-grpc-servers-on-kubernetes/
+
+10. The kubernetes dashboard is not running (meh)

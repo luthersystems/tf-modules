@@ -1,0 +1,133 @@
+data "aws_route53_zone" "external" {
+  name = "${var.domain}."
+}
+
+data "template_file" "fqdn_bastion" {
+  # example: ics-de-dev-es.luthersystemsapp.com
+  template = "$${project}-$${region_code}-$${env}$${org_part}.$${domain}"
+
+  vars {
+    project     = "${var.luther_project}"
+    region_code = "${var.aws_region_short_code[var.aws_region]}"
+    org_part    = "${var.org_name == "" ? "" : "-"}${var.org_name}"
+    env         = "${var.luther_env}"
+    domain      = "${var.domain}"
+  }
+}
+
+output "bastion_dns_name" {
+  value = "${data.template_file.fqdn_bastion.rendered}"
+}
+
+resource "aws_route53_record" "bastion" {
+  zone_id = "${data.aws_route53_zone.external.zone_id}"
+  name    = "${data.template_file.fqdn_bastion.rendered}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["${module.aws_bastion.aws_instance_public_dns[0]}"]
+}
+
+module "aws_bastion" {
+  source = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-bastion.git?ref=v4.0.0"
+
+  #source = "../../terraform-aws-bastion"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+
+  aws_instance_type = "${var.bastion_aws_instance_type}"
+  aws_ami           = "${var.bastion_ami}"
+
+  aws_vpc_id             = "${aws_vpc.main.id}"
+  aws_subnet_ids         = ["${aws_subnet.net.*.id}"]
+  aws_availability_zones = ["${data.template_file.availability_zones.*.rendered}"]
+  aws_ssh_key_name       = "${var.aws_ssh_key_name}"
+
+  ssh_whitelist_ingress = ["0.0.0.0/0"]
+
+  prometheus_server_security_group_id = "${aws_security_group.monitoring_temp.id}"
+  authorized_key_sync_s3_bucket_arn   = "${var.ssh_public_keys_s3_bucket_arn}"
+  common_static_asset_s3_bucket_arn   = "${var.common_static_s3_bucket_arn}"
+
+  aws_kms_key_arns = ["${var.aws_kms_key_arns}"]
+
+  aws_cloudwatch_alarm_actions_enabled = "${var.aws_cloudwatch_alarm_actions_enabled}"
+  aws_autorecovery_sns_arn             = "${var.aws_autorecovery_sns_arn}"
+  aws_autorecovery_arn                 = "${var.aws_autorecovery_arn}"
+  aws_autorestart_arn                  = "${var.aws_autorestart_arn}"
+
+  providers {
+    aws      = "aws"
+    template = "template"
+  }
+}
+
+# null_resource.bastion_k8s_provisioning uploads k8s resource definitions to
+# ec2 so that they may be loaded into eks from inside the VPC (no need for a
+# tunnel).  Ansible playbooks are responsible for applying and destroying the
+# k8s resources defined by the uploaded files.
+resource "null_resource" "bastion_k8s_provisioning" {
+  triggers = {
+    bastion_host    = "${module.aws_bastion.aws_instance_public_dns[0]}"
+    k8s_local_facts = "${local.k8s_local_facts}"
+  }
+
+  connection {
+    host = "${module.aws_bastion.aws_instance_public_dns[0]}"
+    type = "ssh"
+    user = "ubuntu"
+    port = "${var.bastion_ssh_port}"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo mkdir -p /etc/ansible/facts.d",
+      "${local.k8s_local_facts}",
+    ]
+  }
+}
+
+locals {
+  k8s_local_facts = <<LOCAL
+sudo tee /etc/ansible/facts.d/k8s.fact <<FACT
+{
+    "k8s_cluster_aws_region": ${jsonencode(var.aws_region)},
+    "k8s_cluster_name": ${jsonencode(aws_eks_cluster.app.name)},
+    "k8s_cluster_endpoint": ${jsonencode(aws_eks_cluster.app.endpoint)},
+    "k8s_cluster_version": ${jsonencode(aws_eks_cluster.app.version)},
+    "k8s_cluster_auth_config_map": ${jsonencode(local.config_map_aws_auth)}
+}
+FACT
+LOCAL
+}
+
+resource "aws_security_group_rule" "bastion_egress_all" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = "${module.aws_bastion.aws_security_group_id}"
+}
+
+module "luthername_nsg_monitoring_temp" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "mon"
+  resource       = "nsg"
+  subcomponent   = "temp"
+
+  providers {
+    template = "template"
+  }
+}
+
+# This resource is a placeholder for the monitoring security group.
+resource "aws_security_group" "monitoring_temp" {
+  name   = "${module.luthername_nsg_monitoring_temp.names[0]}"
+  vpc_id = "${aws_vpc.main.id}"
+}
