@@ -5,6 +5,7 @@ module "luthername_snap" {
   luther_env     = "${var.luther_env}"
   org_name       = "${var.org_name}"
   component      = "${var.component}"
+  subcomponent   = "${var.subcomponent}"
   resource       = "snap"
   replication    = "${var.replication}"
 

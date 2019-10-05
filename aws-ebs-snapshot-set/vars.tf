@@ -15,6 +15,10 @@ variable "component" {
   type = "string"
 }
 
+variable "subcomponent" {
+  type = "string"
+}
+
 variable "replication" {
   type    = "string"
   default = "1"
