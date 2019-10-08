@@ -16,7 +16,8 @@ variable "component" {
 }
 
 variable "subcomponent" {
-  type = "string"
+  type    = "string"
+  default = ""
 }
 
 variable "replication" {

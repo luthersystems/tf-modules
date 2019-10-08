@@ -41,22 +41,27 @@ data "aws_ami" "eks_worker" {
 # and can be swapped out as necessary.
 data "aws_region" "current" {}
 
-# EKS currently documents this required userdata for EKS worker nodes to
-# properly configure Kubernetes applications on the EC2 instance.
-# We implement a Terraform local here to simplify Base64 encoding this
-# information into the AutoScaling Launch Configuration.
+# EKS currently documents required userdata (local.eks_worker_userdata) for EKS
+# worker nodes to properly configure Kubernetes applications on the EC2
+# instance.  We implement a Terraform local here to simplify Base64 encoding
+# this information into the AutoScaling Launch Configuration.
+#
 # More information: https://docs.aws.amazon.com/eks/latest/userguide/launch-workers.html
 locals {
+  docker_log_opts = <<LOGOPTS
+{
+    "awslogs-region": ${jsonencode(var.aws_region)},
+    "awslogs-group": ${jsonencode(aws_cloudwatch_log_group.main.name)},
+    "awslogs-create-group": "false",
+    "tag": "docker/{{.Name}}/{{.ID}}"
+}
+LOGOPTS
+
   docker_config_json = <<DOCKERCONFIG
 {
     "bridge": "none",
     "log-driver": "awslogs",
-    "log-opts": {
-        "awslogs-region": ${jsonencode(var.aws_region)},
-        "awslogs-group": ${jsonencode(aws_cloudwatch_log_group.main.name)},
-        "awslogs-create-group": "false",
-        "tag": "docker/{{.Name}}/{{.ID}}"
-    },
+    "log-opts": ${indent(4, local.docker_log_opts)},
     "live-restore": true,
     "max-concurrent-downloads": 10
 }
@@ -67,6 +72,12 @@ DOCKERCONFIG
 set -o xtrace
 /etc/eks/bootstrap.sh --apiserver-endpoint '${aws_eks_cluster.app.endpoint}' --b64-cluster-ca '${aws_eks_cluster.app.certificate_authority.0.data}' --docker-config-json '${local.docker_config_json}' '${aws_eks_cluster.app.name}'
 USERDATA
+}
+
+# Docker log options are output so they can be used to configure a
+# docker-in-docker (dind) daemon to route logs into the same log group.
+output "docker_log_opts" {
+  value = "${local.docker_log_opts}"
 }
 
 module "luthername_eks_worker_launch_configuration" {
