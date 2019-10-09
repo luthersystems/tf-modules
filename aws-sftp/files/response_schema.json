@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "User config response",
+    "type": "object",
+    "properties": {
+        "HomeDirectory": {
+            "type": "string"
+        },
+        "Role": {
+            "type": "string"
+        },
+        "Policy": {
+            "type": "string"
+        },
+        "PublicKeys": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    }
+}
