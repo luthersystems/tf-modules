@@ -6,6 +6,23 @@
         "HomeDirectory": {
             "type": "string"
         },
+        "HomeDirectoryDetails": {
+            "type": "array",
+            "items": {
+                "type": "object"
+            },
+            "properties": {
+                "Entry": {
+                    "type": "string"
+                },
+                "Target": {
+                    "type": "string"
+                }
+            }
+        },
+        "HomeDirectoryType": {
+            "type": "string"
+        },
         "Role": {
             "type": "string"
         },

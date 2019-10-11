@@ -67,7 +67,7 @@ def lambda_handler(event, context):
     if 'HomeDirectoryDetails' in resp_dict:
         if 'HomeDirectory' in resp_dict:
             print("HomeDirectory and HomeDirectoryDetails set.  Ignoring HomeDirectory")
-        resp_data['HomeDirectoryDetails'] = resp_dict['HomeDirectoryDetails']
+        resp_data['HomeDirectoryDetails'] = json.dumps(resp_dict['HomeDirectoryDetails'])
         resp_data['HomeDirectoryType'] = "LOGICAL"
     elif 'HomeDirectory' in resp_dict:
         resp_data['HomeDirectory'] = resp_dict['HomeDirectory']
