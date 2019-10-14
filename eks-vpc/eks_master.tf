@@ -22,6 +22,7 @@ resource "aws_eks_cluster" "app" {
   name                      = "${module.luthername_eks_cluster.names[count.index]}"
   role_arn                  = "${aws_iam_role.eks_master.arn}"
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+  version                   = "${var.kubernetes_version}"
 
   vpc_config {
     endpoint_private_access = true
