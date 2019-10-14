@@ -27,6 +27,10 @@ resource "aws_cloudwatch_log_group" "main" {
   }
 }
 
+output "aws_cloudwatch_log_group" {
+  value = "${aws_cloudwatch_log_group.main.arn}"
+}
+
 module "luthername_logs_subscription_filter" {
   source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
   luther_project = "${var.luther_project}"

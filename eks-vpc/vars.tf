@@ -16,6 +16,10 @@ variable "component" {
   default = "main"
 }
 
+variable "kubernetes_version" {
+  type = "string"
+}
+
 variable "worker_instance_type" {
   type    = "string"
   default = "m5.large"
