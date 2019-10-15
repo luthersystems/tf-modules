@@ -44,8 +44,8 @@ def lambda_handler(event, context):
             return {}
     else:
         # SSH Public Key Auth Flow - The incoming password was empty so we are trying ssh auth and need to return the public key data if we have it
-        if 'PublicKey' in resp_dict:
-            resp_data['PublicKeys'] = [resp_dict['PublicKey']]
+        if 'PublicKeys' in resp_dict:
+            resp_data['PublicKeys'] = resp_dict['PublicKeys']
         else:
             print("Unable to authenticate user - No public keys found")
             return {}
