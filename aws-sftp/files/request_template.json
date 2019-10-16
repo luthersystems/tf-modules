@@ -1,0 +1,5 @@
+{
+    "username": "$input.params('username')",
+    "password": "$util.escapeJavaScript($input.params('Password')).replaceAll("\\'","'")",
+    "serverId": "$input.params('serverId')"
+}
