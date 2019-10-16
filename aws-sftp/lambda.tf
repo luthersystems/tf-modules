@@ -109,7 +109,7 @@ data "archive_file" "lambda" {
 resource "aws_lambda_function" "transfer_auth" {
   function_name    = "${module.luthername_transfer_server_lambda.names[0]}"
   filename         = "${local.lambda_zip}"
-  source_code_hash = "${filebase64sha256(local.lambda_zip)}"
+  source_code_hash = "${data.archive_file.lambda.output_base64sha256}"
   role             = "${aws_iam_role.transfer_lambda.arn}"
   handler          = "lambda.lambda_handler"
   runtime          = "python3.7"
