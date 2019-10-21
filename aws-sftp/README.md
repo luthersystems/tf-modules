@@ -170,12 +170,19 @@ This will render to something like this:
 }
 ```
 
+## Gotchas
+
+1) It seems you must populate the s3 bucket with a directory and file in order
+   for the home directory path to work.
+
+2) It seems you need to "deploy" the staged API (apigw) in order for the lambda
+   to be picked up. You may also need to do this when changing the secret value
+   in secrets manager.
+
 ## Future work
 - hashed passwords (requires updating the lambda to hash the incoming user's
   password received from AWS Transfer via API Gateway)
 - better management of auto-generated log groups for Transfer, Lambda and API
   Gateway services (expiration).
-- replace public endpoint with an in-VPC endpoint with an exposed NLB, elastic
-  IP(s) and IP whitelistable security group
 - possibly disable API GW access logs since it adds no data on top of Lambda and
   Transfer logs

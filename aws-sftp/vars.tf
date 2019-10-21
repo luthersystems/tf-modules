@@ -25,3 +25,8 @@ variable "secrets_prefix" {
 variable "bucket_prefix_patterns" {
   default = ["*"]
 }
+
+variable "sftp_whitelist_ingress" {
+  type = "list"
+  description = "List of allowed CIDRs."
+}
