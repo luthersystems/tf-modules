@@ -124,11 +124,425 @@ module "luthername_transfer_server" {
   }
 }
 
+module "luthername_vpc" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "sftp"
+  resource       = "vpc"
+
+  providers {
+    template = "template"
+  }
+}
+
+resource "aws_vpc" "sftp" {
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
+  tags = "${
+    map(
+      "Name", "${module.luthername_vpc.names[count.index]}",
+      "Project", "${module.luthername_vpc.luther_project}",
+      "Environment", "${module.luthername_vpc.luther_env}",
+      "Component", "${module.luthername_vpc.component}",
+      "Resource", "${module.luthername_vpc.resource}",
+      "ID", "${module.luthername_vpc.ids[count.index]}",
+    )
+  }"
+}
+
+module "luthername_ig" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "sftp"
+  resource       = "ig"
+
+  providers {
+    template = "template"
+  }
+}
+
+resource "aws_internet_gateway" "sftp" {
+  vpc_id = "${aws_vpc.sftp.id}"
+
+  tags = {
+    Name         = "${module.luthername_ig.names[0]}"
+    Project      = "${module.luthername_ig.luther_project}"
+    Environment  = "${module.luthername_ig.luther_env}"
+    Organization = "${module.luthername_ig.org_name}"
+    Component    = "${module.luthername_ig.component}"
+    Resource     = "${module.luthername_ig.resource}"
+    ID           = "${module.luthername_ig.ids[0]}"
+  }
+}
+
+module "luthername_rt" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "sftp"
+  resource       = "rt"
+
+  providers {
+    template = "template"
+  }
+}
+
+resource "aws_route_table" "sftp" {
+  vpc_id = "${aws_vpc.sftp.id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.sftp.id}"
+  }
+
+  tags = {
+    Name         = "${module.luthername_rt.names[0]}"
+    Project      = "${module.luthername_rt.luther_project}"
+    Environment  = "${module.luthername_rt.luther_env}"
+    Organization = "${module.luthername_rt.org_name}"
+    Component    = "${module.luthername_rt.component}"
+    Resource     = "${module.luthername_rt.resource}"
+    ID           = "${module.luthername_rt.ids[0]}"
+  }
+}
+
+resource "aws_route_table_association" "sftp" {
+  count          = "${length(data.template_file.availability_zones.*.rendered)}"
+  subnet_id      = "${element(aws_subnet.sftp.*.id, count.index)}"
+  route_table_id = "${aws_route_table.sftp.id}"
+}
+
+module "luthername_sn" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "sftp"
+  resource       = "sn"
+  replication    = "${length(data.template_file.availability_zones.*.rendered)}"
+
+  providers {
+    template = "template"
+  }
+}
+
+resource "aws_subnet" "sftp" {
+  count             = "${length(data.template_file.availability_zones.*.rendered)}"
+  vpc_id            = "${aws_vpc.sftp.id}"
+  cidr_block        = "${cidrsubnet("10.0.0.0/16", 8, count.index+1)}"
+  availability_zone = "${element(data.template_file.availability_zones.*.rendered, count.index)}"
+
+  map_public_ip_on_launch = true
+
+  depends_on = ["aws_internet_gateway.sftp"]
+
+  tags = "${
+    map(
+      "Name", "${module.luthername_sn.names[count.index]}",
+      "Project", "${module.luthername_sn.luther_project}",
+      "Environment", "${module.luthername_sn.luther_env}",
+      "Organization", "${module.luthername_sn.org_name}",
+      "Component", "${module.luthername_sn.component}",
+      "Resource", "${module.luthername_sn.resource}",
+      "ID", "${module.luthername_sn.ids[count.index]}",
+    )
+  }"
+}
+
+
+module "luthername_eip" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "sftp"
+  resource       = "eip"
+  replication    = "${length(data.template_file.availability_zones.*.rendered)}"
+
+  providers {
+    template = "template"
+  }
+}
+
+resource "aws_eip" "sftp" {
+  count = "${length(data.template_file.availability_zones.*.rendered)}"
+  vpc = true
+
+  depends_on = ["aws_internet_gateway.sftp"]
+
+  tags = "${
+    map(
+      "Name", "${module.luthername_eip.names[count.index]}",
+      "Project", "${module.luthername_eip.luther_project}",
+      "Environment", "${module.luthername_eip.luther_env}",
+      "Organization", "${module.luthername_eip.org_name}",
+      "Component", "${module.luthername_eip.component}",
+      "Resource", "${module.luthername_eip.resource}",
+      "ID", "${module.luthername_eip.ids[count.index]}",
+    )
+  }"
+}
+
+module "luthername_lb" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "sftp"
+  resource       = "lb"
+
+  providers {
+    template = "template"
+  }
+}
+
+resource "aws_lb" "sftp" {
+  name               = "${module.luthername_lb.names[0]}"
+  internal           = false
+  load_balancer_type = "network"
+
+  enable_cross_zone_load_balancing = true
+
+  subnet_mapping {
+    subnet_id     = "${element(aws_subnet.sftp.*.id, 0)}"
+    allocation_id = "${element(aws_eip.sftp.*.id, 0)}"
+  }
+
+  subnet_mapping {
+    subnet_id     = "${element(aws_subnet.sftp.*.id, 1)}"
+    allocation_id = "${element(aws_eip.sftp.*.id, 1)}"
+  }
+
+  subnet_mapping {
+    subnet_id     = "${element(aws_subnet.sftp.*.id, 2)}"
+    allocation_id = "${element(aws_eip.sftp.*.id, 2)}"
+  }
+
+  tags = {
+    Name         = "${module.luthername_lb.names[0]}"
+    Project      = "${module.luthername_lb.luther_project}"
+    Environment  = "${module.luthername_lb.luther_env}"
+    Organization = "${module.luthername_lb.org_name}"
+    Component    = "${module.luthername_lb.component}"
+    Resource     = "${module.luthername_lb.resource}"
+    ID           = "${module.luthername_lb.ids[0]}"
+  }
+}
+
+module "luthername_tg" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "sftp"
+  resource       = "tg"
+
+  providers {
+    template = "template"
+  }
+}
+
+resource "aws_lb_target_group" "sftp" {
+  name        = "${module.luthername_tg.names[0]}"
+  port        = "22"
+  protocol    = "TCP"
+  target_type = "ip"
+  vpc_id      = "${aws_vpc.sftp.id}"
+
+  tags = {
+    Name         = "${module.luthername_tg.names[0]}"
+    Project      = "${module.luthername_tg.luther_project}"
+    Environment  = "${module.luthername_tg.luther_env}"
+    Organization = "${module.luthername_tg.org_name}"
+    Component    = "${module.luthername_tg.component}"
+    Resource     = "${module.luthername_tg.resource}"
+    ID           = "${module.luthername_tg.ids[0]}"
+  }
+}
+
+resource "aws_lb_target_group_attachment" "sftp" {
+  count = "${length(data.template_file.availability_zones.*.rendered)}"
+  target_group_arn = "${aws_lb_target_group.sftp.arn}"
+  target_id        = "${element(data.aws_network_interface.sftp.*.private_ip, count.index)}"
+  port             = 22
+}
+
+data "aws_network_interface" "sftp" {
+  count = "${length(data.template_file.availability_zones.*.rendered)}"
+  id = "${element(aws_vpc_endpoint.sftp.network_interface_ids, count.index)}"
+}
+
+resource "aws_lb_listener" "sftp" {
+  load_balancer_arn = "${aws_lb.sftp.arn}"
+  port              = "22"
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = "${aws_lb_target_group.sftp.arn}"
+  }
+}
+
+module "luthername_nsg" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "sftp"
+  resource       = "nsg"
+
+  providers = {
+    template = "template"
+  }
+}
+
+resource "aws_security_group" "sftp" {
+  description = "sftp security group for ${var.luther_project}-${var.luther_env} (${var.org_name})"
+  name        = "${module.luthername_nsg.names[0]}"
+  vpc_id      = "${aws_vpc.sftp.id}"
+
+  tags = {
+    Name         = "${module.luthername_nsg.names[count.index]}"
+    Project      = "${module.luthername_nsg.luther_project}"
+    Environment  = "${module.luthername_nsg.luther_env}"
+    Organization = "${module.luthername_nsg.org_name}"
+    Component    = "${module.luthername_nsg.component}"
+    Resource     = "${module.luthername_nsg.resource}"
+    ID           = "${module.luthername_nsg.ids[count.index]}"
+  }
+}
+
+resource "aws_security_group_rule" "ingress_sftp" {
+  type              = "ingress"
+  from_port         = "22"
+  to_port           = "22"
+  protocol          = "tcp"
+  cidr_blocks       = ["10.0.0.0/16"] # allow internal healthcheck
+  security_group_id = "${aws_security_group.sftp.id}"
+  description       = "Allow external access to SFTP"
+}
+
+module "luthername_ve" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "sftp"
+  resource       = "ve"
+
+  providers = {
+    template = "template"
+  }
+}
+
+locals {
+  sftp_vpc_service_name = "com.amazonaws.${var.aws_region}.transfer.server"
+}
+
+resource "aws_vpc_endpoint" "sftp" {
+  vpc_id            = "${aws_vpc.sftp.id}"
+  service_name      = "${local.sftp_vpc_service_name}"
+  vpc_endpoint_type = "Interface"
+  auto_accept       = true
+
+  security_group_ids = [
+    "${aws_security_group.sftp.id}",
+  ]
+
+  private_dns_enabled = true
+
+  subnet_ids = ["${aws_subnet.sftp.*.id}"]
+
+  tags = {
+    Name         = "${module.luthername_ve.names[count.index]}"
+    Project      = "${module.luthername_ve.luther_project}"
+    Environment  = "${module.luthername_ve.luther_env}"
+    Organization = "${module.luthername_ve.org_name}"
+    Component    = "${module.luthername_ve.component}"
+    Resource     = "${module.luthername_ve.resource}"
+    ID           = "${module.luthername_ve.ids[count.index]}"
+  }
+}
+
+module "luthername_na" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  luther_project = "${var.luther_project}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "sftp"
+  resource       = "nacl"
+
+  providers = {
+    template = "template"
+  }
+}
+
+resource "aws_network_acl" "sftp" {
+  vpc_id = "${aws_vpc.sftp.id}"
+
+  subnet_ids = ["${aws_subnet.sftp.*.id}"]
+
+  tags = {
+    Name         = "${module.luthername_na.names[count.index]}"
+    Project      = "${module.luthername_na.luther_project}"
+    Environment  = "${module.luthername_na.luther_env}"
+    Organization = "${module.luthername_na.org_name}"
+    Component    = "${module.luthername_na.component}"
+    Resource     = "${module.luthername_na.resource}"
+    ID           = "${module.luthername_na.ids[count.index]}"
+  }
+}
+
+resource "aws_network_acl_rule" "ingress_sftp" {
+  count          = "${length(var.sftp_whitelist_ingress)}"
+  network_acl_id = "${aws_network_acl.sftp.id}"
+  rule_number    = "${count.index + 200}"
+  egress         = false
+  protocol       = "tcp"
+  rule_action    = "allow"
+  cidr_block     = "${element(var.sftp_whitelist_ingress, count.index)}"
+  from_port      = 22
+  to_port        = 22
+}
+
+resource "aws_network_acl_rule" "egress_sftp" {
+  network_acl_id = "${aws_network_acl.sftp.id}"
+  rule_number    = 100
+  egress         = true
+  protocol       = "tcp"
+  rule_action    = "allow"
+  cidr_block     = "0.0.0.0/0"
+  from_port      = 1024
+  to_port        = 65535
+}
+
 resource "aws_transfer_server" "sftp" {
   identity_provider_type = "API_GATEWAY"
   url                    = "${aws_api_gateway_stage.transfer_auth.invoke_url}"
   invocation_role        = "${aws_iam_role.transfer_server.arn}"
   logging_role           = "${aws_iam_role.transfer_server_logging.arn}"
+  endpoint_type          = "VPC_ENDPOINT"
+
+  endpoint_details = {
+    vpc_endpoint_id = "${aws_vpc_endpoint.sftp.id}"
+  }
 
   tags = {
     Name         = "${module.luthername_transfer_server.names[0]}"
@@ -141,6 +555,6 @@ resource "aws_transfer_server" "sftp" {
   }
 }
 
-output "transfer_server_endpoint" {
-  value = "${aws_transfer_server.sftp.endpoint}"
+output "transfer_server_public_dns" {
+  value = "${aws_lb.sftp.dns_name}"
 }
