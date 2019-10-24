@@ -101,6 +101,8 @@ resource "aws_api_gateway_integration_response" "transfer_auth_lambda_response" 
   resource_id = "${aws_api_gateway_resource.transfer_auth_user_config.id}"
   http_method = "${aws_api_gateway_method.transfer_auth_get_config.http_method}"
   status_code = "${aws_api_gateway_method_response.transfer_auth_get_config_200.status_code}"
+
+  depends_on = ["aws_api_gateway_integration.transfer_auth_lambda"]
 }
 
 resource "aws_api_gateway_deployment" "transfer_auth" {
