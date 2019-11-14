@@ -15,8 +15,18 @@ data "template_file" "fqdn_bastion" {
   }
 }
 
+# The common name of the bastion host.  Outputs the name from the route53
+# resource to avoid race conditions with module importers trying to use
+# bastion_dns_name for ssh provisioning.  Though it's better to use
+# bastion_provisioning_dns_name for ssh provisioning on the bastion.
 output "bastion_dns_name" {
-  value = "${data.template_file.fqdn_bastion.rendered}"
+  value = "${aws_route53_record.bastion.name}"
+}
+
+# A better dns name to use for ssh provisioning on the bastion because it can
+# trigger reprovisioning if the bastion is replaced for any reason.
+output "bastion_provisioning_dns_name" {
+  value = "${module.aws_bastion.aws_instance_public_dns[0]}"
 }
 
 resource "aws_route53_record" "bastion" {
@@ -95,7 +105,8 @@ sudo tee /etc/ansible/facts.d/k8s.fact <<FACT
     "k8s_cluster_name": ${jsonencode(aws_eks_cluster.app.name)},
     "k8s_cluster_endpoint": ${jsonencode(aws_eks_cluster.app.endpoint)},
     "k8s_cluster_version": ${jsonencode(aws_eks_cluster.app.version)},
-    "k8s_cluster_auth_config_map": ${jsonencode(local.config_map_aws_auth)}
+    "k8s_cluster_auth_config_map": ${jsonencode(local.config_map_aws_auth)},
+    "k8s_cluster_storageclass": ${jsonencode(local.storageclass_gp2_encrypted)}
 }
 FACT
 LOCAL
