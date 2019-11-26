@@ -98,9 +98,9 @@ module "luthername_eks_worker_autoscaling_group" {
 }
 
 resource "aws_autoscaling_group" "eks_worker" {
-  desired_capacity     = 3
+  desired_capacity     = "${var.autoscaling_desired}"
   launch_configuration = "${aws_launch_configuration.eks_worker.id}"
-  max_size             = 3
+  max_size             = "${var.autoscaling_desired}"
   min_size             = 1
   name                 = "${module.luthername_eks_worker_autoscaling_group.names[count.index]}"
   vpc_zone_identifier  = ["${aws_subnet.net.*.id}"]

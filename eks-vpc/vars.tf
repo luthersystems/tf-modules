@@ -87,3 +87,7 @@ variable "storage_s3_bucket_arn" {
 variable "storage_s3_key_prefixes" {
   type = "list"
 }
+
+variable "autoscaling_desired" {
+  default = 3
+}
