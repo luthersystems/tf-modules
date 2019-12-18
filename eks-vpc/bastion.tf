@@ -66,6 +66,8 @@ module "aws_bastion" {
   aws_autorecovery_sns_arn             = "${var.aws_autorecovery_sns_arn}"
   aws_autorecovery_arn                 = "${local.aws_autorecovery_arn}"
   aws_autorestart_arn                  = "${local.aws_autorestart_arn}"
+  ssh_port = "${var.bastion_ssh_port}"
+
   providers {
     aws      = "aws"
     template = "template"
