@@ -77,6 +77,9 @@ set -o xtrace
 # Additional customizations
 set -euo pipefail
 
+# Install latest security updates
+yum update --security -y
+
 # Disable root SSH
 sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
 systemctl reload sshd
