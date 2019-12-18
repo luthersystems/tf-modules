@@ -74,7 +74,17 @@ DOCKERCONFIG
 set -o xtrace
 /etc/eks/bootstrap.sh --apiserver-endpoint '${aws_eks_cluster.app.endpoint}' --b64-cluster-ca '${aws_eks_cluster.app.certificate_authority.0.data}' --docker-config-json '${local.docker_config_json}' '${aws_eks_cluster.app.name}'
 
+# Additional customizations
 set -euo pipefail
+
+# Install latest security updates
+yum update --security -y
+
+# Disable root SSH
+sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+systemctl reload sshd
+
+# Install Amazon Inspector Agent
 curl -o install-inspector.sh https://inspector-agent.amazonaws.com/linux/latest/install
 curl -o install-inspector.sh.sig https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install.sig
 echo '${base64encode(local.inspector_gpg_key)}' | base64 -d | gpg --import
