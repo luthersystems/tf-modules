@@ -50,6 +50,7 @@ LfO9+3sEIlNrsMib0KRLDeBt3EuDsaBZgOkqjDhgJUesqiCy
 =iEhB
 -----END PGP PUBLIC KEY BLOCK-----
 GPGKEY
+
   docker_log_opts = <<LOGOPTS
 {
     "awslogs-region": ${jsonencode(var.aws_region)},

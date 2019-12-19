@@ -47,25 +47,26 @@ module "aws_bastion" {
 
   #source = "../../terraform-aws-bastion"
 
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
-  aws_instance_type = "${var.bastion_aws_instance_type}"
-  aws_ami           = "${var.bastion_ami}"
-  aws_vpc_id             = "${aws_vpc.main.id}"
-  aws_subnet_ids         = ["${aws_subnet.net.*.id}"]
-  aws_availability_zones = ["${data.template_file.availability_zones.*.rendered}"]
-  aws_ssh_key_name       = "${var.aws_ssh_key_name}"
-  ssh_whitelist_ingress = ["0.0.0.0/0"]
-  prometheus_server_security_group_id = "${aws_security_group.monitoring_temp.id}"
-  authorized_key_sync_s3_bucket_arn   = "${var.ssh_public_keys_s3_bucket_arn}"
-  common_static_asset_s3_bucket_arn   = "${var.common_static_s3_bucket_arn}"
-  aws_kms_key_arns = ["${var.aws_kms_key_arns}"]
+  luther_project                       = "${var.luther_project}"
+  aws_region                           = "${var.aws_region}"
+  luther_env                           = "${var.luther_env}"
+  org_name                             = "${var.org_name}"
+  aws_instance_type                    = "${var.bastion_aws_instance_type}"
+  aws_ami                              = "${var.bastion_ami}"
+  aws_vpc_id                           = "${aws_vpc.main.id}"
+  aws_subnet_ids                       = ["${aws_subnet.net.*.id}"]
+  aws_availability_zones               = ["${data.template_file.availability_zones.*.rendered}"]
+  aws_ssh_key_name                     = "${var.aws_ssh_key_name}"
+  ssh_whitelist_ingress                = ["0.0.0.0/0"]
+  prometheus_server_security_group_id  = "${aws_security_group.monitoring_temp.id}"
+  authorized_key_sync_s3_bucket_arn    = "${var.ssh_public_keys_s3_bucket_arn}"
+  common_static_asset_s3_bucket_arn    = "${var.common_static_s3_bucket_arn}"
+  aws_kms_key_arns                     = ["${var.aws_kms_key_arns}"]
   aws_cloudwatch_alarm_actions_enabled = "${var.aws_cloudwatch_alarm_actions_enabled}"
   aws_autorecovery_sns_arn             = "${var.aws_autorecovery_sns_arn}"
   aws_autorecovery_arn                 = "${local.aws_autorecovery_arn}"
   aws_autorestart_arn                  = "${local.aws_autorestart_arn}"
+  ssh_port                             = "${var.bastion_ssh_port}"
   providers {
     aws      = "aws"
     template = "template"
