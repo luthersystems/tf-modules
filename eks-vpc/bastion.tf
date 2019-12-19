@@ -43,9 +43,7 @@ locals {
 }
 
 module "aws_bastion" {
-  source = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-bastion.git?ref=v4.0.0"
-
-  #source = "../../terraform-aws-bastion"
+  source = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-bastion.git?ref=v5.0.0"
 
   luther_project                       = "${var.luther_project}"
   aws_region                           = "${var.aws_region}"
