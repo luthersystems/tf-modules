@@ -22,6 +22,15 @@ resource "aws_instance" "service" {
 
   ebs_optimized = "${lookup(var.aws_ebs_optimizable_instance_types, var.aws_instance_type, false)}"
 
+  user_data = <<USERDATA
+#!/bin/bash
+set -x
+
+# Disable root SSH
+sed -i 's/^#PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
+systemctl reload sshd
+USERDATA
+
   root_block_device {
     volume_type           = "gp2"
     volume_size           = "${var.root_volume_size_gb}"
