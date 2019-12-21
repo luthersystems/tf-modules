@@ -45,15 +45,6 @@ new AZ to a region.
 EOF
 }
 
-variable "snapshots_should_exist" {
-  type = "string"
-
-  description = <<EOF
-A boolean value that should be 1 if terraform should create a snapshot during
-an apply and 0 otherwise.
-EOF
-}
-
 variable "fs_type" {
   type    = "string"
   default = "ext4"
