@@ -498,6 +498,10 @@ resource "aws_security_group" "eks_worker" {
   }"
 }
 
+output "eks_worker_security_group_id" {
+  value = "${aws_security_group.eks_worker.id}"
+}
+
 resource "aws_security_group_rule" "eks_worker_ingress_bastion_ssh" {
   description              = "Allow bastion to connect to the worker over SSH"
   security_group_id        = "${aws_security_group.eks_worker.id}"

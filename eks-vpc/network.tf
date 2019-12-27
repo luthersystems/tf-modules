@@ -30,6 +30,10 @@ resource "aws_vpc" "main" {
   }"
 }
 
+output "main_vpc_id" {
+  value = "${aws_vpc.main.id}"
+}
+
 module "luthername_net" {
   source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
   luther_project = "${var.luther_project}"
@@ -70,6 +74,10 @@ resource "aws_subnet" "net" {
       "kubernetes.io/role/elb", "1",
     )
   }"
+}
+
+output "net_subnet_ids" {
+  value = "${aws_subnet.net.*.id}"
 }
 
 # ip addresses in block 10.0.0.0/18 belong to third-party resources used by
