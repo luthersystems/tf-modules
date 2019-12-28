@@ -155,6 +155,8 @@ resource "aws_autoscaling_group" "eks_worker" {
   name                 = "${module.luthername_eks_worker_autoscaling_group.names[count.index]}"
   vpc_zone_identifier  = ["${aws_subnet.net.*.id}"]
 
+  target_group_arns    = ["${var.worker_asg_target_group_arns}"]
+
   tag {
     key                 = "Name"
     value               = "${module.luthername_eks_worker_autoscaling_group.names[count.index]}"
@@ -196,6 +198,10 @@ resource "aws_autoscaling_group" "eks_worker" {
     value               = "owned"
     propagate_at_launch = true
   }
+}
+
+output "eks_worker_asg_name" {
+  value = "${aws_autoscaling_group.eks_worker.name}"
 }
 
 module "luthername_eks_worker_role" {
