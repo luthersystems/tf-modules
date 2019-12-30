@@ -91,3 +91,9 @@ variable "storage_s3_key_prefixes" {
 variable "autoscaling_desired" {
   default = 3
 }
+
+variable "worker_asg_target_group_arns" {
+  type = "list"
+
+  default = []
+}
