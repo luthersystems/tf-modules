@@ -62,3 +62,8 @@ variable "k8s_storage_class" {
 variable "k8s_access_modes" {
   type = "list"
 }
+
+variable "additional_tags" {
+  type    = "map"
+  default = {}
+}

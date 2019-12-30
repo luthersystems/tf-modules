@@ -25,7 +25,7 @@ module "luthername_pv" {
 data "template_file" "persistentvolume_document" {
   count = "${var.replication}"
 
-  template=<<TEMPLATE
+  template = <<TEMPLATE
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -57,7 +57,7 @@ TEMPLATE
 }
 
 module "aws_ebs_volume_set" {
-  source = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//aws-ebs-volume-set?ref=v3.0.0"
+  source = "../aws-ebs-volume-set"
 
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
@@ -70,6 +70,7 @@ module "aws_ebs_volume_set" {
   aws_availability_zones = "${var.aws_availability_zones}"
   volume_size_gb         = "${var.volume_size_gb}"
   aws_kms_key_arn        = "${data.aws_kms_key.main.arn}"
+  additional_tags        = "${var.additional_tags}"
 
   providers = {
     aws      = "aws"

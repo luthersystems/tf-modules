@@ -44,3 +44,8 @@ internally using data sources, to provide backwards compatability if AWS adds a
 new AZ to a region.
 EOF
 }
+
+variable "additional_tags" {
+  type    = "map"
+  default = {}
+}
