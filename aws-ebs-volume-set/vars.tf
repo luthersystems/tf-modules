@@ -49,3 +49,7 @@ variable "additional_tags" {
   type    = "map"
   default = {}
 }
+
+variable "snapshot_ids" {
+  default = [""]
+}

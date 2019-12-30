@@ -71,6 +71,7 @@ module "aws_ebs_volume_set" {
   volume_size_gb         = "${var.volume_size_gb}"
   aws_kms_key_arn        = "${data.aws_kms_key.main.arn}"
   additional_tags        = "${var.additional_tags}"
+  snapshot_ids           = "${var.snapshot_ids}"
 
   providers = {
     aws      = "aws"
