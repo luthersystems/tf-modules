@@ -45,15 +45,6 @@ new AZ to a region.
 EOF
 }
 
-variable "snapshots_should_exist" {
-  type = "string"
-
-  description = <<EOF
-A boolean value that should be 1 if terraform should create a snapshot during
-an apply and 0 otherwise.
-EOF
-}
-
 variable "fs_type" {
   type    = "string"
   default = "ext4"
@@ -70,4 +61,9 @@ variable "k8s_storage_class" {
 
 variable "k8s_access_modes" {
   type = "list"
+}
+
+variable "additional_tags" {
+  type    = "map"
+  default = {}
 }
