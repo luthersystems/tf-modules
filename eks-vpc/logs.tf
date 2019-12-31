@@ -52,32 +52,4 @@ resource "aws_cloudwatch_log_subscription_filter" "level_error" {
   filter_pattern  = "?\"panic.go\" ?\"level=fatal\" ?\"level=panic\" ?\"level=error\" ?\"level=warn\" ?\"ERROR\" ?\"WARN\" ?\"FATAL\" ?\"CRITICAL\" ?\"NOTICE\" ?\"PANIC\""
   destination_arn = "${var.aws_cloudwatch_log_subscription_filter_lambda_arn}"
   distribution    = "ByLogStream"
-
-  depends_on = ["aws_lambda_permission.cloudwatch_subscription_filter"]
-}
-
-module "luthername_cloudwatch_logs_lambda_permissions" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
-  component      = "${var.component}"
-  resource       = "fnperm"
-  subcomponent   = "logs"
-
-  providers = {
-    template = "template"
-  }
-}
-
-resource "aws_lambda_permission" "cloudwatch_subscription_filter" {
-  statement_id   = "${module.luthername_cloudwatch_logs_lambda_permissions.names[0]}"
-  action         = "lambda:InvokeFunction"
-  function_name  = "${var.aws_cloudwatch_log_subscription_filter_lambda_arn}"
-  principal      = "logs.${var.aws_region}.amazonaws.com"
-  source_arn     = "${aws_cloudwatch_log_group.main.arn}"
-  source_account = "${var.aws_account_id}"
-
-  provider = "aws.cloudwatch"
 }
