@@ -356,8 +356,11 @@ resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
         "ec2:CreateTags",
         "ec2:DeleteTags",
         "ec2:DeleteSecurityGroup",
+        "ec2:DescribeAccountAttributes",
+        "ec2:DescribeAddresses",
         "ec2:DescribeInstances",
         "ec2:DescribeInstanceStatus",
+        "ec2:DescribeInternetGateways",
         "ec2:DescribeSecurityGroups",
         "ec2:DescribeSubnets",
         "ec2:DescribeTags",
@@ -408,6 +411,7 @@ resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
     {
       "Effect": "Allow",
       "Action": [
+        "iam:CreateServiceLinkedRole",
         "iam:GetServerCertificate",
         "iam:ListServerCertificates"
       ],
