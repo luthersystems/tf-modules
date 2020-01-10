@@ -17,3 +17,7 @@ variable "retain_count" {
 variable "role_name" {
   default = "dlm-lifecycle"
 }
+
+variable "description" {
+  type = "string"
+}

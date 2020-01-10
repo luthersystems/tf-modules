@@ -3,7 +3,7 @@ data "aws_iam_role" "dlm" {
 }
 
 resource "aws_dlm_lifecycle_policy" "policy" {
-  description        = "Fabric DLM lifecycle policy"
+  description        = "${var.description}"
   execution_role_arn = "${data.aws_iam_role.arn}"
   state              = "ENABLED"
 
@@ -11,7 +11,7 @@ resource "aws_dlm_lifecycle_policy" "policy" {
     resource_types = ["VOLUME"]
 
     schedule {
-      name = "Fabric volume snapshots"
+      name = "snapshot schedule"
 
       create_rule {
         interval      = "${var.interval_hours}"
