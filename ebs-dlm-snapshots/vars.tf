@@ -13,3 +13,11 @@ variable "times" {
 variable "retain_count" {
   default = 14
 }
+
+variable "role_name" {
+  default = "dlm-lifecycle"
+}
+
+variable "description" {
+  type = "string"
+}
