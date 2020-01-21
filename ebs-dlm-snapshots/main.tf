@@ -1,10 +1,11 @@
-data "aws_iam_role" "dlm" {
-  name = "${var.role_name}"
+locals {
+  default_role_arn   = "arn:aws:iam::967058059066:role/dlm-lifecycle"
+  execution_role_arn = "${var.role_arn == "" ? local.default_role_arn : var.role_arn}"
 }
 
 resource "aws_dlm_lifecycle_policy" "policy" {
   description        = "${var.description}"
-  execution_role_arn = "${data.aws_iam_role.dlm.arn}"
+  execution_role_arn = "${local.execution_role_arn}"
   state              = "ENABLED"
 
   policy_details {
