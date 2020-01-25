@@ -105,7 +105,9 @@ sudo tee /etc/ansible/facts.d/k8s.fact <<FACT
     "k8s_cluster_endpoint": ${jsonencode(aws_eks_cluster.app.endpoint)},
     "k8s_cluster_version": ${jsonencode(aws_eks_cluster.app.version)},
     "k8s_cluster_auth_config_map": ${jsonencode(local.config_map_aws_auth)},
-    "k8s_cluster_storageclass": ${jsonencode(local.storageclass_gp2_encrypted)}
+    "k8s_cluster_storageclass": ${jsonencode(local.storageclass_gp2_encrypted)},
+    "k8s_cluster_storageclass_gp2_encrypted": ${jsonencode(local.storageclass_gp2_encrypted)},
+    "k8s_cluster_storageclass_gp2": ${jsonencode(local.storageclass_gp2)}
 }
 FACT
 LOCAL
