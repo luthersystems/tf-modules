@@ -40,6 +40,7 @@ parameters:
   kmsKeyId: ${var.volumes_aws_kms_key_id}
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
 STORAGECLASS
 }
 
