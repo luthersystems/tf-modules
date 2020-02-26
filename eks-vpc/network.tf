@@ -136,20 +136,17 @@ resource "aws_internet_gateway" "main" {
 
 resource "aws_route_table" "main" {
   vpc_id = "${aws_vpc.main.id}"
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.main.id}"
-  }
 }
 
-#resource "aws_route" "main_igw" {
-#    route_table_id = "${aws_vpc.main.main_route_table_id}"
-#    destination_cidr_block = "0.0.0.0/0"
-#    gateway_id = "${aws_internet_gateway.main.id}"
-#
-#    depends_on = ["aws_internet_gateway.main"]
-#}
+output "route_table_id" {
+  value = "${aws_route_table.main.id}"
+}
+
+resource "aws_route" "main_igw" {
+    route_table_id = "${aws_vpc.main.main_route_table_id}"
+    destination_cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.main.id}"
+}
 
 resource "aws_route_table_association" "main_igw" {
   count          = "${length(data.template_file.availability_zones.*.rendered)}"
