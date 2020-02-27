@@ -102,7 +102,7 @@ output "docker_log_opts" {
 }
 
 module "luthername_eks_worker_launch_configuration" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -133,7 +133,7 @@ resource "aws_launch_configuration" "eks_worker" {
 }
 
 module "luthername_eks_worker_autoscaling_group" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -205,7 +205,7 @@ output "eks_worker_asg_name" {
 }
 
 module "luthername_eks_worker_role" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -452,7 +452,7 @@ POLICY
 }
 
 module "luthername_eks_worker_profile" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -472,7 +472,7 @@ resource "aws_iam_instance_profile" "eks_worker" {
 }
 
 module "luthername_eks_worker_nsg" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"

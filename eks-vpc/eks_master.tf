@@ -1,5 +1,5 @@
 module "luthername_eks_cluster" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -51,7 +51,7 @@ output "aws_eks_cluster_endpoint" {
 }
 
 module "luthername_eks_master_role" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -136,7 +136,7 @@ data "aws_iam_policy_document" "attach_volumes" {
 }
 
 module "luthername_eks_master_nsg" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"

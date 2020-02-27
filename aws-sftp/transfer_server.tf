@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "transfer_assume_role" {
 }
 
 module "luthername_transfer_server_role" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -59,7 +59,7 @@ resource "aws_iam_role_policy" "transfer_server" {
 }
 
 module "luthername_transfer_server_logging_role" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -111,7 +111,7 @@ resource "aws_iam_role_policy" "transfer_server_logging" {
 }
 
 module "luthername_transfer_server" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -125,7 +125,7 @@ module "luthername_transfer_server" {
 }
 
 module "luthername_vpc" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -156,7 +156,7 @@ resource "aws_vpc" "sftp" {
 }
 
 module "luthername_ig" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -184,7 +184,7 @@ resource "aws_internet_gateway" "sftp" {
 }
 
 module "luthername_rt" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -223,7 +223,7 @@ resource "aws_route_table_association" "sftp" {
 }
 
 module "luthername_sn" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -262,7 +262,7 @@ resource "aws_subnet" "sftp" {
 
 
 module "luthername_eip" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -296,7 +296,7 @@ resource "aws_eip" "sftp" {
 }
 
 module "luthername_lb" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -343,7 +343,7 @@ resource "aws_lb" "sftp" {
 }
 
 module "luthername_tg" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -398,7 +398,7 @@ resource "aws_lb_listener" "sftp" {
 }
 
 module "luthername_nsg" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -438,7 +438,7 @@ resource "aws_security_group_rule" "ingress_sftp" {
 }
 
 module "luthername_ve" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -481,7 +481,7 @@ resource "aws_vpc_endpoint" "sftp" {
 }
 
 module "luthername_na" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"

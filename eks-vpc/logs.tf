@@ -1,5 +1,5 @@
 module "luthername_logs" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -32,7 +32,7 @@ output "aws_cloudwatch_log_group" {
 }
 
 module "luthername_logs_subscription_filter" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
