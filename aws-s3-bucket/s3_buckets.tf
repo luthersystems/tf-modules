@@ -1,5 +1,5 @@
 module "luthername_s3_bucket" {
-  source                = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
+  source                = "../luthername"
   luther_project        = "${var.luther_project}"
   aws_region            = "${var.aws_region}"
   aws_region_short_code = "${var.aws_region_short_code}"
