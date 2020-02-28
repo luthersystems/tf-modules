@@ -7,7 +7,7 @@ output "k8s_persistentvolume_document" {
 }
 
 module "luthername_pv" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "../luthername"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"

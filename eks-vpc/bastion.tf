@@ -123,7 +123,7 @@ resource "aws_security_group_rule" "bastion_egress_all" {
 }
 
 module "luthername_nsg_monitoring_temp" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "../luthername"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"

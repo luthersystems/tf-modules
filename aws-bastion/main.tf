@@ -1,5 +1,5 @@
 module "luthername_ec2" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "../luthername"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -113,8 +113,8 @@ output "aws_instance_public_dns" {
 }
 
 module "aws_instance_monitoring_actions_service" {
-  source                               = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-instance-monitoring-actions.git?ref=v1.0.0"
-  replication                          = "1"                                                                                                   # TODO
+  source                               = "../aws-instance-monitoring-actions"
+  replication                          = "1"
   aws_region                           = "${var.aws_region}"
   aws_instance_ids                     = ["${aws_instance.service.id}"]
   instance_names                       = "${module.luthername_ec2.names}"
@@ -128,7 +128,7 @@ module "aws_instance_monitoring_actions_service" {
 }
 
 module "luthername_nsg" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "../luthername"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -209,7 +209,7 @@ data "aws_iam_policy_document" "ec2_assume_role" {
 }
 
 module "luthername_policy_logs" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "../luthername"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -243,7 +243,7 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
 }
 
 module "luthername_policy_authorized_key_sync" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "../luthername"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -283,7 +283,7 @@ data "aws_iam_policy_document" "authorized_key_sync" {
 }
 
 module "luthername_policy_common_assets" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "../luthername"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
@@ -315,7 +315,7 @@ data "aws_iam_policy_document" "common_assets" {
 }
 
 #module "luthername_policy_project_assets" {
-#    source = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+#    source = "../luthername"
 #    luther_project = "${var.luther_project}"
 #    aws_region = "${var.aws_region}"
 #    luther_env = "${var.luther_env}"
@@ -342,7 +342,7 @@ data "aws_iam_policy_document" "common_assets" {
 #}
 
 module "luthername_policy_decrypt" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "../luthername"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"

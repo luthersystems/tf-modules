@@ -8,7 +8,7 @@ https://aws.amazon.com/blogs/storage/enable-password-authentication-for-aws-tran
 The configuration looks something like this:
 ```
 module "luthername_sftp_secrets_prefix" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+  source         = "../luthername"
   luther_project = "${var.luther_project}"
   aws_region     = "${var.aws_region}"
   luther_env     = "${var.luther_env}"
