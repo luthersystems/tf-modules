@@ -110,6 +110,13 @@ sudo tee /etc/ansible/facts.d/k8s.fact <<FACT
     "k8s_cluster_storageclass_gp2": ${jsonencode(local.storageclass_gp2)}
 }
 FACT
+
+# Facts used by the k8s_external_dns role in mars
+sudo tee /etc/ansible/facts.d/externaldns.fact <<FACT
+{
+  "service_account_iam_role_arn": "${module.externaldns_service_account_iam_role.arn}"
+}
+FACT
 LOCAL
 }
 

@@ -50,6 +50,29 @@ output "aws_eks_cluster_endpoint" {
   value = "${aws_eks_cluster.app.endpoint}"
 }
 
+data "external" "oidc_thumbprint" {
+  program = ["bash", "${path.module}/files/thumbprint.sh", "${var.aws_region}"]
+}
+
+resource "aws_iam_openid_connect_provider" "app" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["${data.external.oidc_thumbprint.result.thumbprint}"]
+  url             = "${aws_eks_cluster.app.identity.0.oidc.0.issuer}"
+}
+
+locals {
+  oidc_provider_name = "${replace(aws_eks_cluster.app.identity.0.oidc.0.issuer, "/^https:[/][/]/", "")}"
+  oidc_provider_arn = "${aws_iam_openid_connect_provider.app.arn}"
+}
+
+output "oidc_provider_name" {
+  value = "${local.oidc_provider_name}"
+}
+
+output "oidc_provider_arn" {
+  value = "${local.oidc_provider_arn}"
+}
+
 module "luthername_eks_master_role" {
   source         = "../luthername"
   luther_project = "${var.luther_project}"
