@@ -153,3 +153,9 @@ resource "aws_route_table_association" "main_igw" {
   subnet_id      = "${aws_subnet.net.*.id[count.index]}"
   route_table_id = "${aws_route_table.main.id}"
 }
+
+resource "aws_route_table_association" "net_private_main_igw" {
+  count          = "${length(data.template_file.availability_zones.*.rendered)}"
+  subnet_id      = "${aws_subnet.net_private.*.id[count.index]}"
+  route_table_id = "${aws_route_table.main.id}"
+}
