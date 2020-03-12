@@ -144,12 +144,12 @@ resource "aws_vpc" "sftp" {
   enable_dns_hostnames = true
 
   tags = {
-    "Name"        = module.luthername_vpc.names[count.index]
+    "Name"        = module.luthername_vpc.names[0]
     "Project"     = module.luthername_vpc.luther_project
     "Environment" = module.luthername_vpc.luther_env
     "Component"   = module.luthername_vpc.component
     "Resource"    = module.luthername_vpc.resource
-    "ID"          = module.luthername_vpc.ids[count.index]
+    "ID"          = module.luthername_vpc.ids[0]
   }
 }
 
@@ -413,13 +413,13 @@ resource "aws_security_group" "sftp" {
   vpc_id      = aws_vpc.sftp.id
 
   tags = {
-    Name         = module.luthername_nsg.names[count.index]
+    Name         = module.luthername_nsg.names[0]
     Project      = module.luthername_nsg.luther_project
     Environment  = module.luthername_nsg.luther_env
     Organization = module.luthername_nsg.org_name
     Component    = module.luthername_nsg.component
     Resource     = module.luthername_nsg.resource
-    ID           = module.luthername_nsg.ids[count.index]
+    ID           = module.luthername_nsg.ids[0]
   }
 }
 
@@ -468,13 +468,13 @@ resource "aws_vpc_endpoint" "sftp" {
   subnet_ids = aws_subnet.sftp.*.id
 
   tags = {
-    Name         = module.luthername_ve.names[count.index]
+    Name         = module.luthername_ve.names[0]
     Project      = module.luthername_ve.luther_project
     Environment  = module.luthername_ve.luther_env
     Organization = module.luthername_ve.org_name
     Component    = module.luthername_ve.component
     Resource     = module.luthername_ve.resource
-    ID           = module.luthername_ve.ids[count.index]
+    ID           = module.luthername_ve.ids[0]
   }
 }
 
@@ -498,13 +498,13 @@ resource "aws_network_acl" "sftp" {
   subnet_ids = aws_subnet.sftp.*.id
 
   tags = {
-    Name         = module.luthername_na.names[count.index]
+    Name         = module.luthername_na.names[0]
     Project      = module.luthername_na.luther_project
     Environment  = module.luthername_na.luther_env
     Organization = module.luthername_na.org_name
     Component    = module.luthername_na.component
     Resource     = module.luthername_na.resource
-    ID           = module.luthername_na.ids[count.index]
+    ID           = module.luthername_na.ids[0]
   }
 }
 

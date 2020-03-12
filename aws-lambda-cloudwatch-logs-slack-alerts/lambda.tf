@@ -32,14 +32,14 @@ resource "aws_iam_role" "lambda" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 
   tags = {
-    Name         = module.luthername_lambda_role.names[count.index]
+    Name         = module.luthername_lambda_role.names[0]
     Project      = module.luthername_lambda_role.luther_project
     Environment  = module.luthername_lambda_role.luther_env
     Organization = module.luthername_lambda_role.org_name
     Component    = module.luthername_lambda_role.component
     Subcomponent = module.luthername_lambda_role.subcomponent
     Resource     = module.luthername_lambda_role.resource
-    ID           = module.luthername_lambda_role.ids[count.index]
+    ID           = module.luthername_lambda_role.ids[0]
   }
 }
 
@@ -123,14 +123,14 @@ resource "aws_lambda_function" "main" {
   runtime          = "nodejs8.10"
 
   tags = {
-    Name         = module.luthername_lambda.names[count.index]
+    Name         = module.luthername_lambda.names[0]
     Project      = module.luthername_lambda.luther_project
     Environment  = module.luthername_lambda.luther_env
     Organization = module.luthername_lambda.org_name
     Component    = module.luthername_lambda.component
     Subcomponent = module.luthername_lambda.subcomponent
     Resource     = module.luthername_lambda.resource
-    ID           = module.luthername_lambda.ids[count.index]
+    ID           = module.luthername_lambda.ids[0]
   }
 
   environment {

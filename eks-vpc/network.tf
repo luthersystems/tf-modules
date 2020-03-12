@@ -18,12 +18,12 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
 
   tags = {
-    "Name"                                                            = module.luthername_vpc.names[count.index]
+    "Name"                                                            = module.luthername_vpc.names[0]
     "Project"                                                         = module.luthername_vpc.luther_project
     "Environment"                                                     = module.luthername_vpc.luther_env
     "Component"                                                       = module.luthername_vpc.component
     "Resource"                                                        = module.luthername_vpc.resource
-    "ID"                                                              = module.luthername_vpc.ids[count.index]
+    "ID"                                                              = module.luthername_vpc.ids[0]
     "kubernetes.io/cluster/${module.luthername_eks_cluster.names[0]}" = "shared"
   }
 }
@@ -128,13 +128,13 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name         = module.luthername_igw.names[count.index]
+    Name         = module.luthername_igw.names[0]
     Project      = module.luthername_igw.luther_project
     Environment  = module.luthername_igw.luther_env
     Organization = module.luthername_igw.org_name
     Component    = module.luthername_igw.component
     Resource     = module.luthername_igw.resource
-    ID           = module.luthername_igw.ids[count.index]
+    ID           = module.luthername_igw.ids[0]
   }
 }
 

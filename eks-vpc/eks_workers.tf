@@ -128,7 +128,7 @@ resource "aws_launch_configuration" "eks_worker" {
   iam_instance_profile        = aws_iam_instance_profile.eks_worker.name
   image_id                    = data.aws_ami.eks_worker.id
   instance_type               = var.worker_instance_type
-  name_prefix                 = module.luthername_eks_worker_launch_configuration.names[count.index]
+  name_prefix                 = module.luthername_eks_worker_launch_configuration.names[0]
   security_groups             = [aws_security_group.eks_worker.id]
   user_data_base64            = base64encode(local.eks_worker_userdata)
   key_name                    = var.aws_ssh_key_name
@@ -162,14 +162,14 @@ resource "aws_autoscaling_group" "eks_worker" {
   launch_configuration = aws_launch_configuration.eks_worker.id
   max_size             = var.autoscaling_desired
   min_size             = 1
-  name                 = module.luthername_eks_worker_autoscaling_group.names[count.index]
+  name                 = module.luthername_eks_worker_autoscaling_group.names[0]
   vpc_zone_identifier  = aws_subnet.net.*.id
 
   target_group_arns = var.worker_asg_target_group_arns
 
   tag {
     key                 = "Name"
-    value               = module.luthername_eks_worker_autoscaling_group.names[count.index]
+    value               = module.luthername_eks_worker_autoscaling_group.names[0]
     propagate_at_launch = false
   }
 
@@ -230,7 +230,7 @@ module "luthername_eks_worker_role" {
 }
 
 resource "aws_iam_role" "eks_worker" {
-  name               = module.luthername_eks_worker_role.names[count.index]
+  name               = module.luthername_eks_worker_role.names[0]
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 }
 
@@ -478,7 +478,7 @@ module "luthername_eks_worker_profile" {
 }
 
 resource "aws_iam_instance_profile" "eks_worker" {
-  name = module.luthername_eks_worker_profile.names[count.index]
+  name = module.luthername_eks_worker_profile.names[0]
   role = aws_iam_role.eks_worker.name
 }
 
@@ -498,7 +498,7 @@ module "luthername_eks_worker_nsg" {
 }
 
 resource "aws_security_group" "eks_worker" {
-  name        = module.luthername_eks_worker_nsg.names[count.index]
+  name        = module.luthername_eks_worker_nsg.names[0]
   description = "Security group for worker nodes in k8s"
   vpc_id      = aws_vpc.main.id
 
@@ -510,13 +510,13 @@ resource "aws_security_group" "eks_worker" {
   }
 
   tags = {
-    "Name"                                              = module.luthername_eks_worker_nsg.names[count.index]
+    "Name"                                              = module.luthername_eks_worker_nsg.names[0]
     "Project"                                           = module.luthername_eks_worker_nsg.luther_project
     "Environment"                                       = module.luthername_eks_worker_nsg.luther_env
     "Organization"                                      = module.luthername_eks_worker_nsg.org_name
     "Component"                                         = module.luthername_eks_worker_nsg.component
     "Resource"                                          = module.luthername_eks_worker_nsg.resource
-    "ID"                                                = module.luthername_eks_worker_nsg.ids[count.index]
+    "ID"                                                = module.luthername_eks_worker_nsg.ids[0]
     "kubernetes.io/cluster/${aws_eks_cluster.app.name}" = "owned"
   }
 }

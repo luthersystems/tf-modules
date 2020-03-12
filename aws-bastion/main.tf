@@ -153,13 +153,13 @@ resource "aws_security_group" "service" {
   vpc_id = var.aws_vpc_id
 
   tags = {
-    Name         = module.luthername_nsg.names[count.index]
+    Name         = module.luthername_nsg.names[0]
     Project      = module.luthername_nsg.luther_project
     Environment  = module.luthername_nsg.luther_env
     Organization = module.luthername_nsg.org_name
     Component    = module.luthername_nsg.component
     Resource     = module.luthername_nsg.resource
-    ID           = module.luthername_nsg.ids[count.index]
+    ID           = module.luthername_nsg.ids[0]
   }
 }
 
@@ -230,7 +230,7 @@ module "luthername_policy_logs" {
 }
 
 resource "aws_iam_role_policy" "cloudwatch_logs" {
-  name   = module.luthername_policy_logs.names[count.index]
+  name   = module.luthername_policy_logs.names[0]
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.cloudwatch_logs.json
 }
@@ -264,7 +264,7 @@ module "luthername_policy_authorized_key_sync" {
 }
 
 resource "aws_iam_role_policy" "authorized_key_sync" {
-  name   = module.luthername_policy_authorized_key_sync.names[count.index]
+  name   = module.luthername_policy_authorized_key_sync.names[0]
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.authorized_key_sync.json
 }
@@ -304,7 +304,7 @@ module "luthername_policy_common_assets" {
 }
 
 resource "aws_iam_role_policy" "common_assets" {
-  name   = module.luthername_policy_common_assets.names[count.index]
+  name   = module.luthername_policy_common_assets.names[0]
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.common_assets.json
 }
@@ -332,7 +332,7 @@ data "aws_iam_policy_document" "common_assets" {
 #}
 #
 #resource "aws_iam_role_policy" "project_assets" {
-#    name = "${module.luthername_policy_project_assets.names[count.index]}"
+#    name = "${module.luthername_policy_project_assets.names[0]}"
 #    role = "${aws_iam_role.service.id}"
 #    policy = "${data.aws_iam_policy_document.project_assets.json}"
 #}
@@ -363,7 +363,7 @@ module "luthername_policy_decrypt" {
 }
 
 resource "aws_iam_role_policy" "decrypt" {
-  name   = module.luthername_policy_decrypt.names[count.index]
+  name   = module.luthername_policy_decrypt.names[0]
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.decrypt_assets.json
 }

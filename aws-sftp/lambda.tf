@@ -29,14 +29,14 @@ resource "aws_iam_role" "transfer_lambda" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 
   tags = {
-    Name         = module.luthername_transfer_server_lambda_role.names[count.index]
+    Name         = module.luthername_transfer_server_lambda_role.names[0]
     Project      = module.luthername_transfer_server_lambda_role.luther_project
     Environment  = module.luthername_transfer_server_lambda_role.luther_env
     Organization = module.luthername_transfer_server_lambda_role.org_name
     Component    = module.luthername_transfer_server_lambda_role.component
     Subcomponent = module.luthername_transfer_server_lambda_role.subcomponent
     Resource     = module.luthername_transfer_server_lambda_role.resource
-    ID           = module.luthername_transfer_server_lambda_role.ids[count.index]
+    ID           = module.luthername_transfer_server_lambda_role.ids[0]
   }
 }
 
@@ -115,14 +115,14 @@ resource "aws_lambda_function" "transfer_auth" {
   runtime          = "python3.7"
 
   tags = {
-    Name         = module.luthername_transfer_server_lambda.names[count.index]
+    Name         = module.luthername_transfer_server_lambda.names[0]
     Project      = module.luthername_transfer_server_lambda.luther_project
     Environment  = module.luthername_transfer_server_lambda.luther_env
     Organization = module.luthername_transfer_server_lambda.org_name
     Component    = module.luthername_transfer_server_lambda.component
     Subcomponent = module.luthername_transfer_server_lambda.subcomponent
     Resource     = module.luthername_transfer_server_lambda.resource
-    ID           = module.luthername_transfer_server_lambda.ids[count.index]
+    ID           = module.luthername_transfer_server_lambda.ids[0]
   }
 
   environment {

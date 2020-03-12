@@ -19,7 +19,7 @@ module "luthername_cogpool_client" {
 # to destroy the autoscaling group) then you'd better make sure it works in the
 # staging environment before doing it in production!
 resource "aws_cognito_user_pool_client" "app" {
-  name                                 = module.luthername_cogpool_client.names[count.index]
+  name                                 = module.luthername_cogpool_client.names[0]
   user_pool_id                         = var.user_pool_id
   allowed_oauth_flows                  = ["code"]
   allowed_oauth_flows_user_pool_client = true

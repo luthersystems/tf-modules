@@ -19,7 +19,7 @@ resource "aws_cloudwatch_log_group" "eks_cluster" {
 }
 
 resource "aws_eks_cluster" "app" {
-  name                      = module.luthername_eks_cluster.names[count.index]
+  name                      = module.luthername_eks_cluster.names[0]
   role_arn                  = aws_iam_role.eks_master.arn
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
   version                   = var.kubernetes_version
@@ -93,7 +93,7 @@ module "luthername_eks_master_role" {
 }
 
 resource "aws_iam_role" "eks_master" {
-  name               = module.luthername_eks_master_role.names[count.index]
+  name               = module.luthername_eks_master_role.names[0]
   assume_role_policy = data.aws_iam_policy_document.eks_assume_role.json
 }
 
@@ -178,7 +178,7 @@ module "luthername_eks_master_nsg" {
 }
 
 resource "aws_security_group" "eks_master" {
-  name        = module.luthername_eks_master_nsg.names[count.index]
+  name        = module.luthername_eks_master_nsg.names[0]
   description = "Cluster communication with worker nodes"
   vpc_id      = aws_vpc.main.id
 
@@ -190,7 +190,7 @@ resource "aws_security_group" "eks_master" {
   }
 
   tags = {
-    Name         = module.luthername_eks_master_nsg.names[count.index]
+    Name         = module.luthername_eks_master_nsg.names[0]
     Project      = module.luthername_eks_master_nsg.luther_project
     Environment  = module.luthername_eks_master_nsg.luther_env
     Organization = module.luthername_eks_master_nsg.org_name
