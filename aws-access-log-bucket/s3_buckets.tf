@@ -1,5 +1,5 @@
 module "luthername_s3_bucket_logs" {
-    source = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+    source = "../luthername"
     luther_project = "${var.luther_project}"
     aws_region = "${var.aws_region}"
     aws_region_short_code = "${var.aws_region_short_code}"
@@ -75,7 +75,7 @@ resource "aws_s3_bucket" "logs" {
 }
 
 module "luthername_policy_logs_alb" {
-    source = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+    source = "../luthername"
     luther_project = "${var.luther_project}"
     aws_region = "${var.aws_region}"
     aws_region_short_code = "${var.aws_region_short_code}"
@@ -86,7 +86,7 @@ module "luthername_policy_logs_alb" {
 }
 
 module "luthername_statement_logs_alb" {
-    source = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-luthername.git?ref=v1.0.0"
+    source = "../luthername"
     luther_project = "${var.luther_project}"
     aws_region = "${var.aws_region}"
     aws_region_short_code = "${var.aws_region_short_code}"

@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "idp" {
-  source               = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-cogpool.git?ref=master"
+  source               = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//aws-cogpool?ref=master"
   aws_region           = "eu-west-2"
   luther_project       = "tst"
   luther_project_name  = "testp"

@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "idp" {
-  source               = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-cogpool.git?ref=master"
+  source               = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git/aws-cogpool?ref=master"
   aws_region           = "${var.aws_region}"
   luther_project       = "${var.luther_project}"
   luther_project_name  = "${var.luther_project_name}"
@@ -19,7 +19,7 @@ module "idp" {
 }
 
 module "idp-client" {
-  source               = "git::ssh://git@bitbucket.org/luthersystems/terraform-aws-cogpool-client.git?ref=master"
+  source               = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git/aws-cogpool-client?ref=master"
   aws_region           = "${var.aws_region}"
   luther_project       = "${var.luther_project}"
   luther_env           = "${var.luther_env}"
