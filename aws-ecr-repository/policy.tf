@@ -25,23 +25,19 @@ locals {
   # NOTE:  If both ro_principals and rw_principals are empty then the following
   # is not a valid policy document because it has an empty list of principals but
   # that is OK because in that case no policy will be attached to the repository.
-  policy = "${
-    length(var.ro_principals) == 0 ? data.aws_iam_policy_document.rw.json :
-    length(var.rw_principals) == 0 ? data.aws_iam_policy_document.ro.json :
-                                     data.aws_iam_policy_document.rorw.json
-  }"
+  policy = length(var.ro_principals) == 0 ? data.aws_iam_policy_document.rw.json : length(var.rw_principals) == 0 ? data.aws_iam_policy_document.ro.json : data.aws_iam_policy_document.rorw.json
 }
 
 # policy that has only readonly principals
 data "aws_iam_policy_document" "ro" {
   statement {
-    sid     = "readonlyAccess"
-    effect  = "Allow"
-    actions = ["${local.ecr_actions_ro}"]
+    sid    = "readonlyAccess"
+    effect = "Allow"
+    actions = local.ecr_actions_ro
 
     principals {
       type        = "AWS"
-      identifiers = ["${var.ro_principals}"]
+      identifiers = var.ro_principals
     }
   }
 }
@@ -49,13 +45,13 @@ data "aws_iam_policy_document" "ro" {
 # policy that has only readwrite principals
 data "aws_iam_policy_document" "rw" {
   statement {
-    sid     = "readwriteAccess"
-    effect  = "Allow"
-    actions = ["${local.ecr_actions_rw}"]
+    sid    = "readwriteAccess"
+    effect = "Allow"
+    actions = local.ecr_actions_rw
 
     principals {
       type        = "AWS"
-      identifiers = ["${var.rw_principals}"]
+      identifiers = var.rw_principals
     }
   }
 }
@@ -63,24 +59,24 @@ data "aws_iam_policy_document" "rw" {
 # policy that has both readonly and readwrite principals
 data "aws_iam_policy_document" "rorw" {
   statement {
-    sid     = "readonlyAccess"
-    effect  = "Allow"
-    actions = ["${local.ecr_actions_ro}"]
+    sid    = "readonlyAccess"
+    effect = "Allow"
+    actions = local.ecr_actions_ro
 
     principals {
       type        = "AWS"
-      identifiers = ["${var.ro_principals}"]
+      identifiers = var.ro_principals
     }
   }
 
   statement {
-    sid     = "readwriteAccess"
-    effect  = "Allow"
-    actions = ["${local.ecr_actions_rw}"]
+    sid    = "readwriteAccess"
+    effect = "Allow"
+    actions = local.ecr_actions_rw
 
     principals {
       type        = "AWS"
-      identifiers = ["${var.rw_principals}"]
+      identifiers = var.rw_principals
     }
   }
 }

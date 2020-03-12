@@ -1,25 +1,25 @@
 variable "luther_env" {
-  type = "string"
+  type = string
 }
 
 variable "org_name" {
-  type = "string"
+  type = string
 }
 
 variable "luther_project" {
-  type = "string"
+  type = string
 }
 
 variable "bucket_kms_key_arn" {
-  type = "string"
+  type = string
 }
 
 variable "cloudwatch_log_group" {
-  type = "string"
+  type = string
 }
 
 variable "secrets_prefix" {
-  type = "string"
+  type = string
 }
 
 variable "bucket_prefix_patterns" {
@@ -27,6 +27,6 @@ variable "bucket_prefix_patterns" {
 }
 
 variable "sftp_whitelist_ingress" {
-  type        = "list"
+  type        = list(string)
   description = "List of allowed CIDRs."
 }

@@ -1,34 +1,34 @@
 variable "luther_project" {
-  type        = "string"
+  type        = string
   description = "A short (three character) identifier for the project"
 }
 
 variable "luther_env" {
-  type = "string"
+  type = string
 }
 
 variable "org_name" {
-  type    = "string"
+  type    = string
   default = ""
 }
 
 variable "org_human" {
-  type    = "string"
+  type    = string
   default = "luther"
 }
 
 variable "component" {
-  type    = "string"
+  type    = string
   default = "logs"
 }
 
 variable "random_identifier" {
-  type        = "string"
+  type        = string
   description = "A randomly generated string to mitigate namespace sniffing globally defined S3 bucket names"
 }
 
 variable "aws_kms_key_arn" {
-  type        = "string"
+  type        = string
   description = "The KMS key to encrypt the bucket"
 
   # This default is the Luther Systems default KMS key for S3 buckets defined

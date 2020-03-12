@@ -1,38 +1,38 @@
 variable "aws_region" {
-  type = "string"
+  type = string
 }
 
 variable "luther_project" {
-  type = "string"
+  type = string
 }
 
 variable "luther_env" {
-  type = "string"
+  type = string
 }
 
 variable "org_name" {
-  type = "string"
+  type = string
 }
 
 variable "web_hook_url_secret_arn" {
-  type = "string"
+  type = string
 }
 
 variable "web_hook_url_secret_region" {
-  type    = "string"
+  type    = string
   default = ""
 }
 
 variable "secret_kms_key_id" {
-  type = "string"
+  type = string
 }
 
 variable "min_severity_level" {
-  type    = "string"
+  type    = string
   default = "MED"
 }
 
 variable "slack_channel" {
-  type    = "string"
+  type    = string
   default = "cloudwatch"
 }

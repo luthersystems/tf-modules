@@ -2,12 +2,17 @@ provider "aws" {
   alias = "cloudwatch"
 }
 
-provider "aws" {}
+provider "aws" {
+}
 
-provider "template" {}
+provider "template" {
+}
 
-provider "null" {}
+provider "null" {
+}
 
-provider "local" {}
+provider "local" {
+}
 
-provider "external" {}
+provider "external" {
+}

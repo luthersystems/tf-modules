@@ -11,13 +11,3 @@ variable "aws_region_short_code" {
     eu-central-1 = "de"
   }
 }
-
-provider "aws" {}
-
-provider "template" {
-  version = "~> 0.1"
-}
-
-provider "null" {
-  version = "~> 0.1"
-}

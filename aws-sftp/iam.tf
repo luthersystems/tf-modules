@@ -1,31 +1,31 @@
 module "luthername_transfer_server_user_role" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
   component      = "sftp"
   resource       = "role"
   subcomponent   = "s3"
 
   providers = {
-    template = "template"
+    template = template
   }
 }
 
 resource "aws_iam_role" "transfer_server_user" {
-  name               = "${module.luthername_transfer_server_user_role.names[0]}"
-  assume_role_policy = "${data.aws_iam_policy_document.transfer_assume_role.json}"
+  name               = module.luthername_transfer_server_user_role.names[0]
+  assume_role_policy = data.aws_iam_policy_document.transfer_assume_role.json
 
   tags = {
-    Name         = "${module.luthername_transfer_server_user_role.names[0]}"
-    Project      = "${module.luthername_transfer_server_user_role.luther_project}"
-    Environment  = "${module.luthername_transfer_server_user_role.luther_env}"
-    Organization = "${module.luthername_transfer_server_user_role.org_name}"
-    Component    = "${module.luthername_transfer_server_user_role.component}"
-    Subcomponent = "${module.luthername_transfer_server_logging_role.subcomponent}"
-    Resource     = "${module.luthername_transfer_server_user_role.resource}"
-    ID           = "${module.luthername_transfer_server_user_role.ids[0]}"
+    Name         = module.luthername_transfer_server_user_role.names[0]
+    Project      = module.luthername_transfer_server_user_role.luther_project
+    Environment  = module.luthername_transfer_server_user_role.luther_env
+    Organization = module.luthername_transfer_server_user_role.org_name
+    Component    = module.luthername_transfer_server_user_role.component
+    Subcomponent = module.luthername_transfer_server_logging_role.subcomponent
+    Resource     = module.luthername_transfer_server_user_role.resource
+    ID           = module.luthername_transfer_server_user_role.ids[0]
   }
 }
 
@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "transfer_server_user_s3" {
       "s3:GetBucketLocation",
     ]
 
-    resources = ["${module.aws_s3_bucket_sftp.arn}"]
+    resources = [module.aws_s3_bucket_sftp.arn]
   }
 
   statement {
@@ -52,7 +52,10 @@ data "aws_iam_policy_document" "transfer_server_user_s3" {
       "s3:GetObjectVersion",
     ]
 
-    resources = ["${formatlist("${module.aws_s3_bucket_sftp.arn}/%s", var.bucket_prefix_patterns)}"]
+    resources = formatlist(
+      "${module.aws_s3_bucket_sftp.arn}/%s",
+      var.bucket_prefix_patterns,
+    )
   }
 
   statement {
@@ -75,16 +78,16 @@ data "aws_iam_policy_document" "transfer_server_user_s3" {
       ]
     }
 
-    resources = ["${var.bucket_kms_key_arn}"]
+    resources = [var.bucket_kms_key_arn]
   }
 }
 
 resource "aws_iam_role_policy" "transfer_server_user" {
   name   = "s3-access"
-  role   = "${aws_iam_role.transfer_server_user.id}"
-  policy = "${data.aws_iam_policy_document.transfer_server_user_s3.json}"
+  role   = aws_iam_role.transfer_server_user.id
+  policy = data.aws_iam_policy_document.transfer_server_user_s3.json
 }
 
 output "sftp_user_role" {
-  value = "${aws_iam_role.transfer_server_user.arn}"
+  value = aws_iam_role.transfer_server_user.arn
 }

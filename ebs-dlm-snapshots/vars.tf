@@ -1,5 +1,5 @@
 variable "target_tags" {
-  type = "map"
+  type = map(string)
 }
 
 variable "interval_hours" {
@@ -19,5 +19,5 @@ variable "role_arn" {
 }
 
 variable "description" {
-  type = "string"
+  type = string
 }

@@ -22,6 +22,7 @@ data:
         - system:masters
 CONFIGMAPAWSAUTH
 
+
   # storageclass_gp2_encrypted declares "gp2-encrypted" as the default
   # storageclass but that will not actually work until the eks-created
   # storageclass, "gp2", is patched to deny its claim as the default.
@@ -43,6 +44,7 @@ volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
 STORAGECLASS
 
+
   storageclass_gp2 = <<STORAGECLASS
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -58,8 +60,9 @@ reclaimPolicy: Delete
 volumeBindingMode: Immediate
 allowVolumeExpansion: true
 STORAGECLASS
+
 }
 
 output "config_map_aws_auth" {
-  value = "${local.config_map_aws_auth}"
+  value = local.config_map_aws_auth
 }

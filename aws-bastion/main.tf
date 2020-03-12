@@ -1,14 +1,14 @@
 module "luthername_ec2" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
-  component      = "${var.component}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
   resource       = "ec2"
 
   providers = {
-    template = "template"
+    template = template
   }
 }
 
@@ -44,17 +44,22 @@ LfO9+3sEIlNrsMib0KRLDeBt3EuDsaBZgOkqjDhgJUesqiCy
 =iEhB
 -----END PGP PUBLIC KEY BLOCK-----
 GPGKEY
+
 }
 
 resource "aws_instance" "service" {
   count = "1" # TODO
 
-  ami           = "${var.aws_ami}"
-  subnet_id     = "${element(var.aws_subnet_ids, count.index)}"
-  instance_type = "${var.aws_instance_type}"
-  key_name      = "${var.aws_ssh_key_name}"
+  ami           = var.aws_ami
+  subnet_id     = element(var.aws_subnet_ids, count.index)
+  instance_type = var.aws_instance_type
+  key_name      = var.aws_ssh_key_name
 
-  ebs_optimized = "${lookup(var.aws_ebs_optimizable_instance_types, var.aws_instance_type, false)}"
+  ebs_optimized = lookup(
+    var.aws_ebs_optimizable_instance_types,
+    var.aws_instance_type,
+    false,
+  )
 
   user_data = <<USERDATA
 #!/bin/bash
@@ -73,127 +78,128 @@ bash install-inspector.sh
 rm -f install-inspector.sh
 USERDATA
 
+
   root_block_device {
     volume_type           = "gp2"
-    volume_size           = "${var.root_volume_size_gb}"
+    volume_size           = var.root_volume_size_gb
     delete_on_termination = true
   }
 
-  iam_instance_profile   = "${aws_iam_instance_profile.service.name}"
-  vpc_security_group_ids = ["${aws_security_group.service.id}"]
+  iam_instance_profile   = aws_iam_instance_profile.service.name
+  vpc_security_group_ids = [aws_security_group.service.id]
 
   tags = {
-    Name         = "${module.luthername_ec2.names[count.index]}"
-    Project      = "${module.luthername_ec2.luther_project}"
-    Environment  = "${module.luthername_ec2.luther_env}"
-    Organization = "${module.luthername_ec2.org_name}"
-    Component    = "${module.luthername_ec2.component}"
-    Resource     = "${module.luthername_ec2.resource}"
-    ID           = "${module.luthername_ec2.ids[count.index]}"
+    Name         = module.luthername_ec2.names[count.index]
+    Project      = module.luthername_ec2.luther_project
+    Environment  = module.luthername_ec2.luther_env
+    Organization = module.luthername_ec2.org_name
+    Component    = module.luthername_ec2.component
+    Resource     = module.luthername_ec2.resource
+    ID           = module.luthername_ec2.ids[count.index]
   }
 
   lifecycle {
     ignore_changes = [
-      "ami",
-      "key_name",
+      ami,
+      key_name,
     ]
   }
 }
 
 output "aws_instance_private_ips" {
-  value = "${aws_instance.service.*.private_ip}"
+  value = aws_instance.service.*.private_ip
 }
 
 output "aws_instance_public_ips" {
-  value = "${aws_instance.service.*.public_ip}"
+  value = aws_instance.service.*.public_ip
 }
 
 output "aws_instance_public_dns" {
-  value = "${aws_instance.service.*.public_dns}"
+  value = aws_instance.service.*.public_dns
 }
 
 module "aws_instance_monitoring_actions_service" {
   source                               = "../aws-instance-monitoring-actions"
   replication                          = "1"
-  aws_region                           = "${var.aws_region}"
-  aws_instance_ids                     = ["${aws_instance.service.id}"]
-  instance_names                       = "${module.luthername_ec2.names}"
-  aws_cloudwatch_alarm_actions_enabled = "${var.aws_cloudwatch_alarm_actions_enabled}"
-  aws_autorecovery_sns_arn             = "${var.aws_autorecovery_sns_arn}"
-  aws_autorestart_arn                  = "${var.aws_autorestart_arn}"
+  aws_region                           = var.aws_region
+  aws_instance_ids                     = [aws_instance.service[0].id]
+  instance_names                       = module.luthername_ec2.names
+  aws_cloudwatch_alarm_actions_enabled = var.aws_cloudwatch_alarm_actions_enabled
+  aws_autorecovery_sns_arn             = var.aws_autorecovery_sns_arn
+  aws_autorestart_arn                  = var.aws_autorestart_arn
 
   providers = {
-    template = "template"
+    template = template
   }
 }
 
 module "luthername_nsg" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
-  component      = "${var.component}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
   resource       = "nsg"
 
   providers = {
-    template = "template"
+    template = template
   }
 }
 
 resource "aws_security_group" "service" {
   description = "${var.component} security group for ${var.luther_project}-${var.luther_env} (${var.org_name})"
 
-  vpc_id = "${var.aws_vpc_id}"
+  vpc_id = var.aws_vpc_id
 
   tags = {
-    Name         = "${module.luthername_nsg.names[count.index]}"
-    Project      = "${module.luthername_nsg.luther_project}"
-    Environment  = "${module.luthername_nsg.luther_env}"
-    Organization = "${module.luthername_nsg.org_name}"
-    Component    = "${module.luthername_nsg.component}"
-    Resource     = "${module.luthername_nsg.resource}"
-    ID           = "${module.luthername_nsg.ids[count.index]}"
+    Name         = module.luthername_nsg.names[0]
+    Project      = module.luthername_nsg.luther_project
+    Environment  = module.luthername_nsg.luther_env
+    Organization = module.luthername_nsg.org_name
+    Component    = module.luthername_nsg.component
+    Resource     = module.luthername_nsg.resource
+    ID           = module.luthername_nsg.ids[0]
   }
 }
 
 output "aws_security_group_id" {
-  value = "${aws_security_group.service.id}"
+  value = aws_security_group.service.id
 }
 
 resource "aws_security_group_rule" "ingress_prometheus_server" {
   type                     = "ingress"
-  from_port                = "${var.prometheus_node_exporter_metrics_port}"
-  to_port                  = "${var.prometheus_node_exporter_metrics_port}"
+  from_port                = var.prometheus_node_exporter_metrics_port
+  to_port                  = var.prometheus_node_exporter_metrics_port
   protocol                 = "tcp"
-  source_security_group_id = "${var.prometheus_server_security_group_id}"
-  security_group_id        = "${aws_security_group.service.id}"
+  source_security_group_id = var.prometheus_server_security_group_id
+  security_group_id        = aws_security_group.service.id
 }
 
 resource "aws_security_group_rule" "ingress_prometheus_server_pubkey" {
   type                     = "ingress"
-  from_port                = "${var.authorized_key_sync_metrics_port}"
-  to_port                  = "${var.authorized_key_sync_metrics_port}"
+  from_port                = var.authorized_key_sync_metrics_port
+  to_port                  = var.authorized_key_sync_metrics_port
   protocol                 = "tcp"
-  source_security_group_id = "${var.prometheus_server_security_group_id}"
-  security_group_id        = "${aws_security_group.service.id}"
+  source_security_group_id = var.prometheus_server_security_group_id
+  security_group_id        = aws_security_group.service.id
 }
 
 resource "aws_security_group_rule" "ingress_ssh" {
   type              = "ingress"
-  from_port         = "${var.ssh_port}"
-  to_port           = "${var.ssh_port}"
+  from_port         = var.ssh_port
+  to_port           = var.ssh_port
   protocol          = "tcp"
-  cidr_blocks       = ["${var.ssh_whitelist_ingress}"]
-  security_group_id = "${aws_security_group.service.id}"
+  cidr_blocks       = var.ssh_whitelist_ingress
+  security_group_id = aws_security_group.service.id
 }
 
 resource "aws_iam_instance_profile" "service" {
-  role = "${aws_iam_role.service.name}"
+  role = aws_iam_role.service.name
 }
 
 resource "aws_iam_role" "service" {
-  assume_role_policy = "${data.aws_iam_policy_document.ec2_assume_role.json}"
+  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 }
 
 data "aws_iam_policy_document" "ec2_assume_role" {
@@ -210,23 +216,23 @@ data "aws_iam_policy_document" "ec2_assume_role" {
 
 module "luthername_policy_logs" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
-  component      = "${var.component}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
   resource       = "iampolicy"
   subcomponent   = "logs"
 
   providers = {
-    template = "template"
+    template = template
   }
 }
 
 resource "aws_iam_role_policy" "cloudwatch_logs" {
-  name   = "${module.luthername_policy_logs.names[count.index]}"
-  role   = "${aws_iam_role.service.id}"
-  policy = "${data.aws_iam_policy_document.cloudwatch_logs.json}"
+  name   = module.luthername_policy_logs.names[0]
+  role   = aws_iam_role.service.id
+  policy = data.aws_iam_policy_document.cloudwatch_logs.json
 }
 
 data "aws_iam_policy_document" "cloudwatch_logs" {
@@ -244,30 +250,30 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
 
 module "luthername_policy_authorized_key_sync" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
-  component      = "${var.component}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
   resource       = "iampolicy"
   subcomponent   = "pubkey"
 
   providers = {
-    template = "template"
+    template = template
   }
 }
 
 resource "aws_iam_role_policy" "authorized_key_sync" {
-  name   = "${module.luthername_policy_authorized_key_sync.names[count.index]}"
-  role   = "${aws_iam_role.service.id}"
-  policy = "${data.aws_iam_policy_document.authorized_key_sync.json}"
+  name   = module.luthername_policy_authorized_key_sync.names[0]
+  role   = aws_iam_role.service.id
+  policy = data.aws_iam_policy_document.authorized_key_sync.json
 }
 
 data "aws_iam_policy_document" "authorized_key_sync" {
   statement {
     sid       = "LutherListAuthorizedKeys"
     actions   = ["s3:ListBucket"]
-    resources = ["${var.authorized_key_sync_s3_bucket_arn}"]
+    resources = [var.authorized_key_sync_s3_bucket_arn]
   }
 
   statement {
@@ -284,23 +290,23 @@ data "aws_iam_policy_document" "authorized_key_sync" {
 
 module "luthername_policy_common_assets" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
-  component      = "${var.component}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
   resource       = "iampolicy"
   subcomponent   = "commons"
 
   providers = {
-    template = "template"
+    template = template
   }
 }
 
 resource "aws_iam_role_policy" "common_assets" {
-  name   = "${module.luthername_policy_common_assets.names[count.index]}"
-  role   = "${aws_iam_role.service.id}"
-  policy = "${data.aws_iam_policy_document.common_assets.json}"
+  name   = module.luthername_policy_common_assets.names[0]
+  role   = aws_iam_role.service.id
+  policy = data.aws_iam_policy_document.common_assets.json
 }
 
 data "aws_iam_policy_document" "common_assets" {
@@ -326,7 +332,7 @@ data "aws_iam_policy_document" "common_assets" {
 #}
 #
 #resource "aws_iam_role_policy" "project_assets" {
-#    name = "${module.luthername_policy_project_assets.names[count.index]}"
+#    name = "${module.luthername_policy_project_assets.names[0]}"
 #    role = "${aws_iam_role.service.id}"
 #    policy = "${data.aws_iam_policy_document.project_assets.json}"
 #}
@@ -343,30 +349,30 @@ data "aws_iam_policy_document" "common_assets" {
 
 module "luthername_policy_decrypt" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
-  component      = "${var.component}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
   resource       = "iampolicy"
   subcomponent   = "decrypt"
 
   providers = {
-    template = "template"
+    template = template
   }
 }
 
 resource "aws_iam_role_policy" "decrypt" {
-  name   = "${module.luthername_policy_decrypt.names[count.index]}"
-  role   = "${aws_iam_role.service.id}"
-  policy = "${data.aws_iam_policy_document.decrypt_assets.json}"
+  name   = module.luthername_policy_decrypt.names[0]
+  role   = aws_iam_role.service.id
+  policy = data.aws_iam_policy_document.decrypt_assets.json
 }
 
 data "aws_iam_policy_document" "decrypt_assets" {
   statement {
     sid       = "DecryptAssets"
     actions   = ["kms:Decrypt"]
-    resources = ["${var.aws_kms_key_arns}"]
+    resources = var.aws_kms_key_arns
   }
 }
 
@@ -374,9 +380,9 @@ data "aws_iam_policy_document" "decrypt_assets" {
 # provision the bastion instance(s) in case the ssh whitelist prevents it.
 resource "aws_security_group_rule" "ingress_bastion" {
   type                     = "ingress"
-  from_port                = "${var.ssh_port}"
-  to_port                  = "${var.ssh_port}"
+  from_port                = var.ssh_port
+  to_port                  = var.ssh_port
   protocol                 = "tcp"
-  source_security_group_id = "${aws_security_group.service.id}"
-  security_group_id        = "${aws_security_group.service.id}"
+  source_security_group_id = aws_security_group.service.id
+  security_group_id        = aws_security_group.service.id
 }

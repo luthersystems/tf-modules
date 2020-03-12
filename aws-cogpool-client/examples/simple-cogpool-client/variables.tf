@@ -1,35 +1,35 @@
 variable "luther_env" {
-  type = "string"
+  type = string
 }
 
 variable "luther_project" {
-  type = "string"
+  type = string
 }
 
 variable "luther_project_name" {
-  type = "string"
+  type = string
 }
 
 variable "luther_project_human" {
-  type = "string"
+  type = string
 }
 
 variable "org_human" {
-  type = "string"
+  type = string
 }
 
 variable "org_name" {
-  type = "string"
+  type = string
 }
 
 variable "aws_region" {
-  type = "string"
+  type = string
 }
 
 variable "callback_url" {
-  type = "string"
+  type = string
 }
 
 variable "default_redirect_uri" {
-  type = "string"
+  type = string
 }
