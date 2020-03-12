@@ -1,46 +1,46 @@
 variable "luther_project" {
-  type = "string"
+  type = string
 }
 
 variable "aws_region" {
-  type = "string"
+  type = string
 }
 
 variable "luther_env" {
-  type = "string"
+  type = string
 }
 
 variable "org_name" {
-  type    = "string"
+  type    = string
   default = ""
 }
 
 variable "component" {
-  type = "string"
+  type = string
 }
 
 variable "oidc_provider_arn" {
-  type = "string"
+  type = string
 }
 
 variable "oidc_provider_name" {
-  type = "string"
+  type = string
 }
 
 variable "k8s_namespace" {
-  type = "string"
+  type = string
 }
 
 variable "service_account" {
-  type = "string"
+  type = string
 }
 
 variable "policy_name" {
-  type    = "string"
+  type    = string
   default = "main"
 }
 
 variable "policy" {
-  type    = "string"
+  type    = string
   default = ""
 }

@@ -14,22 +14,22 @@ module "idp" {
   org_human            = "Test Organization"
 
   providers = {
-    aws = "aws"
+    aws = aws
   }
 }
 
 output "user_pool_id" {
-  value = "${module.idp.user_pool_id}"
+  value = module.idp.user_pool_id
 }
 
 output "user_pool_base_url" {
-  value = "${module.idp.user_pool_base_url}"
+  value = module.idp.user_pool_base_url
 }
 
 output "user_pool_webkey_url" {
-  value = "${module.idp.user_pool_base_url}"
+  value = module.idp.user_pool_base_url
 }
 
 output "user_pool_domain" {
-  value = "${module.idp.user_pool_domain}"
+  value = module.idp.user_pool_domain
 }

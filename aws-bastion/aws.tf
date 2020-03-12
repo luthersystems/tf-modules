@@ -5,7 +5,7 @@ variable "aws_region" {
 }
 
 variable "aws_ssh_key_name" {
-  type = "string"
+  type = string
 }
 
 data "template_file" "availability_zones" {
@@ -13,8 +13,8 @@ data "template_file" "availability_zones" {
 
   template = "$${az}"
 
-  vars {
-    az = "${element(var.aws_availability_zones, count.index)}"
+  vars = {
+    az = element(var.aws_availability_zones, count.index)
   }
 }
 
@@ -90,7 +90,6 @@ variable "aws_alb_access_log_accounts" {
     "ap-southeast-2" = "783225319266"
     "ap-south-1"     = "718504428378"
     "sa-east-1"      = "507241528517"
-
     # us-gov-wets-1 and cn-north-1 require separate aws accounts
     "us-gov-west-1" = "048591011584"
     "cn-north-1"    = "638102146993"

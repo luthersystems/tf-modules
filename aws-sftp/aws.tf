@@ -1,9 +1,10 @@
 # This file declares the basic AWS configuration for the project
 
-variable "aws_account_id" {}
+variable "aws_account_id" {
+}
 
 variable "aws_region" {
-  type = "string"
+  type = string
 }
 
 variable "aws_region_short_code" {
@@ -25,7 +26,6 @@ variable "aws_availability_zones" {
       "eu-central-1b",
       "eu-central-1c",
     ]
-
     "eu-west-2" = [
       "eu-west-2a",
       "eu-west-2b",
@@ -35,11 +35,11 @@ variable "aws_availability_zones" {
 }
 
 data "template_file" "availability_zones" {
-  count    = "${length(var.aws_availability_zones[var.aws_region])}"
+  count    = length(var.aws_availability_zones[var.aws_region])
   template = "$${az}"
 
   vars = {
-    az = "${element(var.aws_availability_zones[var.aws_region], count.index)}"
+    az = element(var.aws_availability_zones[var.aws_region], count.index)
   }
 }
 
@@ -109,7 +109,6 @@ variable "aws_alb_access_log_accounts" {
     "ap-southeast-2" = "783225319266"
     "ap-south-1"     = "718504428378"
     "sa-east-1"      = "507241528517"
-
     # us-gov-wets-1 and cn-north-1 require separate aws accounts
     "us-gov-west-1" = "048591011584"
     "cn-north-1"    = "638102146993"

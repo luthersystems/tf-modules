@@ -1,10 +1,10 @@
 module "luthername_cogpool" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
-  component      = "${var.component}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
   resource       = "cogpool"
 }
 
@@ -17,7 +17,7 @@ module "luthername_cogpool" {
 #       https://github.com/terraform-providers/terraform-provider-aws/blob/master/CHANGELOG.md
 
 resource "aws_cognito_user_pool" "org" {
-  name = "${module.luthername_cogpool.names[count.index]}"
+  name = module.luthername_cogpool.names[0]
 
   #mfa_configuration = "OPTIONAL"
 
@@ -74,8 +74,10 @@ resource "aws_cognito_user_pool" "org" {
     </p>
 </div>
 EOT
+
     }
   }
+
   # NOTE:  You can't change the schema at all with version 1.13.0 of the aws
   # provider.  It will cause downtime if the schema changes.  The autoscaling
   # group needs to be torn down, recreated, reprovisioned.  Try not to do it.
@@ -85,59 +87,57 @@ EOT
   # terraform will never be able to satisfy the configuration and will always
   # try to recreate a more-perfect user pool.  The only reason to include the
   # attributes in the schema **at all** is to make them required.
-  schema = [
-    {
-      attribute_data_type = "String"
-      name                = "email"
-      mutable             = true
-      required            = true
+  schema {
+    attribute_data_type = "String"
+    name                = "email"
+    mutable             = true
+    required            = true
 
-      string_attribute_constraints {
-        min_length = 0
-        max_length = 2048
-      }
-    },
-    {
-      attribute_data_type = "String"
-      name                = "name"
-      mutable             = true
-      required            = true
+    string_attribute_constraints {
+      min_length = 0
+      max_length = 2048
+    }
+  }
+  schema {
+    attribute_data_type = "String"
+    name                = "name"
+    mutable             = true
+    required            = true
 
-      string_attribute_constraints {
-        min_length = 0
-        max_length = 2048
-      }
-    },
-    {
-      attribute_data_type = "String"
-      name                = "org"
-      mutable             = true
-      required            = false
+    string_attribute_constraints {
+      min_length = 0
+      max_length = 2048
+    }
+  }
+  schema {
+    attribute_data_type = "String"
+    name                = "org"
+    mutable             = true
+    required            = false
 
-      string_attribute_constraints {
-        min_length = 0
-        max_length = 2048
-      }
-    },
-  ]
-  tags {
-    Name         = "${module.luthername_cogpool.names[count.index]}"
-    Project      = "${module.luthername_cogpool.luther_project}"
-    Environment  = "${module.luthername_cogpool.luther_env}"
-    Organization = "${module.luthername_cogpool.org_name}"
-    Component    = "${module.luthername_cogpool.component}"
-    Resource     = "${module.luthername_cogpool.resource}"
-    ID           = "${module.luthername_cogpool.ids[count.index]}"
+    string_attribute_constraints {
+      min_length = 0
+      max_length = 2048
+    }
+  }
+  tags = {
+    Name         = module.luthername_cogpool.names[0]
+    Project      = module.luthername_cogpool.luther_project
+    Environment  = module.luthername_cogpool.luther_env
+    Organization = module.luthername_cogpool.org_name
+    Component    = module.luthername_cogpool.component
+    Resource     = module.luthername_cogpool.resource
+    ID           = module.luthername_cogpool.ids[0]
   }
 }
 
 resource "aws_cognito_user_group" "admin" {
   name         = "luther:admin"
-  user_pool_id = "${aws_cognito_user_pool.org.id}"
+  user_pool_id = aws_cognito_user_pool.org.id
   description  = "Luther Systems administrators"
 }
 
 resource "aws_cognito_user_pool_domain" "org" {
   domain       = "luthersystems-${var.luther_project}-${var.luther_env}-${var.org_name}-0"
-  user_pool_id = "${aws_cognito_user_pool.org.id}"
+  user_pool_id = aws_cognito_user_pool.org.id
 }

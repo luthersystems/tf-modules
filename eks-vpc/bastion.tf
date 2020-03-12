@@ -6,12 +6,12 @@ data "template_file" "fqdn_bastion" {
   # example: ics-de-dev-es.luthersystemsapp.com
   template = "$${project}-$${region_code}-$${env}$${org_part}.$${domain}"
 
-  vars {
-    project     = "${var.luther_project}"
-    region_code = "${var.aws_region_short_code[var.aws_region]}"
+  vars = {
+    project     = var.luther_project
+    region_code = var.aws_region_short_code[var.aws_region]
     org_part    = "${var.org_name == "" ? "" : "-"}${var.org_name}"
-    env         = "${var.luther_env}"
-    domain      = "${var.domain}"
+    env         = var.luther_env
+    domain      = var.domain
   }
 }
 
@@ -20,21 +20,29 @@ data "template_file" "fqdn_bastion" {
 # bastion_dns_name for ssh provisioning.  Though it's better to use
 # bastion_provisioning_dns_name for ssh provisioning on the bastion.
 output "bastion_dns_name" {
-  value = "${aws_route53_record.bastion.name}"
+  value = aws_route53_record.bastion.name
 }
 
 # A better dns name to use for ssh provisioning on the bastion because it can
 # trigger reprovisioning if the bastion is replaced for any reason.
 output "bastion_provisioning_dns_name" {
-  value = "${module.aws_bastion.aws_instance_public_dns[0]}"
+  value = module.aws_bastion.aws_instance_public_dns[0]
 }
 
 resource "aws_route53_record" "bastion" {
-  zone_id = "${data.aws_route53_zone.external.zone_id}"
-  name    = "${data.template_file.fqdn_bastion.rendered}"
+  zone_id = data.aws_route53_zone.external.zone_id
+  name    = data.template_file.fqdn_bastion.rendered
   type    = "CNAME"
   ttl     = 300
-  records = ["${module.aws_bastion.aws_instance_public_dns[0]}"]
+  # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
+  # force an interpolation expression to be interpreted as a list by wrapping it
+  # in an extra set of list brackets. That form was supported for compatibility in
+  # v0.11, but is no longer supported in Terraform v0.12.
+  #
+  # If the expression in the following list itself returns a list, remove the
+  # brackets to avoid interpretation as a list of lists. If the expression
+  # returns a single list item then leave it as-is and remove this TODO comment.
+  records = [module.aws_bastion.aws_instance_public_dns[0]]
 }
 
 locals {
@@ -45,30 +53,30 @@ locals {
 module "aws_bastion" {
   source = "../aws-bastion"
 
-  luther_project                       = "${var.luther_project}"
-  aws_region                           = "${var.aws_region}"
-  luther_env                           = "${var.luther_env}"
-  org_name                             = "${var.org_name}"
-  aws_instance_type                    = "${var.bastion_aws_instance_type}"
-  aws_ami                              = "${var.bastion_ami}"
-  aws_vpc_id                           = "${aws_vpc.main.id}"
-  aws_subnet_ids                       = ["${aws_subnet.net.*.id}"]
-  aws_availability_zones               = ["${data.template_file.availability_zones.*.rendered}"]
-  aws_ssh_key_name                     = "${var.aws_ssh_key_name}"
+  luther_project                       = var.luther_project
+  aws_region                           = var.aws_region
+  luther_env                           = var.luther_env
+  org_name                             = var.org_name
+  aws_instance_type                    = var.bastion_aws_instance_type
+  aws_ami                              = var.bastion_ami
+  aws_vpc_id                           = aws_vpc.main.id
+  aws_subnet_ids                       = [aws_subnet.net.*.id]
+  aws_availability_zones               = [data.template_file.availability_zones.*.rendered]
+  aws_ssh_key_name                     = var.aws_ssh_key_name
   ssh_whitelist_ingress                = ["0.0.0.0/0"]
-  prometheus_server_security_group_id  = "${aws_security_group.monitoring_temp.id}"
-  authorized_key_sync_s3_bucket_arn    = "${var.ssh_public_keys_s3_bucket_arn}"
-  common_static_asset_s3_bucket_arn    = "${var.common_static_s3_bucket_arn}"
-  aws_kms_key_arns                     = ["${var.aws_kms_key_arns}"]
-  aws_cloudwatch_alarm_actions_enabled = "${var.aws_cloudwatch_alarm_actions_enabled}"
-  aws_autorecovery_sns_arn             = "${var.aws_autorecovery_sns_arn}"
-  aws_autorecovery_arn                 = "${local.aws_autorecovery_arn}"
-  aws_autorestart_arn                  = "${local.aws_autorestart_arn}"
-  ssh_port                             = "${var.bastion_ssh_port}"
+  prometheus_server_security_group_id  = aws_security_group.monitoring_temp.id
+  authorized_key_sync_s3_bucket_arn    = var.ssh_public_keys_s3_bucket_arn
+  common_static_asset_s3_bucket_arn    = var.common_static_s3_bucket_arn
+  aws_kms_key_arns                     = [var.aws_kms_key_arns]
+  aws_cloudwatch_alarm_actions_enabled = var.aws_cloudwatch_alarm_actions_enabled
+  aws_autorecovery_sns_arn             = var.aws_autorecovery_sns_arn
+  aws_autorecovery_arn                 = local.aws_autorecovery_arn
+  aws_autorestart_arn                  = local.aws_autorestart_arn
+  ssh_port                             = var.bastion_ssh_port
 
-  providers {
-    aws      = "aws"
-    template = "template"
+  providers = {
+    aws      = aws
+    template = template
   }
 }
 
@@ -78,21 +86,21 @@ module "aws_bastion" {
 # k8s resources defined by the uploaded files.
 resource "null_resource" "bastion_k8s_provisioning" {
   triggers = {
-    bastion_host    = "${module.aws_bastion.aws_instance_public_dns[0]}"
-    k8s_local_facts = "${local.k8s_local_facts}"
+    bastion_host    = module.aws_bastion.aws_instance_public_dns[0]
+    k8s_local_facts = local.k8s_local_facts
   }
 
   connection {
-    host = "${module.aws_bastion.aws_instance_public_dns[0]}"
+    host = module.aws_bastion.aws_instance_public_dns[0]
     type = "ssh"
     user = "ubuntu"
-    port = "${var.bastion_ssh_port}"
+    port = var.bastion_ssh_port
   }
 
   provisioner "remote-exec" {
     inline = [
       "sudo mkdir -p /etc/ansible/facts.d",
-      "${local.k8s_local_facts}",
+      local.k8s_local_facts,
     ]
   }
 }
@@ -120,6 +128,7 @@ sudo tee /etc/ansible/facts.d/externaldns.fact <<FACT
 }
 FACT
 LOCAL
+
 }
 
 resource "aws_security_group_rule" "bastion_egress_all" {
@@ -128,26 +137,26 @@ resource "aws_security_group_rule" "bastion_egress_all" {
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = "${module.aws_bastion.aws_security_group_id}"
+  security_group_id = module.aws_bastion.aws_security_group_id
 }
 
 module "luthername_nsg_monitoring_temp" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
   component      = "mon"
   resource       = "nsg"
   subcomponent   = "temp"
 
-  providers {
-    template = "template"
+  providers = {
+    template = template
   }
 }
 
 # This resource is a placeholder for the monitoring security group.
 resource "aws_security_group" "monitoring_temp" {
-  name   = "${module.luthername_nsg_monitoring_temp.names[0]}"
-  vpc_id = "${aws_vpc.main.id}"
+  name   = module.luthername_nsg_monitoring_temp.names[0]
+  vpc_id = aws_vpc.main.id
 }

@@ -1,12 +1,12 @@
 module "luthername_s3_bucket_logs" {
   source                = "../luthername"
-  luther_project        = "${var.luther_project}"
-  aws_region            = "${var.aws_region}"
-  aws_region_short_code = "${var.aws_region_short_code}"
-  luther_env            = "${var.luther_env}"
-  component             = "${var.component}"
+  luther_project        = var.luther_project
+  aws_region            = var.aws_region
+  aws_region_short_code = var.aws_region_short_code
+  luther_env            = var.luther_env
+  component             = var.component
   resource              = "s3"
-  id                    = "${var.random_identifier}"
+  id                    = var.random_identifier
 }
 
 data "template_file" "aws_s3_bucket_logs_name_full" {
@@ -19,23 +19,22 @@ data "template_file" "aws_s3_bucket_logs_name_full" {
 data "template_file" "aws_s3_bucket_logs_arn" {
   template = "arn:aws:s3:::$${bucket}"
 
-  vars {
-    bucket = "${data.template_file.aws_s3_bucket_logs_name_full.rendered}"
+  vars = {
+    bucket = data.template_file.aws_s3_bucket_logs_name_full.rendered
   }
 }
 
 resource "aws_s3_bucket" "logs" {
   bucket = "luther-${module.luthername_s3_bucket_logs.names[0]}"
   acl    = "private"
-  region = "${var.aws_region}"
+  region = var.aws_region
 
   versioning {
     enabled = true
-
     #mfa_delete = true
   }
 
-  policy = "${data.aws_iam_policy_document.logs_alb.json}"
+  policy = data.aws_iam_policy_document.logs_alb.json
 
   lifecycle_rule {
     prefix  = "access_logs/"
@@ -61,7 +60,7 @@ resource "aws_s3_bucket" "logs" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        kms_master_key_id = "${var.aws_kms_key_arn}"
+        kms_master_key_id = var.aws_kms_key_arn
         sse_algorithm     = "aws:kms"
       }
     }
@@ -69,32 +68,32 @@ resource "aws_s3_bucket" "logs" {
 
   tags = {
     Name        = "luther-${module.luthername_s3_bucket_logs.names[0]}"
-    Project     = "${module.luthername_s3_bucket_logs.luther_project}"
-    Environment = "${module.luthername_s3_bucket_logs.luther_env}"
-    Component   = "${module.luthername_s3_bucket_logs.component}"
-    Resource    = "${module.luthername_s3_bucket_logs.resource}"
-    ID          = "${module.luthername_s3_bucket_logs.ids[0]}"
+    Project     = module.luthername_s3_bucket_logs.luther_project
+    Environment = module.luthername_s3_bucket_logs.luther_env
+    Component   = module.luthername_s3_bucket_logs.component
+    Resource    = module.luthername_s3_bucket_logs.resource
+    ID          = module.luthername_s3_bucket_logs.ids[0]
   }
 }
 
 module "luthername_policy_logs_alb" {
   source                = "../luthername"
-  luther_project        = "${var.luther_project}"
-  aws_region            = "${var.aws_region}"
-  aws_region_short_code = "${var.aws_region_short_code}"
-  luther_env            = "${var.luther_env}"
-  component             = "${var.component}"
+  luther_project        = var.luther_project
+  aws_region            = var.aws_region
+  aws_region_short_code = var.aws_region_short_code
+  luther_env            = var.luther_env
+  component             = var.component
   resource              = "policy"
   subcomponent          = "alb"
 }
 
 module "luthername_statement_logs_alb" {
   source                = "../luthername"
-  luther_project        = "${var.luther_project}"
-  aws_region            = "${var.aws_region}"
-  aws_region_short_code = "${var.aws_region_short_code}"
-  luther_env            = "${var.luther_env}"
-  component             = "${var.component}"
+  luther_project        = var.luther_project
+  aws_region            = var.aws_region
+  aws_region_short_code = var.aws_region_short_code
+  luther_env            = var.luther_env
+  component             = var.component
   resource              = "sid"
   subcomponent          = "alb"
 }
@@ -102,10 +101,10 @@ module "luthername_statement_logs_alb" {
 # Allow the AWS account which operates ALBs to write access logs
 # aws_s3_bucket.logs.
 data "aws_iam_policy_document" "logs_alb" {
-  policy_id = "${module.luthername_policy_logs_alb.names[0]}"
+  policy_id = module.luthername_policy_logs_alb.names[0]
 
   statement {
-    sid    = "${module.luthername_statement_logs_alb.names[0]}"
+    sid    = module.luthername_statement_logs_alb.names[0]
     effect = "Allow"
 
     actions = [
@@ -122,7 +121,7 @@ data "aws_iam_policy_document" "logs_alb" {
       type = "AWS"
 
       identifiers = [
-        "${data.template_file.aws_account_alb_access_logs.rendered}",
+        data.template_file.aws_account_alb_access_logs.rendered,
       ]
     }
   }
@@ -131,7 +130,7 @@ data "aws_iam_policy_document" "logs_alb" {
 data "template_file" "aws_account_alb_access_logs" {
   template = "arn:aws:iam::$${account_number}:root"
 
-  vars {
-    account_number = "${var.aws_alb_access_log_accounts[var.aws_region]}"
+  vars = {
+    account_number = var.aws_alb_access_log_accounts[var.aws_region]
   }
 }

@@ -1,5 +1,5 @@
 variable "name" {
-  type = "string"
+  type = string
 }
 
 # ro_principals lists AWS principals that have readonly access to the
@@ -8,7 +8,7 @@ variable "name" {
 # ECR repository policies may only have principals which are roles, account
 # account roots, or users.
 variable "ro_principals" {
-  type = "list"
+  type = list(string)
 }
 
 # rw_principals lists AWS principals that have readwrite access to the
@@ -17,5 +17,5 @@ variable "ro_principals" {
 # ECR repository policies may only have principals which are roles, account
 # account roots, or users.
 variable "rw_principals" {
-  type = "list"
+  type = list(string)
 }

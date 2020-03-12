@@ -10,7 +10,8 @@ data "aws_ami" "eks_worker" {
 
 # This data source is included for ease of sample architecture deployment
 # and can be swapped out as necessary.
-data "aws_region" "current" {}
+data "aws_region" "current" {
+}
 
 # EKS currently documents required userdata (local.eks_worker_userdata) for EKS
 # worker nodes to properly configure Kubernetes applications on the EC2
@@ -51,6 +52,7 @@ LfO9+3sEIlNrsMib0KRLDeBt3EuDsaBZgOkqjDhgJUesqiCy
 -----END PGP PUBLIC KEY BLOCK-----
 GPGKEY
 
+
   docker_log_opts = <<LOGOPTS
 {
     "awslogs-region": ${jsonencode(var.aws_region)},
@@ -59,6 +61,7 @@ GPGKEY
     "tag": "docker/{{.Name}}/{{.ID}}"
 }
 LOGOPTS
+
 
   docker_config_json = <<DOCKERCONFIG
 {
@@ -70,10 +73,11 @@ LOGOPTS
 }
 DOCKERCONFIG
 
+
   eks_worker_userdata = <<USERDATA
 #!/bin/bash
 set -o xtrace
-/etc/eks/bootstrap.sh --apiserver-endpoint '${aws_eks_cluster.app.endpoint}' --b64-cluster-ca '${aws_eks_cluster.app.certificate_authority.0.data}' --docker-config-json '${local.docker_config_json}' '${aws_eks_cluster.app.name}'
+/etc/eks/bootstrap.sh --apiserver-endpoint '${aws_eks_cluster.app.endpoint}' --b64-cluster-ca '${aws_eks_cluster.app.certificate_authority[0].data}' --docker-config-json '${local.docker_config_json}' '${aws_eks_cluster.app.name}'
 
 # Additional customizations
 set -euo pipefail
@@ -93,105 +97,109 @@ gpg --verify ./install-inspector.sh.sig
 bash install-inspector.sh
 rm -f install-inspector.sh
 USERDATA
+
 }
 
 # Docker log options are output so they can be used to configure a
 # docker-in-docker (dind) daemon to route logs into the same log group.
 output "docker_log_opts" {
-  value = "${local.docker_log_opts}"
+  value = local.docker_log_opts
 }
 
 module "luthername_eks_worker_launch_configuration" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
-  component      = "${var.component}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
   resource       = "ec2"
 
   # This id is a hack because ASG uses it as a prefix
   id = "worker-"
 
-  providers {
-    template = "template"
+  providers = {
+    template = template
   }
 }
 
 resource "aws_launch_configuration" "eks_worker" {
   associate_public_ip_address = true
-  iam_instance_profile        = "${aws_iam_instance_profile.eks_worker.name}"
-  image_id                    = "${data.aws_ami.eks_worker.id}"
-  instance_type               = "${var.worker_instance_type}"
-  name_prefix                 = "${module.luthername_eks_worker_launch_configuration.names[count.index]}"
-  security_groups             = ["${aws_security_group.eks_worker.id}"]
-  user_data_base64            = "${base64encode(local.eks_worker_userdata)}"
-  key_name                    = "${var.aws_ssh_key_name}"
+  iam_instance_profile        = aws_iam_instance_profile.eks_worker.name
+  image_id                    = data.aws_ami.eks_worker.id
+  instance_type               = var.worker_instance_type
+  name_prefix                 = module.luthername_eks_worker_launch_configuration.names[count.index]
+  security_groups             = [aws_security_group.eks_worker.id]
+  user_data_base64            = base64encode(local.eks_worker_userdata)
+  key_name                    = var.aws_ssh_key_name
 
   lifecycle {
     create_before_destroy = true
-    ignore_changes        = ["key_name", "image_id"]
+    ignore_changes = [
+      key_name,
+      image_id,
+    ]
   }
 }
 
 module "luthername_eks_worker_autoscaling_group" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
   component      = "app"
   resource       = "asg"
   subcomponent   = "worker"
 
-  providers {
-    template = "template"
+  providers = {
+    template = template
   }
 }
 
 resource "aws_autoscaling_group" "eks_worker" {
-  desired_capacity     = "${var.autoscaling_desired}"
-  launch_configuration = "${aws_launch_configuration.eks_worker.id}"
-  max_size             = "${var.autoscaling_desired}"
+  desired_capacity     = var.autoscaling_desired
+  launch_configuration = aws_launch_configuration.eks_worker.id
+  max_size             = var.autoscaling_desired
   min_size             = 1
-  name                 = "${module.luthername_eks_worker_autoscaling_group.names[count.index]}"
-  vpc_zone_identifier  = ["${aws_subnet.net.*.id}"]
+  name                 = module.luthername_eks_worker_autoscaling_group.names[count.index]
+  vpc_zone_identifier  = aws_subnet.net.*.id
 
-  target_group_arns = ["${var.worker_asg_target_group_arns}"]
+  target_group_arns = var.worker_asg_target_group_arns
 
   tag {
     key                 = "Name"
-    value               = "${module.luthername_eks_worker_autoscaling_group.names[count.index]}"
+    value               = module.luthername_eks_worker_autoscaling_group.names[count.index]
     propagate_at_launch = false
   }
 
   tag {
     key                 = "Project"
-    value               = "${module.luthername_eks_worker_autoscaling_group.luther_project}"
+    value               = module.luthername_eks_worker_autoscaling_group.luther_project
     propagate_at_launch = true
   }
 
   tag {
     key                 = "Environment"
-    value               = "${module.luthername_eks_worker_autoscaling_group.luther_env}"
+    value               = module.luthername_eks_worker_autoscaling_group.luther_env
     propagate_at_launch = true
   }
 
   tag {
     key                 = "Organization"
-    value               = "${module.luthername_eks_worker_autoscaling_group.org_name}"
+    value               = module.luthername_eks_worker_autoscaling_group.org_name
     propagate_at_launch = true
   }
 
   tag {
     key                 = "Component"
-    value               = "${module.luthername_eks_worker_autoscaling_group.component}"
+    value               = module.luthername_eks_worker_autoscaling_group.component
     propagate_at_launch = true
   }
 
   tag {
     key                 = "Subcomponent"
-    value               = "${module.luthername_eks_worker_autoscaling_group.subcomponent}"
+    value               = module.luthername_eks_worker_autoscaling_group.subcomponent
     propagate_at_launch = true
   }
 
@@ -203,31 +211,31 @@ resource "aws_autoscaling_group" "eks_worker" {
 }
 
 output "eks_worker_asg_name" {
-  value = "${aws_autoscaling_group.eks_worker.name}"
+  value = aws_autoscaling_group.eks_worker.name
 }
 
 module "luthername_eks_worker_role" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
   component      = "app"
   resource       = "role"
   subcomponent   = "worker"
 
-  providers {
-    template = "template"
+  providers = {
+    template = template
   }
 }
 
 resource "aws_iam_role" "eks_worker" {
-  name               = "${module.luthername_eks_worker_role.names[count.index]}"
-  assume_role_policy = "${data.aws_iam_policy_document.ec2_assume_role.json}"
+  name               = module.luthername_eks_worker_role.names[count.index]
+  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 }
 
 output "aws_iam_role_eks_worker" {
-  value = "${aws_iam_role.eks_worker.name}"
+  value = aws_iam_role.eks_worker.name
 }
 
 data "aws_iam_policy_document" "ec2_assume_role" {
@@ -244,29 +252,29 @@ data "aws_iam_policy_document" "ec2_assume_role" {
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = "${aws_iam_role.eks_worker.name}"
+  role       = aws_iam_role.eks_worker.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = "${aws_iam_role.eks_worker.name}"
+  role       = aws_iam_role.eks_worker.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = "${aws_iam_role.eks_worker.name}"
+  role       = aws_iam_role.eks_worker.name
 }
 
 resource "aws_iam_role_policy" "eks_worker_s3_readonly" {
-  role   = "${aws_iam_role.eks_worker.name}"
-  policy = "${data.aws_iam_policy_document.s3_readonly.json}"
+  role   = aws_iam_role.eks_worker.name
+  policy = data.aws_iam_policy_document.s3_readonly.json
 }
 
 data "aws_iam_policy_document" "s3_readonly" {
   statement {
     effect    = "Allow"
     actions   = ["kms:Decrypt"]
-    resources = ["${var.aws_kms_key_arns}"]
+    resources = var.aws_kms_key_arns
   }
 
   statement {
@@ -276,7 +284,7 @@ data "aws_iam_policy_document" "s3_readonly" {
       "s3:GetObject",
     ]
 
-    resources = ["${data.template_file.s3_prefixes.*.rendered}"]
+    resources = data.template_file.s3_prefixes.*.rendered
   }
 
   statement {
@@ -300,27 +308,27 @@ data "aws_iam_policy_document" "s3_readonly" {
     ]
 
     resources = [
-      "${var.storage_s3_bucket_arn}",
-      "${var.common_static_s3_bucket_arn}",
-      "${var.common_external_s3_bucket_arn}",
+      var.storage_s3_bucket_arn,
+      var.common_static_s3_bucket_arn,
+      var.common_external_s3_bucket_arn,
     ]
   }
 }
 
 data "template_file" "s3_prefixes" {
-  count = "${length(var.storage_s3_key_prefixes)}"
+  count = length(var.storage_s3_key_prefixes)
 
   template = "$${bucket_arn}/$${prefix}"
 
   vars = {
-    bucket_arn = "${var.storage_s3_bucket_arn}"
-    prefix     = "${var.storage_s3_key_prefixes[count.index]}"
+    bucket_arn = var.storage_s3_bucket_arn
+    prefix     = var.storage_s3_key_prefixes[count.index]
   }
 }
 
 resource "aws_iam_role_policy" "eks_worker_cloudwatch_logs" {
-  role   = "${aws_iam_role.eks_worker.name}"
-  policy = "${data.aws_iam_policy_document.cloudwatch_logs.json}"
+  role   = aws_iam_role.eks_worker.name
+  policy = data.aws_iam_policy_document.cloudwatch_logs.json
 }
 
 data "aws_iam_policy_document" "cloudwatch_logs" {
@@ -332,14 +340,14 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
       "logs:PutLogEvents",
     ]
 
-    resources = ["${aws_cloudwatch_log_group.main.arn}"]
+    resources = [aws_cloudwatch_log_group.main.arn]
   }
 }
 
 resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
   # Policy taken from the guide here: https://aws.amazon.com/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/
   # Original policy: https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.0.0/docs/examples/iam-policy.json
-  role = "${aws_iam_role.eks_worker.name}"
+  role = aws_iam_role.eks_worker.name
 
   policy = <<POLICY
 {
@@ -451,47 +459,48 @@ resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
   ]
 }
 POLICY
+
 }
 
 module "luthername_eks_worker_profile" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
   component      = "app"
   resource       = "profile"
   subcomponent   = "worker"
 
-  providers {
-    template = "template"
+  providers = {
+    template = template
   }
 }
 
 resource "aws_iam_instance_profile" "eks_worker" {
-  name = "${module.luthername_eks_worker_profile.names[count.index]}"
-  role = "${aws_iam_role.eks_worker.name}"
+  name = module.luthername_eks_worker_profile.names[count.index]
+  role = aws_iam_role.eks_worker.name
 }
 
 module "luthername_eks_worker_nsg" {
   source         = "../luthername"
-  luther_project = "${var.luther_project}"
-  aws_region     = "${var.aws_region}"
-  luther_env     = "${var.luther_env}"
-  org_name       = "${var.org_name}"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
   component      = "app"
   resource       = "nsg"
   subcomponent   = "worker"
 
-  providers {
-    template = "template"
+  providers = {
+    template = template
   }
 }
 
 resource "aws_security_group" "eks_worker" {
-  name        = "${module.luthername_eks_worker_nsg.names[count.index]}"
+  name        = module.luthername_eks_worker_nsg.names[count.index]
   description = "Security group for worker nodes in k8s"
-  vpc_id      = "${aws_vpc.main.id}"
+  vpc_id      = aws_vpc.main.id
 
   egress {
     from_port   = 0
@@ -500,42 +509,40 @@ resource "aws_security_group" "eks_worker" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = "${
-    map(
-     "Name", "${module.luthername_eks_worker_nsg.names[count.index]}",
-     "Project", "${module.luthername_eks_worker_nsg.luther_project}",
-     "Environment", "${module.luthername_eks_worker_nsg.luther_env}",
-     "Organization", "${module.luthername_eks_worker_nsg.org_name}",
-     "Component", "${module.luthername_eks_worker_nsg.component}",
-     "Resource", "${module.luthername_eks_worker_nsg.resource}",
-     "ID", "${module.luthername_eks_worker_nsg.ids[count.index]}",
-     "kubernetes.io/cluster/${aws_eks_cluster.app.name}", "owned",
-    )
-  }"
+  tags = {
+    "Name"                                              = module.luthername_eks_worker_nsg.names[count.index]
+    "Project"                                           = module.luthername_eks_worker_nsg.luther_project
+    "Environment"                                       = module.luthername_eks_worker_nsg.luther_env
+    "Organization"                                      = module.luthername_eks_worker_nsg.org_name
+    "Component"                                         = module.luthername_eks_worker_nsg.component
+    "Resource"                                          = module.luthername_eks_worker_nsg.resource
+    "ID"                                                = module.luthername_eks_worker_nsg.ids[count.index]
+    "kubernetes.io/cluster/${aws_eks_cluster.app.name}" = "owned"
+  }
 }
 
 output "eks_worker_security_group_id" {
-  value = "${aws_security_group.eks_worker.id}"
+  value = aws_security_group.eks_worker.id
 }
 
 resource "aws_security_group_rule" "eks_worker_ingress_bastion_ssh" {
   description              = "Allow bastion to connect to the worker over SSH"
-  security_group_id        = "${aws_security_group.eks_worker.id}"
+  security_group_id        = aws_security_group.eks_worker.id
   type                     = "ingress"
   protocol                 = "tcp"
   from_port                = 22
   to_port                  = 22
-  source_security_group_id = "${module.aws_bastion.aws_security_group_id}"
+  source_security_group_id = module.aws_bastion.aws_security_group_id
 }
 
 resource "aws_security_group_rule" "eks_worker_ingress_self" {
   description              = "Allow workers to communicate with each other"
-  security_group_id        = "${aws_security_group.eks_worker.id}"
+  security_group_id        = aws_security_group.eks_worker.id
   type                     = "ingress"
   protocol                 = "-1"
   from_port                = 0
   to_port                  = 65535
-  source_security_group_id = "${aws_security_group.eks_worker.id}"
+  source_security_group_id = aws_security_group.eks_worker.id
 }
 
 # NOTE:  Seems like I had to change this range from a lower bound of 1024 being
@@ -543,10 +550,10 @@ resource "aws_security_group_rule" "eks_worker_ingress_self" {
 # bound to low ports (e.g. 80).
 resource "aws_security_group_rule" "eks_worker_ingress_eks_master" {
   description              = "Allow worker Kubelets and pods to receive communication from the cluster control plane"
-  security_group_id        = "${aws_security_group.eks_worker.id}"
+  security_group_id        = aws_security_group.eks_worker.id
   type                     = "ingress"
   protocol                 = "tcp"
   from_port                = 0
   to_port                  = 65535
-  source_security_group_id = "${aws_security_group.eks_master.id}"
+  source_security_group_id = aws_security_group.eks_master.id
 }
