@@ -19,7 +19,7 @@ variable "web_hook_url_secret_arn" {
 }
 
 variable "web_hook_url_secret_region" {
-  type = "string"
+  type    = "string"
   default = ""
 }
 

@@ -27,6 +27,6 @@ variable "bucket_prefix_patterns" {
 }
 
 variable "sftp_whitelist_ingress" {
-  type = "list"
+  type        = "list"
   description = "List of allowed CIDRs."
 }

@@ -260,7 +260,6 @@ resource "aws_subnet" "sftp" {
   }"
 }
 
-
 module "luthername_eip" {
   source         = "../luthername"
   luther_project = "${var.luther_project}"
@@ -278,7 +277,7 @@ module "luthername_eip" {
 
 resource "aws_eip" "sftp" {
   count = "${length(data.template_file.availability_zones.*.rendered)}"
-  vpc = true
+  vpc   = true
 
   depends_on = ["aws_internet_gateway.sftp"]
 
@@ -375,7 +374,7 @@ resource "aws_lb_target_group" "sftp" {
 }
 
 resource "aws_lb_target_group_attachment" "sftp" {
-  count = "${length(data.template_file.availability_zones.*.rendered)}"
+  count            = "${length(data.template_file.availability_zones.*.rendered)}"
   target_group_arn = "${aws_lb_target_group.sftp.arn}"
   target_id        = "${element(data.aws_network_interface.sftp.*.private_ip, count.index)}"
   port             = 22
@@ -383,7 +382,7 @@ resource "aws_lb_target_group_attachment" "sftp" {
 
 data "aws_network_interface" "sftp" {
   count = "${length(data.template_file.availability_zones.*.rendered)}"
-  id = "${element(aws_vpc_endpoint.sftp.network_interface_ids, count.index)}"
+  id    = "${element(aws_vpc_endpoint.sftp.network_interface_ids, count.index)}"
 }
 
 resource "aws_lb_listener" "sftp" {
@@ -428,11 +427,13 @@ resource "aws_security_group" "sftp" {
 }
 
 resource "aws_security_group_rule" "ingress_sftp" {
-  type              = "ingress"
-  from_port         = "22"
-  to_port           = "22"
-  protocol          = "tcp"
-  cidr_blocks       = ["10.0.0.0/16"] # allow internal healthcheck
+  type      = "ingress"
+  from_port = "22"
+  to_port   = "22"
+  protocol  = "tcp"
+
+  # allow internal healthcheck
+  cidr_blocks       = ["10.0.0.0/16"]
   security_group_id = "${aws_security_group.sftp.id}"
   description       = "Allow external access to SFTP"
 }

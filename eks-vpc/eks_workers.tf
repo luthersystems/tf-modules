@@ -109,7 +109,9 @@ module "luthername_eks_worker_launch_configuration" {
   org_name       = "${var.org_name}"
   component      = "${var.component}"
   resource       = "ec2"
-  id             = "worker-"                                                                            # This id is a hack because ASG uses it as a prefix
+
+  # This id is a hack because ASG uses it as a prefix
+  id = "worker-"
 
   providers {
     template = "template"
@@ -155,7 +157,7 @@ resource "aws_autoscaling_group" "eks_worker" {
   name                 = "${module.luthername_eks_worker_autoscaling_group.names[count.index]}"
   vpc_zone_identifier  = ["${aws_subnet.net.*.id}"]
 
-  target_group_arns    = ["${var.worker_asg_target_group_arns}"]
+  target_group_arns = ["${var.worker_asg_target_group_arns}"]
 
   tag {
     key                 = "Name"
