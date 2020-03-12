@@ -2,12 +2,12 @@ module "role_name" {
   source = "../luthername"
 
   luther_project = "${var.luther_project}"
-  aws_region = "${var.aws_region}"
-  luther_env = "${var.luther_env}"
-  org_name = "${var.org_name}"
-  component = "${var.component}"
-  resource = "role"
-  subcomponent = "${var.service_account}"
+  aws_region     = "${var.aws_region}"
+  luther_env     = "${var.luther_env}"
+  org_name       = "${var.org_name}"
+  component      = "${var.component}"
+  resource       = "role"
+  subcomponent   = "${var.service_account}"
 
   providers = {
     template = "template"

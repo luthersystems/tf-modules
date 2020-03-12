@@ -12,8 +12,7 @@ variable "aws_region_short_code" {
   }
 }
 
-provider "aws" {
-}
+provider "aws" {}
 
 provider "template" {
   version = "~> 0.1"

@@ -1,41 +1,41 @@
 variable "luther_project" {
-    type = "string"
+  type = "string"
 }
 
 variable "aws_region" {
-    type = "string"
+  type = "string"
 }
 
 variable "luther_env" {
-    type = "string"
+  type = "string"
 }
 
 variable "org_name" {
-    type = "string"
-    default = ""
+  type    = "string"
+  default = ""
 }
 
 variable "component" {
-    type = "string"
+  type = "string"
 }
 
 variable "subcomponent" {
-    type = "string"
-    default = ""
+  type    = "string"
+  default = ""
 }
 
 variable "resource" {
-    type = "string"
+  type = "string"
 }
 
 variable "id" {
-    type = "string"
-    default = ""
-    description = "DO NOT PROVIDE id IF ALSO PROVIDING replication"
+  type        = "string"
+  default     = ""
+  description = "DO NOT PROVIDE id IF ALSO PROVIDING replication"
 }
 
 variable "replication" {
-    type = "string"
-    default = "1"
-    description = "DO NOT PROVIDE replication IF ALSO PROVIDING id"
+  type        = "string"
+  default     = "1"
+  description = "DO NOT PROVIDE replication IF ALSO PROVIDING id"
 }

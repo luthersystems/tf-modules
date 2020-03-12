@@ -62,7 +62,7 @@ resource "aws_iam_openid_connect_provider" "app" {
 
 locals {
   oidc_provider_name = "${replace(aws_eks_cluster.app.identity.0.oidc.0.issuer, "/^https:[/][/]/", "")}"
-  oidc_provider_arn = "${aws_iam_openid_connect_provider.app.arn}"
+  oidc_provider_arn  = "${aws_iam_openid_connect_provider.app.arn}"
 }
 
 output "oidc_provider_name" {
