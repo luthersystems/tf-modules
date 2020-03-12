@@ -114,7 +114,8 @@ FACT
 # Facts used by the k8s_external_dns role in mars
 sudo tee /etc/ansible/facts.d/externaldns.fact <<FACT
 {
-  "service_account_iam_role_arn": "${module.externaldns_service_account_iam_role.arn}"
+  "public_service_account_iam_role_arn": "${module.externaldns_public_service_account_iam_role.arn}",
+  "private_service_account_iam_role_arn": "${module.externaldns_private_service_account_iam_role.arn}"
 }
 FACT
 LOCAL
