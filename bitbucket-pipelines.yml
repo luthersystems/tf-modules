@@ -1,0 +1,10 @@
+image: hashicorp/terraform:0.11.14
+
+pipelines:
+  pull-requests:
+    '**':
+      - parallel:
+          - step:
+              name: Check format
+              script:
+                - terraform fmt -diff=true -check=true
