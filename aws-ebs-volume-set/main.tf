@@ -27,7 +27,7 @@ locals {
 resource "aws_ebs_volume" "vol" {
   count             = var.replication
   availability_zone = var.aws_availability_zones[count.index]
-  snapshot_id       = var.snapshot_ids[count.index]
+  snapshot_id       = length(var.snapshot_ids) > 0 ? var.snapshot_ids[count.index] : null
 
   size = var.volume_size_gb
 
