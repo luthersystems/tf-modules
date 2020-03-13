@@ -59,7 +59,8 @@ TEMPLATE
         {
           "app.kubernetes.io/name"                   = module.luthername_pv.names[count.index]
           "app.kubernetes.io/component"              = var.component
-          "replica-index"                            = count.index
+          # TF 0.12 tweak - confirm whether a string is necessary here
+          "replica-index"                            = tostring(count.index)
           "failure-domain.beta.kubernetes.io/region" = var.aws_region
           "failure-domain.beta.kubernetes.io/zone"   = var.aws_availability_zones[count.index % length(var.aws_availability_zones)]
         },
