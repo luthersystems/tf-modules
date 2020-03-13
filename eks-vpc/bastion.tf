@@ -60,8 +60,8 @@ module "aws_bastion" {
   aws_instance_type                    = var.bastion_aws_instance_type
   aws_ami                              = var.bastion_ami
   aws_vpc_id                           = aws_vpc.main.id
-  aws_subnet_ids                       = [aws_subnet.net.*.id]
-  aws_availability_zones               = [data.template_file.availability_zones.*.rendered]
+  aws_subnet_ids                       = aws_subnet.net.*.id
+  aws_availability_zones               = data.template_file.availability_zones.*.rendered
   aws_ssh_key_name                     = var.aws_ssh_key_name
   ssh_whitelist_ingress                = ["0.0.0.0/0"]
   prometheus_server_security_group_id  = aws_security_group.monitoring_temp.id
