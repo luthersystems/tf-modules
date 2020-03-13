@@ -129,7 +129,7 @@ module "aws_instance_monitoring_actions_service" {
   aws_autorestart_arn                  = var.aws_autorestart_arn
 
   providers = {
-    template = template
+    aws = aws
   }
 }
 
