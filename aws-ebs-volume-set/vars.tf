@@ -52,5 +52,6 @@ variable "additional_tags" {
 }
 
 variable "snapshot_ids" {
-  default = [""]
+  default = []
+  type    = list(string)
 }
