@@ -116,7 +116,6 @@ output "aws_instance_public_dns" {
 
 module "aws_instance_monitoring_actions_service" {
   source                               = "../aws-instance-monitoring-actions"
-  replication                          = "1"
   aws_region                           = var.aws_region
   aws_instance_ids                     = [aws_instance.service[0].id]
   instance_names                       = module.luthername_ec2.names
