@@ -1,11 +1,7 @@
-provider "aws" {
-}
+provider "aws" {}
 
-provider "template" {
-}
+provider "template" {}
 
-provider "random" {
-}
+provider "random" {}
 
-provider "archive" {
-}
+provider "archive" {}
