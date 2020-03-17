@@ -149,10 +149,6 @@ module "luthername_nsg_monitoring_temp" {
   component      = "mon"
   resource       = "nsg"
   subcomponent   = "temp"
-
-  providers = {
-    template = template
-  }
 }
 
 # This resource is a placeholder for the monitoring security group.

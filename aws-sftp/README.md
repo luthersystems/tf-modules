@@ -15,10 +15,6 @@ module "luthername_sftp_secrets_prefix" {
   org_name       = "${var.org_name}"
   component      = "sftp"
   resource       = "user"
-
-  providers = {
-    template = "template"
-  }
 }
 
 module "sftp" {

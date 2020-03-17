@@ -17,10 +17,6 @@ module "luthername_transfer_server_role" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "role"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role" "transfer_server" {
@@ -67,10 +63,6 @@ module "luthername_transfer_server_logging_role" {
   component      = "sftp"
   resource       = "role"
   subcomponent   = "logging"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role" "transfer_server_logging" {
@@ -118,10 +110,6 @@ module "luthername_transfer_server" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "ts"
-
-  providers = {
-    template = template
-  }
 }
 
 module "luthername_vpc" {
@@ -132,10 +120,6 @@ module "luthername_vpc" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "vpc"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_vpc" "sftp" {
@@ -161,10 +145,6 @@ module "luthername_ig" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "ig"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_internet_gateway" "sftp" {
@@ -189,10 +169,6 @@ module "luthername_rt" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "rt"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_route_table" "sftp" {
@@ -229,10 +205,6 @@ module "luthername_sn" {
   component      = "sftp"
   resource       = "sn"
   replication    = length(data.template_file.availability_zones.*.rendered)
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_subnet" "sftp" {
@@ -268,10 +240,6 @@ module "luthername_eip" {
   component      = "sftp"
   resource       = "eip"
   replication    = length(data.template_file.availability_zones.*.rendered)
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_eip" "sftp" {
@@ -299,10 +267,6 @@ module "luthername_lb" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "lb"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_lb" "sftp" {
@@ -346,10 +310,6 @@ module "luthername_tg" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "tg"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_lb_target_group" "sftp" {
@@ -401,10 +361,6 @@ module "luthername_nsg" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "nsg"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_security_group" "sftp" {
@@ -443,10 +399,6 @@ module "luthername_ve" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "ve"
-
-  providers = {
-    template = template
-  }
 }
 
 locals {
@@ -486,10 +438,6 @@ module "luthername_na" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "nacl"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_network_acl" "sftp" {

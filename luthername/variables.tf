@@ -35,7 +35,7 @@ variable "id" {
 }
 
 variable "replication" {
-  type        = string
-  default     = "1"
+  type        = number
+  default     = 1
   description = "DO NOT PROVIDE replication IF ALSO PROVIDING id"
 }

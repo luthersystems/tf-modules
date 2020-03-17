@@ -6,10 +6,6 @@ module "luthername_cogpool" {
   org_name       = var.org_name
   component      = var.component
   resource       = "cogpool"
-
-  providers = {
-    template = template
-  }
 }
 
 # NOTE:  In version 1.13.0 of the terraform aws provider there seem to be bugs

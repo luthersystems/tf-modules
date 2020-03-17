@@ -7,10 +7,6 @@ module "luthername_s3_bucket_logs" {
   component             = var.component
   resource              = "s3"
   id                    = var.random_identifier
-
-  providers = {
-    template = template
-  }
 }
 
 data "template_file" "aws_s3_bucket_logs_name_full" {
@@ -89,10 +85,6 @@ module "luthername_policy_logs_alb" {
   component             = var.component
   resource              = "policy"
   subcomponent          = "alb"
-
-  providers = {
-    template = template
-  }
 }
 
 module "luthername_statement_logs_alb" {
@@ -104,10 +96,6 @@ module "luthername_statement_logs_alb" {
   component             = var.component
   resource              = "sid"
   subcomponent          = "alb"
-
-  providers = {
-    template = template
-  }
 }
 
 # Allow the AWS account which operates ALBs to write access logs

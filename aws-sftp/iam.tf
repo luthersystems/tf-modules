@@ -7,10 +7,6 @@ module "luthername_transfer_server_user_role" {
   component      = "sftp"
   resource       = "role"
   subcomponent   = "s3"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role" "transfer_server_user" {

@@ -117,10 +117,6 @@ module "luthername_eks_worker_launch_configuration" {
 
   # This id is a hack because ASG uses it as a prefix
   id = "worker-"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_launch_configuration" "eks_worker" {
@@ -151,10 +147,6 @@ module "luthername_eks_worker_autoscaling_group" {
   component      = "app"
   resource       = "asg"
   subcomponent   = "worker"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_autoscaling_group" "eks_worker" {
@@ -223,10 +215,6 @@ module "luthername_eks_worker_role" {
   component      = "app"
   resource       = "role"
   subcomponent   = "worker"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role" "eks_worker" {
@@ -471,10 +459,6 @@ module "luthername_eks_worker_profile" {
   component      = "app"
   resource       = "profile"
   subcomponent   = "worker"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_instance_profile" "eks_worker" {
@@ -491,10 +475,6 @@ module "luthername_eks_worker_nsg" {
   component      = "app"
   resource       = "nsg"
   subcomponent   = "worker"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_security_group" "eks_worker" {

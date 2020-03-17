@@ -6,10 +6,6 @@ module "luthername_vpc" {
   org_name       = var.org_name
   component      = var.component
   resource       = "vpc"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_vpc" "main" {
@@ -41,10 +37,6 @@ module "luthername_net" {
   component      = "project"
   resource       = "net"
   replication    = length(data.template_file.availability_zones.*.rendered)
-
-  providers = {
-    template = template
-  }
 }
 
 # ip addresses in block 10.0.0.0/18 belong to third-party resources used by
@@ -118,10 +110,6 @@ module "luthername_igw" {
   org_name       = var.org_name
   component      = "project"
   resource       = "igw"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_internet_gateway" "main" {

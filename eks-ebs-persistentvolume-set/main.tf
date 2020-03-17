@@ -16,10 +16,6 @@ module "luthername_pv" {
   subcomponent   = var.subcomponent
   resource       = "k8spv"
   replication    = var.replication
-
-  providers = {
-    template = template
-  }
 }
 
 data "template_file" "persistentvolume_document" {
