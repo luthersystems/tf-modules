@@ -7,16 +7,6 @@ variable "luther_env" {
   type = string
 }
 
-variable "org_name" {
-  type    = string
-  default = ""
-}
-
-variable "org_human" {
-  type    = string
-  default = "luther"
-}
-
 variable "component" {
   type    = string
   default = "logs"

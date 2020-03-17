@@ -191,7 +191,7 @@ resource "aws_route_table" "sftp" {
 }
 
 resource "aws_route_table_association" "sftp" {
-  count          = length(data.template_file.availability_zones.*.rendered)
+  count          = length(local.region_availability_zones)
   subnet_id      = element(aws_subnet.sftp.*.id, count.index)
   route_table_id = aws_route_table.sftp.id
 }
@@ -204,15 +204,15 @@ module "luthername_sn" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "sn"
-  replication    = length(data.template_file.availability_zones.*.rendered)
+  replication    = length(local.region_availability_zones)
 }
 
 resource "aws_subnet" "sftp" {
-  count      = length(data.template_file.availability_zones.*.rendered)
+  count      = length(local.region_availability_zones)
   vpc_id     = aws_vpc.sftp.id
   cidr_block = cidrsubnet("10.0.0.0/16", 8, count.index + 1)
   availability_zone = element(
-    data.template_file.availability_zones.*.rendered,
+    local.region_availability_zones,
     count.index,
   )
 
@@ -239,11 +239,11 @@ module "luthername_eip" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "eip"
-  replication    = length(data.template_file.availability_zones.*.rendered)
+  replication    = length(local.region_availability_zones)
 }
 
 resource "aws_eip" "sftp" {
-  count = length(data.template_file.availability_zones.*.rendered)
+  count = length(local.region_availability_zones)
   vpc   = true
 
   depends_on = [aws_internet_gateway.sftp]
@@ -331,14 +331,14 @@ resource "aws_lb_target_group" "sftp" {
 }
 
 resource "aws_lb_target_group_attachment" "sftp" {
-  count            = length(data.template_file.availability_zones.*.rendered)
+  count            = length(local.region_availability_zones)
   target_group_arn = aws_lb_target_group.sftp.arn
   target_id        = element(data.aws_network_interface.sftp.*.private_ip, count.index)
   port             = 22
 }
 
 data "aws_network_interface" "sftp" {
-  count = length(data.template_file.availability_zones.*.rendered)
+  count = length(local.region_availability_zones)
   id    = element(tolist(aws_vpc_endpoint.sftp.network_interface_ids), count.index)
 }
 

@@ -40,24 +40,6 @@ variable "aws_subnet_ids" {
   type = list(string)
 }
 
-variable "aws_availability_zones" {
-  type = list(string)
-
-  description = <<EOF
-The availability zones in which to create each instance's persistant storage
-volume.  The list of availability zones must be passed as a list, instead of
-being inferred internally using data sources, to provide backwards
-compatability if AWS adds a new AZ to a region.
-
-NOTE:  The entries of aws_availability_zones must match the availability zone
-of the subnet referenced by the corresponding entry of list variable
-aws_subnet_ids.  The availability zones are passed as a separate list to avoid
-making storage volumes dependent on subnets (i.e. The subnets can be destroyed
-without destroying the data volumes).
-EOF
-
-}
-
 variable "ssh_port" {
   type    = string
   default = "2222"
@@ -110,10 +92,6 @@ variable "aws_cloudwatch_alarm_actions_enabled" {
 }
 
 variable "aws_autorecovery_sns_arn" {
-  type = string
-}
-
-variable "aws_autorecovery_arn" {
   type = string
 }
 
