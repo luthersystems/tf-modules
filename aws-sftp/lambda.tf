@@ -18,10 +18,6 @@ module "luthername_transfer_server_lambda_role" {
   component      = "sftp"
   resource       = "role"
   subcomponent   = "lambda"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role" "transfer_lambda" {
@@ -90,10 +86,6 @@ module "luthername_transfer_server_lambda" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "lambda"
-
-  providers = {
-    template = template
-  }
 }
 
 locals {

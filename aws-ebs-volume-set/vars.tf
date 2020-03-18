@@ -21,8 +21,8 @@ variable "subcomponent" {
 }
 
 variable "replication" {
-  type    = string
-  default = "1"
+  type    = number
+  default = 1
 }
 
 variable "volume_size_gb" {

@@ -6,10 +6,6 @@ module "luthername_ec2" {
   org_name       = var.org_name
   component      = var.component
   resource       = "ec2"
-
-  providers = {
-    template = template
-  }
 }
 
 locals {
@@ -120,7 +116,6 @@ output "aws_instance_public_dns" {
 
 module "aws_instance_monitoring_actions_service" {
   source                               = "../aws-instance-monitoring-actions"
-  replication                          = "1"
   aws_region                           = var.aws_region
   aws_instance_ids                     = [aws_instance.service[0].id]
   instance_names                       = module.luthername_ec2.names
@@ -141,10 +136,6 @@ module "luthername_nsg" {
   org_name       = var.org_name
   component      = var.component
   resource       = "nsg"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_security_group" "service" {
@@ -223,10 +214,6 @@ module "luthername_policy_logs" {
   component      = var.component
   resource       = "iampolicy"
   subcomponent   = "logs"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role_policy" "cloudwatch_logs" {
@@ -257,10 +244,6 @@ module "luthername_policy_authorized_key_sync" {
   component      = var.component
   resource       = "iampolicy"
   subcomponent   = "pubkey"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role_policy" "authorized_key_sync" {
@@ -297,10 +280,6 @@ module "luthername_policy_common_assets" {
   component      = var.component
   resource       = "iampolicy"
   subcomponent   = "commons"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role_policy" "common_assets" {
@@ -356,10 +335,6 @@ module "luthername_policy_decrypt" {
   component      = var.component
   resource       = "iampolicy"
   subcomponent   = "decrypt"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role_policy" "decrypt" {

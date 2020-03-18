@@ -1,9 +1,17 @@
+output "id" {
+  value = local.id
+}
+
 output "ids" {
-  value = data.template_file.id.*.rendered
+  value = local.ids
+}
+
+output "name" {
+  value = local.name
 }
 
 output "names" {
-  value = data.template_file.name.*.rendered
+  value = local.names
 }
 
 output "luther_project" {

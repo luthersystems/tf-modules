@@ -21,10 +21,6 @@ module "luthername_lambda_role" {
   component      = "mon"
   resource       = "role"
   subcomponent   = "logstoslack"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role" "lambda" {
@@ -98,10 +94,6 @@ module "luthername_lambda" {
   component      = "mon"
   resource       = "lambda"
   subcomponent   = "logstoslack"
-
-  providers = {
-    template = template
-  }
 }
 
 locals {
@@ -156,10 +148,6 @@ module "luthername_lambda_permissions" {
   component      = "mon"
   resource       = "fnperm"
   subcomponent   = "logstoslack"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_lambda_permission" "main" {

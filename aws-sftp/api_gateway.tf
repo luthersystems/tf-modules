@@ -6,10 +6,6 @@ module "luthername_transfer_server_api" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "api"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_api_gateway_rest_api" "transfer_auth" {

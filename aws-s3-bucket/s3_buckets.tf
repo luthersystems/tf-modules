@@ -7,10 +7,6 @@ module "luthername_s3_bucket" {
   component             = var.component
   resource              = "s3"
   id                    = var.random_identifier
-
-  providers = {
-    template = template
-  }
 }
 
 data "template_file" "aws_s3_bucket_name_full" {

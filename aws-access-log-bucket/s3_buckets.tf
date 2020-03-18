@@ -7,29 +7,21 @@ module "luthername_s3_bucket_logs" {
   component             = var.component
   resource              = "s3"
   id                    = var.random_identifier
-
-  providers = {
-    template = template
-  }
 }
 
-data "template_file" "aws_s3_bucket_logs_name_full" {
-  template = "luther-${module.luthername_s3_bucket_logs.names[0]}"
-}
+locals {
+  aws_account_number = var.aws_alb_access_log_accounts[var.aws_region]
+  aws_logging_arn    = "arn:aws:iam::${local.aws_account_number}:root"
 
-# NOTE:  We define a template containing the ARN for resource
-# aws_s3_bucket.logs because we need to reference the bucket in the policy
-# document which is passed in during the bucket's creation.
-data "template_file" "aws_s3_bucket_logs_arn" {
-  template = "arn:aws:s3:::$${bucket}"
-
-  vars = {
-    bucket = data.template_file.aws_s3_bucket_logs_name_full.rendered
-  }
+  bucket_name = "luther-${module.luthername_s3_bucket_logs.names[0]}"
+  bucket_arn  = "arn:aws:s3:::${local.bucket_name}"
+  # This is a bit permissive, but several environments will have their
+  # access logs written under this root key prefix.
+  bucket_resource = "${local.bucket_arn}/access_logs/*"
 }
 
 resource "aws_s3_bucket" "logs" {
-  bucket = "luther-${module.luthername_s3_bucket_logs.names[0]}"
+  bucket = local.bucket_name
   acl    = "private"
   region = var.aws_region
 
@@ -46,14 +38,6 @@ resource "aws_s3_bucket" "logs" {
 
     expiration {
       days = 30
-
-      # Because we have versioning on the bucket we need to delete
-      # "expired object delete markers". See the following link for
-      # more information:
-      # http://docs.aws.amazon.com/AmazonS3/latest/dev/lifecycle-configuration-examples.html#lifecycle-config-conceptual-ex8
-      # This is needed in addition to noncurrent_version_expiration to
-      # completely remove a key from the bucket.
-      expired_object_delete_marker = true
     }
 
     noncurrent_version_expiration {
@@ -71,7 +55,7 @@ resource "aws_s3_bucket" "logs" {
   }
 
   tags = {
-    Name        = "luther-${module.luthername_s3_bucket_logs.names[0]}"
+    Name        = local.bucket_name
     Project     = module.luthername_s3_bucket_logs.luther_project
     Environment = module.luthername_s3_bucket_logs.luther_env
     Component   = module.luthername_s3_bucket_logs.component
@@ -80,69 +64,36 @@ resource "aws_s3_bucket" "logs" {
   }
 }
 
-module "luthername_policy_logs_alb" {
-  source                = "../luthername"
-  luther_project        = var.luther_project
-  aws_region            = var.aws_region
-  aws_region_short_code = var.aws_region_short_code
-  luther_env            = var.luther_env
-  component             = var.component
-  resource              = "policy"
-  subcomponent          = "alb"
-
-  providers = {
-    template = template
-  }
-}
-
-module "luthername_statement_logs_alb" {
-  source                = "../luthername"
-  luther_project        = var.luther_project
-  aws_region            = var.aws_region
-  aws_region_short_code = var.aws_region_short_code
-  luther_env            = var.luther_env
-  component             = var.component
-  resource              = "sid"
-  subcomponent          = "alb"
-
-  providers = {
-    template = template
-  }
-}
-
 # Allow the AWS account which operates ALBs to write access logs
 # aws_s3_bucket.logs.
 data "aws_iam_policy_document" "logs_alb" {
-  policy_id = module.luthername_policy_logs_alb.names[0]
-
   statement {
-    sid    = module.luthername_statement_logs_alb.names[0]
-    effect = "Allow"
-
-    actions = [
-      "s3:PutObject",
-    ]
-
-    # This is a bit permissive, but several environments will have their
-    # access logs written under this root key prefix.
-    resources = [
-      "${data.template_file.aws_s3_bucket_logs_arn.rendered}/access_logs/*",
-    ]
+    actions   = ["s3:PutObject"]
+    resources = [local.bucket_resource]
 
     principals {
-      type = "AWS"
-
-      identifiers = [
-        data.template_file.aws_account_alb_access_logs.rendered,
-      ]
+      type        = "AWS"
+      identifiers = [local.aws_logging_arn]
     }
   }
-}
 
-data "template_file" "aws_account_alb_access_logs" {
-  template = "arn:aws:iam::$${account_number}:root"
+  statement {
+    actions   = ["s3:PutObject"]
+    resources = [local.bucket_resource]
 
-  vars = {
-    account_number = var.aws_alb_access_log_accounts[var.aws_region]
+    principals {
+      type        = "Service"
+      identifiers = ["delivery.logs.amazonaws.com"]
+    }
+  }
+
+  statement {
+    actions   = ["s3:GetBucketAcl"]
+    resources = [local.bucket_arn]
+
+    principals {
+      type        = "Service"
+      identifiers = ["delivery.logs.amazonaws.com"]
+    }
   }
 }

@@ -17,10 +17,6 @@ module "luthername_transfer_server_role" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "role"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role" "transfer_server" {
@@ -67,10 +63,6 @@ module "luthername_transfer_server_logging_role" {
   component      = "sftp"
   resource       = "role"
   subcomponent   = "logging"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role" "transfer_server_logging" {
@@ -118,10 +110,6 @@ module "luthername_transfer_server" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "ts"
-
-  providers = {
-    template = template
-  }
 }
 
 module "luthername_vpc" {
@@ -132,10 +120,6 @@ module "luthername_vpc" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "vpc"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_vpc" "sftp" {
@@ -161,10 +145,6 @@ module "luthername_ig" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "ig"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_internet_gateway" "sftp" {
@@ -189,10 +169,6 @@ module "luthername_rt" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "rt"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_route_table" "sftp" {
@@ -215,7 +191,7 @@ resource "aws_route_table" "sftp" {
 }
 
 resource "aws_route_table_association" "sftp" {
-  count          = length(data.template_file.availability_zones.*.rendered)
+  count          = length(local.region_availability_zones)
   subnet_id      = element(aws_subnet.sftp.*.id, count.index)
   route_table_id = aws_route_table.sftp.id
 }
@@ -228,19 +204,15 @@ module "luthername_sn" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "sn"
-  replication    = length(data.template_file.availability_zones.*.rendered)
-
-  providers = {
-    template = template
-  }
+  replication    = length(local.region_availability_zones)
 }
 
 resource "aws_subnet" "sftp" {
-  count      = length(data.template_file.availability_zones.*.rendered)
+  count      = length(local.region_availability_zones)
   vpc_id     = aws_vpc.sftp.id
   cidr_block = cidrsubnet("10.0.0.0/16", 8, count.index + 1)
   availability_zone = element(
-    data.template_file.availability_zones.*.rendered,
+    local.region_availability_zones,
     count.index,
   )
 
@@ -267,15 +239,11 @@ module "luthername_eip" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "eip"
-  replication    = length(data.template_file.availability_zones.*.rendered)
-
-  providers = {
-    template = template
-  }
+  replication    = length(local.region_availability_zones)
 }
 
 resource "aws_eip" "sftp" {
-  count = length(data.template_file.availability_zones.*.rendered)
+  count = length(local.region_availability_zones)
   vpc   = true
 
   depends_on = [aws_internet_gateway.sftp]
@@ -299,10 +267,6 @@ module "luthername_lb" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "lb"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_lb" "sftp" {
@@ -346,10 +310,6 @@ module "luthername_tg" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "tg"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_lb_target_group" "sftp" {
@@ -371,14 +331,14 @@ resource "aws_lb_target_group" "sftp" {
 }
 
 resource "aws_lb_target_group_attachment" "sftp" {
-  count            = length(data.template_file.availability_zones.*.rendered)
+  count            = length(local.region_availability_zones)
   target_group_arn = aws_lb_target_group.sftp.arn
   target_id        = element(data.aws_network_interface.sftp.*.private_ip, count.index)
   port             = 22
 }
 
 data "aws_network_interface" "sftp" {
-  count = length(data.template_file.availability_zones.*.rendered)
+  count = length(local.region_availability_zones)
   id    = element(tolist(aws_vpc_endpoint.sftp.network_interface_ids), count.index)
 }
 
@@ -401,10 +361,6 @@ module "luthername_nsg" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "nsg"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_security_group" "sftp" {
@@ -443,10 +399,6 @@ module "luthername_ve" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "ve"
-
-  providers = {
-    template = template
-  }
 }
 
 locals {
@@ -486,10 +438,6 @@ module "luthername_na" {
   org_name       = var.org_name
   component      = "sftp"
   resource       = "nacl"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_network_acl" "sftp" {

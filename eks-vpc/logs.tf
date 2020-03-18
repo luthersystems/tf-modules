@@ -6,10 +6,6 @@ module "luthername_logs" {
   org_name       = var.org_name
   component      = var.component
   resource       = "logs"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_cloudwatch_log_group" "main" {
@@ -40,10 +36,6 @@ module "luthername_logs_subscription_filter" {
   component      = var.component
   resource       = "logs"
   subcomponent   = "sub"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "level_error" {

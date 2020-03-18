@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_metric_alarm" "auto_recovery_alarm" {
-  count               = var.replication
+  count               = length(var.aws_instance_ids)
   alarm_name          = "AutoRecoveryAlarm-${var.instance_names[count.index]}-${var.aws_instance_ids[count.index]}"
   alarm_description   = "Auto recover the EC2 instance if Status Check (System) fails."
   namespace           = "AWS/EC2"
@@ -31,7 +31,7 @@ resource "aws_cloudwatch_metric_alarm" "auto_recovery_alarm" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "auto_restart_alarm" {
-  count               = var.replication
+  count               = length(var.aws_instance_ids)
   alarm_name          = "AutoRestartAlarm-${var.instance_names[count.index]}-${var.aws_instance_ids[count.index]}"
   alarm_description   = "Auto restart the EC2 instance if Status Check (Instance) fails."
   namespace           = "AWS/EC2"

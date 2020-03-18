@@ -2,11 +2,6 @@ variable "aws_region" {
   type = string
 }
 
-variable "replication" {
-  type        = string
-  description = "must equal the number of instance ids supplied.  required due to terraform module restrictions"
-}
-
 variable "instance_names" {
   type = list(string)
 }

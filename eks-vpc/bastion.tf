@@ -46,8 +46,7 @@ resource "aws_route53_record" "bastion" {
 }
 
 locals {
-  aws_autorecovery_arn = "arn:aws:automate:${var.aws_region}:ec2:recover"
-  aws_autorestart_arn  = "arn:aws:swf:${var.aws_region}:${var.aws_account_id}:action/actions/AWS_EC2.InstanceId.Reboot/1.0"
+  aws_autorestart_arn = "arn:aws:swf:${var.aws_region}:${var.aws_account_id}:action/actions/AWS_EC2.InstanceId.Reboot/1.0"
 }
 
 module "aws_bastion" {
@@ -61,7 +60,6 @@ module "aws_bastion" {
   aws_ami                              = var.bastion_ami
   aws_vpc_id                           = aws_vpc.main.id
   aws_subnet_ids                       = aws_subnet.net.*.id
-  aws_availability_zones               = data.template_file.availability_zones.*.rendered
   aws_ssh_key_name                     = var.aws_ssh_key_name
   ssh_whitelist_ingress                = ["0.0.0.0/0"]
   prometheus_server_security_group_id  = aws_security_group.monitoring_temp.id
@@ -70,13 +68,11 @@ module "aws_bastion" {
   aws_kms_key_arns                     = var.aws_kms_key_arns
   aws_cloudwatch_alarm_actions_enabled = var.aws_cloudwatch_alarm_actions_enabled
   aws_autorecovery_sns_arn             = var.aws_autorecovery_sns_arn
-  aws_autorecovery_arn                 = local.aws_autorecovery_arn
   aws_autorestart_arn                  = local.aws_autorestart_arn
   ssh_port                             = var.bastion_ssh_port
 
   providers = {
-    aws      = aws
-    template = template
+    aws = aws
   }
 }
 
@@ -149,10 +145,6 @@ module "luthername_nsg_monitoring_temp" {
   component      = "mon"
   resource       = "nsg"
   subcomponent   = "temp"
-
-  providers = {
-    template = template
-  }
 }
 
 # This resource is a placeholder for the monitoring security group.

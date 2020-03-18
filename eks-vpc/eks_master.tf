@@ -6,10 +6,6 @@ module "luthername_eks_cluster" {
   org_name       = var.org_name
   component      = var.component
   resource       = "eks"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_cloudwatch_log_group" "eks_cluster" {
@@ -86,10 +82,6 @@ module "luthername_eks_master_role" {
   component      = var.component
   resource       = "role"
   subcomponent   = "eks"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role" "eks_master" {
@@ -171,10 +163,6 @@ module "luthername_eks_master_nsg" {
   component      = var.component
   resource       = "nsg"
   subcomponent   = "eks"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_security_group" "eks_master" {

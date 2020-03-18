@@ -6,10 +6,6 @@ module "luthername_cogpool_client" {
   org_name       = var.org_name
   component      = var.component
   resource       = "cogclient"
-
-  providers = {
-    template = template
-  }
 }
 
 # BUG:  Updates to user pool clients don't work well with terraform aws

@@ -8,10 +8,6 @@ module "luthername_vol" {
   subcomponent   = var.subcomponent
   resource       = "vol"
   replication    = var.replication
-
-  providers = {
-    template = template
-  }
 }
 
 locals {

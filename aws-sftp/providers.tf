@@ -1,7 +1,7 @@
 provider "aws" {}
 
-provider "template" {}
-
 provider "random" {}
+
+provider "template" {}
 
 provider "archive" {}

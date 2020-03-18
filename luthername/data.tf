@@ -1,33 +1,18 @@
-data "template_file" "id" {
-  count    = var.replication
-  template = "$${subcomponent}$${id}"
+locals {
+  region_code = var.aws_region_short_code[var.aws_region]
+  prefix = join("-", compact(
+    [
+      var.luther_project,
+      local.region_code,
+      var.luther_env,
+      var.org_name,
+      var.component,
+      var.resource,
+  ]))
 
-  vars = {
-    subcomponent = var.subcomponent
-    id           = var.id != "" ? var.id : count.index
-  }
-}
+  ids   = [for i in range(var.replication) : "${var.subcomponent}${var.id == "" ? i : var.id}"]
+  names = [for i in range(var.replication) : "${local.prefix}-${local.ids[i]}"]
 
-data "template_file" "org_part" {
-  template = "$${hyphen}$${org_name}"
-
-  vars = {
-    hyphen   = var.org_name == "" ? "" : "-"
-    org_name = var.org_name
-  }
-}
-
-data "template_file" "name" {
-  count    = var.replication
-  template = "$${project}-$${region_code}-$${env}$${org_part}-$${component}-$${resource}-$${id}"
-
-  vars = {
-    project     = var.luther_project
-    region_code = var.aws_region_short_code[var.aws_region]
-    env         = var.luther_env
-    org_part    = data.template_file.org_part.rendered
-    component   = var.component
-    resource    = var.resource
-    id          = data.template_file.id[count.index].rendered
-  }
+  id   = var.replication == 1 ? local.ids[0] : null
+  name = var.replication == 1 ? local.names[0] : null
 }
