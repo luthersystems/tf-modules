@@ -8,3 +8,7 @@ pipelines:
               name: Check format
               script:
                 - terraform fmt -diff=true -check=true
+          - step:
+              name: Validate
+              script:
+                - ./validate.sh
