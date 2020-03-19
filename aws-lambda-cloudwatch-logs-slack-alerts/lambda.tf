@@ -112,7 +112,7 @@ resource "aws_lambda_function" "main" {
   source_code_hash = data.archive_file.lambda.output_base64sha256
   role             = aws_iam_role.lambda.arn
   handler          = "index.handler"
-  runtime          = "nodejs8.10"
+  runtime          = "nodejs12.x"
 
   tags = {
     Name         = module.luthername_lambda.names[0]
