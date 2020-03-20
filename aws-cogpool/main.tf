@@ -22,15 +22,15 @@ resource "aws_cognito_user_pool" "org" {
   #mfa_configuration = "OPTIONAL"
 
   password_policy {
-    minimum_length    = 8
-    require_lowercase = true
-    require_numbers   = true
-    require_symbols   = true
-    require_uppercase = true
+    minimum_length                   = 8
+    require_lowercase                = true
+    require_numbers                  = true
+    require_symbols                  = true
+    require_uppercase                = true
+    temporary_password_validity_days = 7
   }
   admin_create_user_config {
     allow_admin_create_user_only = true
-    unused_account_validity_days = 7
 
     invite_message_template {
       # NOTE:  The terraform docs say that sms_message is optional but it
