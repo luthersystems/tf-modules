@@ -13,97 +13,40 @@ data "aws_ami" "eks_worker" {
 data "aws_region" "current" {
 }
 
-# EKS currently documents required userdata (local.eks_worker_userdata) for EKS
-# worker nodes to properly configure Kubernetes applications on the EC2
-# instance.  We implement a Terraform local here to simplify Base64 encoding
-# this information into the AutoScaling Launch Configuration.
-#
-# More information: https://docs.aws.amazon.com/eks/latest/userguide/launch-workers.html
+
 locals {
-  inspector_gpg_key = <<GPGKEY
------BEGIN PGP PUBLIC KEY BLOCK-----
-Version: GnuPG v2.0.18 (GNU/Linux)
+  docker_log_opts = {
+    "awslogs-region"       = var.aws_region,
+    "awslogs-group"        = aws_cloudwatch_log_group.main.name,
+    "awslogs-create-group" = "false",
+    "tag"                  = "docker/{{.Name}}/{{.ID}}",
+  }
 
-mQINBFYDlfEBEADFpfNt/mdCtsmfDoga+PfHY9bdXAD68yhp2m9NyH3BOzle/MXI
-8siNfoRgzDwuWnIaezHwwLWkDw2paRxp1NMQ9qRe8Phq0ewheLrQu95dwDgMcw90
-gf9m1iKVHjdVQ9qNHlB2OFknPDxMDRHcrmlJYDKYCX3+MODEHnlK25tIH2KWezXP
-FPSU+TkwjLRzSMYH1L8IwjFUIIi78jQS9a31R/cOl4zuC5fOVghYlSomLI8irfoD
-JSa3csVRujSmOAf9o3beiMR/kNDMpgDOxgiQTu/Kh39cl6o8AKe+QKK48kqO7hra
-h1dpzLbfeZEVU6dWMZtlUksG/zKxuzD6d8vXYH7Z+x09POPFALQCQQMC3WisIKgj
-zJEFhXMCCQ3NLC3CeyMq3vP7MbVRBYE7t3d2uDREkZBgIf+mbUYfYPhrzy0qT9Tr
-PgwcnUvDZuazxuuPzucZGOJ5kbptat3DcUpstjdkMGAId3JawBbps77qRZdA+swr
-o9o3jbowgmf0y5ZS6KwvZnC6XyTAkXy2io7mSrAIRECrANrzYzfp5v7uD7w8Dk0X
-1OrfOm1VufMzAyTu0YQGBWaQKzSB8tCkvFw54PrRuUTcV826XU7SIJNzmNQo58uL
-bKyLVBSCVabfs0lkECIesq8PT9xMYfQJ421uATHyYUnFTU2TYrCQEab7oQARAQAB
-tCdBbWF6b24gSW5zcGVjdG9yIDxpbnNwZWN0b3JAYW1hem9uLmNvbT6JAjgEEwEC
-ACIFAlYDlfECGwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJECR0CWBYNgQY
-8yUP/2GpIl40f3mKBUiSTe0XQLvwiBCHmY+V9fOuKqDTinxssjEMCnz0vsKeCZF/
-L35pwNa/oW0OJa8D7sCkKG+8LuyMpcPDyqptLrYPprUWtz2+qLCHgpWsrku7ateF
-x4hWS0jUVeHPaBzI9V1NTHsCx9+nbpWQ5Fk+7VJI8hbMDY7NQx6fcse8WTlP/0r/
-HIkKzzqQQaaOf5t9zc5DKwi+dFmJbRUyaq22xs8C81UODjHunhjHdZ21cnsgk91S
-fviuaum9aR4/uVIYOTVWnjC5J3+VlczyUt5FaYrrQ5ov0dM+biTUXwve3X8Q85Nu
-DPnO/+zxb7Jz3QCHXnuTbxZTjvvl60Oi8//uRTnPXjz4wZLwQfibgHmk1++hzND7
-wOYA02Js6v5FZQlLQAod7q2wuA1pq4MroLXzziDfy/9ea8B+tzyxlmNVRpVZY4Ll
-DOHyqGQhpkyV3drjjNZlEofwbfu7m6ODwsgMl5ynzhKklJzwPJFfB3mMc7qLi+qX
-MJtEX8KJ/iVUQStHHAG7daL1bxpWSI3BRuaHsWbBGQ/mcHBgUUOQJyEp5LAdg9Fs
-VP55gWtF7pIqifiqlcfgG0Ov+A3NmVbmiGKSZvfrc5KsF/k43rCGqDx1RV6gZvyI
-LfO9+3sEIlNrsMib0KRLDeBt3EuDsaBZgOkqjDhgJUesqiCy
-=iEhB
------END PGP PUBLIC KEY BLOCK-----
-GPGKEY
+  docker_config = {
+    "bridge"                   = "none",
+    "log-driver"               = "awslogs",
+    "log-opts"                 = local.docker_log_opts,
+    "live-restore"             = true,
+    "max-concurrent-downloads" = 10,
+  }
 
+  inspector_gpg_key = file("${path.module}/files/inspector.gpg")
 
-  docker_log_opts = <<LOGOPTS
-{
-    "awslogs-region": ${jsonencode(var.aws_region)},
-    "awslogs-group": ${jsonencode(aws_cloudwatch_log_group.main.name)},
-    "awslogs-create-group": "false",
-    "tag": "docker/{{.Name}}/{{.ID}}"
-}
-LOGOPTS
+  user_data_vars = {
+    inspector_gpg_key_base64 = base64encode(local.inspector_gpg_key),
+    docker_config_json       = jsonencode(local.docker_config),
+    endpoint                 = aws_eks_cluster.app.endpoint,
+    cluster_ca               = aws_eks_cluster.app.certificate_authority[0].data,
+    cluster_name             = aws_eks_cluster.app.name,
+  }
 
-
-  docker_config_json = <<DOCKERCONFIG
-{
-    "bridge": "none",
-    "log-driver": "awslogs",
-    "log-opts": ${indent(4, local.docker_log_opts)},
-    "live-restore": true,
-    "max-concurrent-downloads": 10
-}
-DOCKERCONFIG
-
-
-  eks_worker_userdata = <<USERDATA
-#!/bin/bash
-set -o xtrace
-/etc/eks/bootstrap.sh --apiserver-endpoint '${aws_eks_cluster.app.endpoint}' --b64-cluster-ca '${aws_eks_cluster.app.certificate_authority[0].data}' --docker-config-json '${local.docker_config_json}' '${aws_eks_cluster.app.name}'
-
-# Additional customizations
-set -euo pipefail
-
-# Install latest security updates
-yum update --security -y
-
-# Disable root SSH
-sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
-systemctl reload sshd
-
-# Install Amazon Inspector Agent
-curl -o install-inspector.sh https://inspector-agent.amazonaws.com/linux/latest/install
-curl -o install-inspector.sh.sig https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install.sig
-echo '${base64encode(local.inspector_gpg_key)}' | base64 -d | gpg --import
-gpg --verify ./install-inspector.sh.sig
-bash install-inspector.sh
-rm -f install-inspector.sh
-USERDATA
-
+  user_data = templatefile("${path.module}/files/userdata.sh.tmpl", local.user_data_vars)
 }
 
 # Docker log options are output so they can be used to configure a
 # docker-in-docker (dind) daemon to route logs into the same log group.
 output "docker_log_opts" {
-  value = local.docker_log_opts
+  value = jsonencode(local.docker_log_opts)
 }
 
 module "luthername_eks_worker_launch_configuration" {
@@ -126,7 +69,7 @@ resource "aws_launch_configuration" "eks_worker" {
   instance_type               = var.worker_instance_type
   name_prefix                 = module.luthername_eks_worker_launch_configuration.names[0]
   security_groups             = [aws_security_group.eks_worker.id]
-  user_data_base64            = base64encode(local.eks_worker_userdata)
+  user_data_base64            = base64gzip(local.user_data)
   key_name                    = var.aws_ssh_key_name
 
   lifecycle {

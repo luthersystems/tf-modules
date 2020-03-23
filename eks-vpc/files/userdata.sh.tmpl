@@ -1,0 +1,30 @@
+#!/bin/bash
+set -euxo pipefail
+
+# EKS currently documents required userdata (local.eks_worker_userdata) for EKS
+# worker nodes to properly configure Kubernetes applications on the EC2
+# instance.  We implement a Terraform local here to simplify Base64 encoding
+# this information into the AutoScaling Launch Configuration.
+#
+# More information: https://docs.aws.amazon.com/eks/latest/userguide/launch-workers.html
+/etc/eks/bootstrap.sh --apiserver-endpoint '${endpoint}' \
+                      --b64-cluster-ca '${cluster_ca}' \
+                      --docker-config-json '${docker_config_json}' \
+                      '${cluster_name}'
+
+# Additional customizations
+
+# Install latest security updates
+yum update --security -y
+
+# Disable root SSH
+sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+systemctl reload sshd
+
+# Install Amazon Inspector Agent
+curl -o install-inspector.sh https://inspector-agent.amazonaws.com/linux/latest/install
+curl -o install-inspector.sh.sig https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install.sig
+echo '${inspector_gpg_key_base64}' | base64 -d | gpg --import
+gpg --verify ./install-inspector.sh.sig
+bash install-inspector.sh
+rm -f install-inspector.sh install-inspector.sh.sig

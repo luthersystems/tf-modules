@@ -15,7 +15,7 @@ variable "component" {
   type = string
 
   # a default component is defined in this module because it will typically
-  # be "bastion" 
+  # be "bastion"
   default = "bastion"
 }
 
