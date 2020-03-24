@@ -54,6 +54,8 @@ resource "aws_instance" "service" {
     ignore_changes = [
       ami,
       key_name,
+      user_data,
+      user_data_base64,
     ]
   }
 }
