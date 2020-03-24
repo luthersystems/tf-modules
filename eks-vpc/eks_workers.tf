@@ -13,6 +13,41 @@ data "aws_ami" "eks_worker" {
 data "aws_region" "current" {
 }
 
+locals {
+  syslog_timestamp_format = "%b %d %H:%M:%S"
+}
+
+module "common_userdata" {
+  source = "../aws-instance-userdata"
+
+  aws_region           = var.aws_region
+  cloudwatch_log_group = aws_cloudwatch_log_group.main.name
+  distro               = "amazon_linux"
+  log_namespace        = "worker"
+
+  timestamped_log_files = [
+    {
+      path             = "/var/log/messages",
+      timestamp_format = local.syslog_timestamp_format,
+    },
+    {
+      path             = "/var/log/secure",
+      timestamp_format = local.syslog_timestamp_format,
+    },
+    {
+      path             = "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log",
+      timestamp_format = "%Y-%m-%dT%H:%M:%S",
+    },
+    {
+      path             = "/var/log/cloud-init.log",
+      timestamp_format = local.syslog_timestamp_format,
+    },
+  ]
+
+  log_files = [
+    "/var/log/cloud-init-output.log",
+  ]
+}
 
 locals {
   docker_log_opts = {
@@ -30,14 +65,12 @@ locals {
     "max-concurrent-downloads" = 10,
   }
 
-  inspector_gpg_key = file("${path.module}/files/inspector.gpg")
-
   user_data_vars = {
-    inspector_gpg_key_base64 = base64encode(local.inspector_gpg_key),
-    docker_config_json       = jsonencode(local.docker_config),
-    endpoint                 = aws_eks_cluster.app.endpoint,
-    cluster_ca               = aws_eks_cluster.app.certificate_authority[0].data,
-    cluster_name             = aws_eks_cluster.app.name,
+    docker_config_json = jsonencode(local.docker_config),
+    endpoint           = aws_eks_cluster.app.endpoint,
+    cluster_ca         = aws_eks_cluster.app.certificate_authority[0].data,
+    cluster_name       = aws_eks_cluster.app.name,
+    common_userdata    = module.common_userdata.user_data
   }
 
   user_data = templatefile("${path.module}/files/userdata.sh.tmpl", local.user_data_vars)
@@ -270,6 +303,8 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
 
     actions = [
       "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
       "logs:PutLogEvents",
     ]
 

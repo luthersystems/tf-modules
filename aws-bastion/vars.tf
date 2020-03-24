@@ -98,3 +98,11 @@ variable "aws_autorecovery_sns_arn" {
 variable "aws_autorestart_arn" {
   type = string
 }
+
+variable "cloudwatch_log_group" {
+  type = string
+}
+
+variable "cloudwatch_log_group_arn" {
+  type = string
+}

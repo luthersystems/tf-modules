@@ -70,6 +70,8 @@ module "aws_bastion" {
   aws_autorecovery_sns_arn             = var.aws_autorecovery_sns_arn
   aws_autorestart_arn                  = local.aws_autorestart_arn
   ssh_port                             = var.bastion_ssh_port
+  cloudwatch_log_group                 = aws_cloudwatch_log_group.main.name
+  cloudwatch_log_group_arn             = aws_cloudwatch_log_group.main.arn
 
   providers = {
     aws = aws

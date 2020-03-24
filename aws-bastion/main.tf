@@ -9,9 +9,45 @@ module "luthername_ec2" {
 }
 
 locals {
-  inspector_gpg_key = file("${path.module}/files/inspector.gpg")
+  syslog_timestamp_format = "%b %d %H:%M:%S"
+}
+
+module "common_userdata" {
+  source = "../aws-instance-userdata"
+
+  aws_region           = var.aws_region
+  cloudwatch_log_group = var.cloudwatch_log_group
+  distro               = "ubuntu"
+  log_namespace        = "bastion"
+  run_as_user          = "cwagent"
+
+  timestamped_log_files = [
+    {
+      path             = "/var/log/auth.log",
+      timestamp_format = local.syslog_timestamp_format,
+    },
+    {
+      path             = "/var/log/syslog",
+      timestamp_format = local.syslog_timestamp_format,
+    },
+    {
+      path             = "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log",
+      timestamp_format = "%Y-%m-%dT%H:%M:%S",
+    },
+    {
+      path             = "/var/log/cloud-init.log",
+      timestamp_format = "%Y-%m-%d %H:%M:%S",
+    },
+  ]
+
+  log_files = [
+    "/var/log/cloud-init-output.log",
+  ]
+}
+
+locals {
   user_data_vars = {
-    inspector_gpg_key_base64 = base64encode(local.inspector_gpg_key)
+    common_userdata = module.common_userdata.user_data
   }
   user_data = templatefile("${path.module}/files/userdata.sh.tmpl", local.user_data_vars)
 }
@@ -182,14 +218,16 @@ resource "aws_iam_role_policy" "cloudwatch_logs" {
 
 data "aws_iam_policy_document" "cloudwatch_logs" {
   statement {
-    sid = "LutherPutLogs"
+    effect = "Allow"
 
     actions = [
       "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
       "logs:PutLogEvents",
     ]
 
-    resources = ["*"]
+    resources = [var.cloudwatch_log_group_arn]
   }
 }
 

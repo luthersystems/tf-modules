@@ -21,10 +21,4 @@ yum update --security -y
 sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
 systemctl reload sshd
 
-# Install Amazon Inspector Agent
-curl -o install-inspector.sh https://inspector-agent.amazonaws.com/linux/latest/install
-curl -o install-inspector.sh.sig https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install.sig
-echo '${inspector_gpg_key_base64}' | base64 -d | gpg --import
-gpg --verify ./install-inspector.sh.sig
-bash install-inspector.sh
-rm -f install-inspector.sh install-inspector.sh.sig
+${common_userdata}

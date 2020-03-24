@@ -1,0 +1,21 @@
+# Install Amazon Inspector Agent
+curl -o install-inspector.sh https://inspector-agent.amazonaws.com/linux/latest/install
+curl -o install-inspector.sh.sig https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install.sig
+echo '${inspector_gpg_key_base64}' | base64 -d | gpg --import
+gpg --verify install-inspector.sh.sig
+bash install-inspector.sh
+rm -f install-inspector.sh install-inspector.sh.sig
+
+# Install CloudWatch Agent
+pkgfile="$(basename '${cloudwatch_package_source}')"
+curl -o "$${pkgfile}" '${cloudwatch_package_source}'
+curl -o "$${pkgfile}.sig" '${cloudwatch_package_source}.sig'
+echo '${cloudwatch_gpg_key_base64}' | base64 -d | gpg --import
+gpg --verify "$${pkgfile}.sig"
+${package_install} "$${pkgfile}"
+usermod -aG adm cwagent
+rm -f "$${pkgfile}" "$${pkgfile}.sig"
+echo '${cloudwatch_config_base64}' | base64 -d > cloudwatch-agent.json
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:cloudwatch-agent.json
+systemctl start amazon-cloudwatch-agent.service
+systemctl enable amazon-cloudwatch-agent.service
