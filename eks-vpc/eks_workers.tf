@@ -197,6 +197,7 @@ resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEC2ContainerRegistry
 }
 
 resource "aws_iam_role_policy" "eks_worker_s3_readonly" {
+  name   = "s3-readonly"
   role   = aws_iam_role.eks_worker.name
   policy = data.aws_iam_policy_document.s3_readonly.json
 }
@@ -258,6 +259,7 @@ data "template_file" "s3_prefixes" {
 }
 
 resource "aws_iam_role_policy" "eks_worker_cloudwatch_logs" {
+  name   = "cloudwatch-logs"
   role   = aws_iam_role.eks_worker.name
   policy = data.aws_iam_policy_document.cloudwatch_logs.json
 }
@@ -276,6 +278,7 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
 }
 
 resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
+  name = "alb-ingress-controller"
   # Policy taken from the guide here: https://aws.amazon.com/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/
   # Original policy: https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.0.0/docs/examples/iam-policy.json
   role = aws_iam_role.eks_worker.name
