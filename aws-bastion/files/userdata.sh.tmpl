@@ -4,6 +4,7 @@ set -euxo pipefail
 
 # Disable root SSH
 sed -i 's/^#PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i 's/^AcceptEnv LANG LC_\*$/AcceptEnv LANG LC_* AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN/' /etc/ssh/sshd_config
 systemctl reload sshd
 
 ${common_userdata}
