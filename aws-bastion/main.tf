@@ -183,7 +183,18 @@ resource "aws_iam_instance_profile" "service" {
   role = aws_iam_role.service.name
 }
 
+module "luthername_instance_role" {
+  source         = "../luthername"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
+  resource       = "role"
+}
+
 resource "aws_iam_role" "service" {
+  name               = module.luthername_instance_role.name
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 }
 
@@ -199,19 +210,8 @@ data "aws_iam_policy_document" "ec2_assume_role" {
   }
 }
 
-module "luthername_policy_logs" {
-  source         = "../luthername"
-  luther_project = var.luther_project
-  aws_region     = var.aws_region
-  luther_env     = var.luther_env
-  org_name       = var.org_name
-  component      = var.component
-  resource       = "iampolicy"
-  subcomponent   = "logs"
-}
-
 resource "aws_iam_role_policy" "cloudwatch_logs" {
-  name   = module.luthername_policy_logs.name
+  name   = "cloudwatch-logs"
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.cloudwatch_logs.json
 }
@@ -231,19 +231,8 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
   }
 }
 
-module "luthername_policy_authorized_key_sync" {
-  source         = "../luthername"
-  luther_project = var.luther_project
-  aws_region     = var.aws_region
-  luther_env     = var.luther_env
-  org_name       = var.org_name
-  component      = var.component
-  resource       = "iampolicy"
-  subcomponent   = "pubkey"
-}
-
 resource "aws_iam_role_policy" "authorized_key_sync" {
-  name   = module.luthername_policy_authorized_key_sync.name
+  name   = "authorized-key-sync"
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.authorized_key_sync.json
 }
@@ -267,19 +256,8 @@ data "aws_iam_policy_document" "authorized_key_sync" {
   }
 }
 
-module "luthername_policy_common_assets" {
-  source         = "../luthername"
-  luther_project = var.luther_project
-  aws_region     = var.aws_region
-  luther_env     = var.luther_env
-  org_name       = var.org_name
-  component      = var.component
-  resource       = "iampolicy"
-  subcomponent   = "commons"
-}
-
 resource "aws_iam_role_policy" "common_assets" {
-  name   = module.luthername_policy_common_assets.name
+  name   = "common-assets"
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.common_assets.json
 }
@@ -295,46 +273,8 @@ data "aws_iam_policy_document" "common_assets" {
   }
 }
 
-#module "luthername_policy_project_assets" {
-#    source = "../luthername"
-#    luther_project = "${var.luther_project}"
-#    aws_region = "${var.aws_region}"
-#    luther_env = "${var.luther_env}"
-#    org_name = "${var.org_name}"
-#    component = "${var.component}"
-#    resource = "iampolicy"
-#    subcomponent = "project"
-#}
-#
-#resource "aws_iam_role_policy" "project_assets" {
-#    name = "${module.luthername_policy_project_assets.name}"
-#    role = "${aws_iam_role.service.id}"
-#    policy = "${data.aws_iam_policy_document.project_assets.json}"
-#}
-#
-#data "aws_iam_policy_document" "project_assets" {
-#    statement {
-#        actions = [
-#            "s3:HeadObject",
-#            "s3:GetObject",
-#        ]
-#        resources = ["${var.project_static_asset_s3_bucket_arn}/*"]
-#    }
-#}
-
-module "luthername_policy_decrypt" {
-  source         = "../luthername"
-  luther_project = var.luther_project
-  aws_region     = var.aws_region
-  luther_env     = var.luther_env
-  org_name       = var.org_name
-  component      = var.component
-  resource       = "iampolicy"
-  subcomponent   = "decrypt"
-}
-
 resource "aws_iam_role_policy" "decrypt" {
-  name   = module.luthername_policy_decrypt.name
+  name   = "decrypt"
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.decrypt_assets.json
 }
