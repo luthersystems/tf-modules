@@ -271,18 +271,17 @@ data "aws_iam_policy_document" "common_assets" {
 
     resources = ["${var.common_static_asset_s3_bucket_arn}/*"]
   }
-}
 
-resource "aws_iam_role_policy" "decrypt" {
-  name   = "decrypt"
-  role   = aws_iam_role.service.id
-  policy = data.aws_iam_policy_document.decrypt_assets.json
-}
-
-data "aws_iam_policy_document" "decrypt_assets" {
   statement {
-    sid       = "DecryptAssets"
-    actions   = ["kms:Decrypt"]
+    sid     = "DecryptAssets"
+    actions = ["kms:Decrypt"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values   = ["s3.${var.aws_region}.amazonaws.com"]
+    }
+
     resources = var.aws_kms_key_arns
   }
 }
