@@ -9,71 +9,63 @@ module "luthername_ec2" {
 }
 
 locals {
-  inspector_gpg_key = <<GPGKEY
------BEGIN PGP PUBLIC KEY BLOCK-----
-Version: GnuPG v2.0.18 (GNU/Linux)
+  syslog_timestamp_format = "%b %d %H:%M:%S"
+}
 
-mQINBFYDlfEBEADFpfNt/mdCtsmfDoga+PfHY9bdXAD68yhp2m9NyH3BOzle/MXI
-8siNfoRgzDwuWnIaezHwwLWkDw2paRxp1NMQ9qRe8Phq0ewheLrQu95dwDgMcw90
-gf9m1iKVHjdVQ9qNHlB2OFknPDxMDRHcrmlJYDKYCX3+MODEHnlK25tIH2KWezXP
-FPSU+TkwjLRzSMYH1L8IwjFUIIi78jQS9a31R/cOl4zuC5fOVghYlSomLI8irfoD
-JSa3csVRujSmOAf9o3beiMR/kNDMpgDOxgiQTu/Kh39cl6o8AKe+QKK48kqO7hra
-h1dpzLbfeZEVU6dWMZtlUksG/zKxuzD6d8vXYH7Z+x09POPFALQCQQMC3WisIKgj
-zJEFhXMCCQ3NLC3CeyMq3vP7MbVRBYE7t3d2uDREkZBgIf+mbUYfYPhrzy0qT9Tr
-PgwcnUvDZuazxuuPzucZGOJ5kbptat3DcUpstjdkMGAId3JawBbps77qRZdA+swr
-o9o3jbowgmf0y5ZS6KwvZnC6XyTAkXy2io7mSrAIRECrANrzYzfp5v7uD7w8Dk0X
-1OrfOm1VufMzAyTu0YQGBWaQKzSB8tCkvFw54PrRuUTcV826XU7SIJNzmNQo58uL
-bKyLVBSCVabfs0lkECIesq8PT9xMYfQJ421uATHyYUnFTU2TYrCQEab7oQARAQAB
-tCdBbWF6b24gSW5zcGVjdG9yIDxpbnNwZWN0b3JAYW1hem9uLmNvbT6JAjgEEwEC
-ACIFAlYDlfECGwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJECR0CWBYNgQY
-8yUP/2GpIl40f3mKBUiSTe0XQLvwiBCHmY+V9fOuKqDTinxssjEMCnz0vsKeCZF/
-L35pwNa/oW0OJa8D7sCkKG+8LuyMpcPDyqptLrYPprUWtz2+qLCHgpWsrku7ateF
-x4hWS0jUVeHPaBzI9V1NTHsCx9+nbpWQ5Fk+7VJI8hbMDY7NQx6fcse8WTlP/0r/
-HIkKzzqQQaaOf5t9zc5DKwi+dFmJbRUyaq22xs8C81UODjHunhjHdZ21cnsgk91S
-fviuaum9aR4/uVIYOTVWnjC5J3+VlczyUt5FaYrrQ5ov0dM+biTUXwve3X8Q85Nu
-DPnO/+zxb7Jz3QCHXnuTbxZTjvvl60Oi8//uRTnPXjz4wZLwQfibgHmk1++hzND7
-wOYA02Js6v5FZQlLQAod7q2wuA1pq4MroLXzziDfy/9ea8B+tzyxlmNVRpVZY4Ll
-DOHyqGQhpkyV3drjjNZlEofwbfu7m6ODwsgMl5ynzhKklJzwPJFfB3mMc7qLi+qX
-MJtEX8KJ/iVUQStHHAG7daL1bxpWSI3BRuaHsWbBGQ/mcHBgUUOQJyEp5LAdg9Fs
-VP55gWtF7pIqifiqlcfgG0Ov+A3NmVbmiGKSZvfrc5KsF/k43rCGqDx1RV6gZvyI
-LfO9+3sEIlNrsMib0KRLDeBt3EuDsaBZgOkqjDhgJUesqiCy
-=iEhB
------END PGP PUBLIC KEY BLOCK-----
-GPGKEY
+module "common_userdata" {
+  source = "../aws-instance-userdata"
 
+  aws_region           = var.aws_region
+  cloudwatch_log_group = var.cloudwatch_log_group
+  distro               = "ubuntu"
+  log_namespace        = "bastion"
+  run_as_user          = "cwagent"
+
+  timestamped_log_files = [
+    {
+      path             = "/var/log/auth.log",
+      timestamp_format = local.syslog_timestamp_format,
+    },
+    {
+      path             = "/var/log/syslog",
+      timestamp_format = local.syslog_timestamp_format,
+    },
+    {
+      path             = "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log",
+      timestamp_format = "%Y-%m-%dT%H:%M:%S",
+    },
+    {
+      path             = "/var/log/cloud-init.log",
+      timestamp_format = "%Y-%m-%d %H:%M:%S",
+    },
+  ]
+
+  log_files = [
+    "/var/log/cloud-init-output.log",
+  ]
+}
+
+locals {
+  user_data_vars = {
+    common_userdata = module.common_userdata.user_data
+  }
+  user_data = templatefile("${path.module}/files/userdata.sh.tmpl", local.user_data_vars)
 }
 
 resource "aws_instance" "service" {
   count = "1" # TODO
 
-  ami           = var.aws_ami
-  subnet_id     = element(var.aws_subnet_ids, count.index)
-  instance_type = var.aws_instance_type
-  key_name      = var.aws_ssh_key_name
+  ami              = var.aws_ami
+  subnet_id        = element(var.aws_subnet_ids, count.index)
+  instance_type    = var.aws_instance_type
+  key_name         = var.aws_ssh_key_name
+  user_data_base64 = base64gzip(local.user_data)
 
   ebs_optimized = lookup(
     var.aws_ebs_optimizable_instance_types,
     var.aws_instance_type,
     false,
   )
-
-  user_data = <<USERDATA
-#!/bin/bash
-set -euxo pipefail
-
-# Disable root SSH
-sed -i 's/^#PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
-systemctl reload sshd
-
-# Install Amazon Inspector Agent
-curl -o install-inspector.sh https://inspector-agent.amazonaws.com/linux/latest/install
-curl -o install-inspector.sh.sig https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install.sig
-echo '${base64encode(local.inspector_gpg_key)}' | base64 -d | gpg --import
-gpg --verify ./install-inspector.sh.sig
-bash install-inspector.sh
-rm -f install-inspector.sh
-USERDATA
-
 
   root_block_device {
     volume_type           = "gp2"
@@ -98,6 +90,8 @@ USERDATA
     ignore_changes = [
       ami,
       key_name,
+      user_data,
+      user_data_base64,
     ]
   }
 }
@@ -144,13 +138,13 @@ resource "aws_security_group" "service" {
   vpc_id = var.aws_vpc_id
 
   tags = {
-    Name         = module.luthername_nsg.names[0]
+    Name         = module.luthername_nsg.name
     Project      = module.luthername_nsg.luther_project
     Environment  = module.luthername_nsg.luther_env
     Organization = module.luthername_nsg.org_name
     Component    = module.luthername_nsg.component
     Resource     = module.luthername_nsg.resource
-    ID           = module.luthername_nsg.ids[0]
+    ID           = module.luthername_nsg.id
   }
 }
 
@@ -189,7 +183,18 @@ resource "aws_iam_instance_profile" "service" {
   role = aws_iam_role.service.name
 }
 
+module "luthername_instance_role" {
+  source         = "../luthername"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
+  resource       = "role"
+}
+
 resource "aws_iam_role" "service" {
+  name               = module.luthername_instance_role.name
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 }
 
@@ -205,49 +210,29 @@ data "aws_iam_policy_document" "ec2_assume_role" {
   }
 }
 
-module "luthername_policy_logs" {
-  source         = "../luthername"
-  luther_project = var.luther_project
-  aws_region     = var.aws_region
-  luther_env     = var.luther_env
-  org_name       = var.org_name
-  component      = var.component
-  resource       = "iampolicy"
-  subcomponent   = "logs"
-}
-
 resource "aws_iam_role_policy" "cloudwatch_logs" {
-  name   = module.luthername_policy_logs.names[0]
+  name   = "cloudwatch-logs"
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.cloudwatch_logs.json
 }
 
 data "aws_iam_policy_document" "cloudwatch_logs" {
   statement {
-    sid = "LutherPutLogs"
+    effect = "Allow"
 
     actions = [
       "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
       "logs:PutLogEvents",
     ]
 
-    resources = ["*"]
+    resources = [var.cloudwatch_log_group_arn]
   }
 }
 
-module "luthername_policy_authorized_key_sync" {
-  source         = "../luthername"
-  luther_project = var.luther_project
-  aws_region     = var.aws_region
-  luther_env     = var.luther_env
-  org_name       = var.org_name
-  component      = var.component
-  resource       = "iampolicy"
-  subcomponent   = "pubkey"
-}
-
 resource "aws_iam_role_policy" "authorized_key_sync" {
-  name   = module.luthername_policy_authorized_key_sync.names[0]
+  name   = "authorized-key-sync"
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.authorized_key_sync.json
 }
@@ -271,19 +256,8 @@ data "aws_iam_policy_document" "authorized_key_sync" {
   }
 }
 
-module "luthername_policy_common_assets" {
-  source         = "../luthername"
-  luther_project = var.luther_project
-  aws_region     = var.aws_region
-  luther_env     = var.luther_env
-  org_name       = var.org_name
-  component      = var.component
-  resource       = "iampolicy"
-  subcomponent   = "commons"
-}
-
 resource "aws_iam_role_policy" "common_assets" {
-  name   = module.luthername_policy_common_assets.names[0]
+  name   = "common-assets"
   role   = aws_iam_role.service.id
   policy = data.aws_iam_policy_document.common_assets.json
 }
@@ -297,56 +271,17 @@ data "aws_iam_policy_document" "common_assets" {
 
     resources = ["${var.common_static_asset_s3_bucket_arn}/*"]
   }
-}
 
-#module "luthername_policy_project_assets" {
-#    source = "../luthername"
-#    luther_project = "${var.luther_project}"
-#    aws_region = "${var.aws_region}"
-#    luther_env = "${var.luther_env}"
-#    org_name = "${var.org_name}"
-#    component = "${var.component}"
-#    resource = "iampolicy"
-#    subcomponent = "project"
-#}
-#
-#resource "aws_iam_role_policy" "project_assets" {
-#    name = "${module.luthername_policy_project_assets.names[0]}"
-#    role = "${aws_iam_role.service.id}"
-#    policy = "${data.aws_iam_policy_document.project_assets.json}"
-#}
-#
-#data "aws_iam_policy_document" "project_assets" {
-#    statement {
-#        actions = [
-#            "s3:HeadObject",
-#            "s3:GetObject",
-#        ]
-#        resources = ["${var.project_static_asset_s3_bucket_arn}/*"]
-#    }
-#}
-
-module "luthername_policy_decrypt" {
-  source         = "../luthername"
-  luther_project = var.luther_project
-  aws_region     = var.aws_region
-  luther_env     = var.luther_env
-  org_name       = var.org_name
-  component      = var.component
-  resource       = "iampolicy"
-  subcomponent   = "decrypt"
-}
-
-resource "aws_iam_role_policy" "decrypt" {
-  name   = module.luthername_policy_decrypt.names[0]
-  role   = aws_iam_role.service.id
-  policy = data.aws_iam_policy_document.decrypt_assets.json
-}
-
-data "aws_iam_policy_document" "decrypt_assets" {
   statement {
-    sid       = "DecryptAssets"
-    actions   = ["kms:Decrypt"]
+    sid     = "DecryptAssets"
+    actions = ["kms:Decrypt"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values   = ["s3.${var.aws_region}.amazonaws.com"]
+    }
+
     resources = var.aws_kms_key_arns
   }
 }

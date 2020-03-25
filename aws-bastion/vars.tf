@@ -15,7 +15,7 @@ variable "component" {
   type = string
 
   # a default component is defined in this module because it will typically
-  # be "bastion" 
+  # be "bastion"
   default = "bastion"
 }
 
@@ -96,5 +96,13 @@ variable "aws_autorecovery_sns_arn" {
 }
 
 variable "aws_autorestart_arn" {
+  type = string
+}
+
+variable "cloudwatch_log_group" {
+  type = string
+}
+
+variable "cloudwatch_log_group_arn" {
   type = string
 }
