@@ -16,7 +16,3 @@ variable "random_identifier" {
   type        = string
   description = "A randomly generated string to mitigate namespace sniffing globally defined S3 bucket names"
 }
-
-variable "aws_kms_key_arn" {
-  type = string
-}
