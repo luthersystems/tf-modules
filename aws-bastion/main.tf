@@ -179,7 +179,18 @@ resource "aws_security_group_rule" "ingress_ssh" {
   security_group_id = aws_security_group.service.id
 }
 
+module "luthername_instance_profile" {
+  source         = "../luthername"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
+  resource       = "profile"
+}
+
 resource "aws_iam_instance_profile" "service" {
+  name = module.luthername_instance_profile.name
   role = aws_iam_role.service.name
 }
 
@@ -281,7 +292,7 @@ data "aws_iam_policy_document" "common_assets" {
       variable = "kms:ViaService"
       # TODO look up this region to support a common bucket in an alternate
       # region
-      values   = ["s3.eu-west-2.amazonaws.com"]
+      values = ["s3.eu-west-2.amazonaws.com"]
     }
 
     resources = var.aws_kms_key_arns
