@@ -279,7 +279,9 @@ data "aws_iam_policy_document" "common_assets" {
     condition {
       test     = "StringEquals"
       variable = "kms:ViaService"
-      values   = ["s3.${var.aws_region}.amazonaws.com"]
+      # TODO look up this region to support a common bucket in an alternate
+      # region
+      values   = ["s3.eu-west-2.amazonaws.com"]
     }
 
     resources = var.aws_kms_key_arns
