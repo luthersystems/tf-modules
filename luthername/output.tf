@@ -1,3 +1,8 @@
+locals {
+  organization = var.org_name == "" ? null : var.org_name
+  subcomponent = var.subcomponent == "" ? null : var.subcomponent
+}
+
 output "id" {
   value = local.id
 }
@@ -27,7 +32,7 @@ output "luther_env" {
 }
 
 output "org_name" {
-  value = var.org_name
+  value = local.organization
 }
 
 output "component" {
@@ -35,7 +40,7 @@ output "component" {
 }
 
 output "subcomponent" {
-  value = var.subcomponent
+  value = local.subcomponent
 }
 
 output "resource" {
@@ -44,4 +49,17 @@ output "resource" {
 
 output "replication" {
   value = var.replication
+}
+
+output "tags" {
+  value = {
+    Name         = local.name
+    Project      = var.luther_project
+    Environment  = var.luther_env
+    Organization = local.organization
+    Component    = var.component
+    Subcomponent = local.subcomponent
+    Resource     = var.resource
+    ID           = local.id
+  }
 }
