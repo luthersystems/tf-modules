@@ -96,6 +96,14 @@ resource "aws_instance" "service" {
   }
 }
 
+output "name" {
+  value = module.luthername_ec2.name
+}
+
+output "names" {
+  value = module.luthername_ec2.names
+}
+
 output "aws_instance_private_ips" {
   value = aws_instance.service.*.private_ip
 }
