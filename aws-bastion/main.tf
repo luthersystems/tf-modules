@@ -133,6 +133,7 @@ module "luthername_nsg" {
 }
 
 resource "aws_security_group" "service" {
+  name        = module.luthername_nsg.name
   description = "${var.component} security group for ${var.luther_project}-${var.luther_env} (${var.org_name})"
 
   vpc_id = var.aws_vpc_id
