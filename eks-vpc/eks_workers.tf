@@ -135,40 +135,13 @@ resource "aws_autoscaling_group" "eks_worker" {
 
   target_group_arns = var.worker_asg_target_group_arns
 
-  tag {
-    key                 = "Name"
-    value               = module.luthername_eks_worker_autoscaling_group.name
-    propagate_at_launch = false
-  }
-
-  tag {
-    key                 = "Project"
-    value               = module.luthername_eks_worker_autoscaling_group.luther_project
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "Environment"
-    value               = module.luthername_eks_worker_autoscaling_group.luther_env
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "Organization"
-    value               = module.luthername_eks_worker_autoscaling_group.org_name
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "Component"
-    value               = module.luthername_eks_worker_autoscaling_group.component
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "Subcomponent"
-    value               = module.luthername_eks_worker_autoscaling_group.subcomponent
-    propagate_at_launch = true
+  dynamic "tag" {
+    for_each = module.luthername_eks_worker_autoscaling_group.tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
   }
 
   tag {

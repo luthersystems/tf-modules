@@ -1,6 +1,17 @@
 locals {
   organization = var.org_name == "" ? null : var.org_name
   subcomponent = var.subcomponent == "" ? null : var.subcomponent
+
+  all_tags = {
+    Name         = local.name
+    Project      = var.luther_project
+    Environment  = var.luther_env
+    Organization = local.organization
+    Component    = var.component
+    Subcomponent = local.subcomponent
+    Resource     = var.resource
+    ID           = local.id
+  }
 }
 
 output "id" {
@@ -52,14 +63,5 @@ output "replication" {
 }
 
 output "tags" {
-  value = {
-    Name         = local.name
-    Project      = var.luther_project
-    Environment  = var.luther_env
-    Organization = local.organization
-    Component    = var.component
-    Subcomponent = local.subcomponent
-    Resource     = var.resource
-    ID           = local.id
-  }
+  value = {for k, v in local.all_tags : k => v if v != null}
 }
