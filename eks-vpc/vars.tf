@@ -100,7 +100,11 @@ variable "autoscaling_desired" {
 }
 
 variable "worker_asg_target_group_arns" {
-  type = list(string)
+  type    = list(string)
+  default = []
+}
 
+variable "inspector_rules_package_arns" {
+  type    = list(string)
   default = []
 }
