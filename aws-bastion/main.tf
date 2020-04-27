@@ -155,6 +155,10 @@ resource "aws_security_group" "service" {
     Resource     = module.luthername_nsg.resource
     ID           = module.luthername_nsg.id
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 output "aws_security_group_id" {
