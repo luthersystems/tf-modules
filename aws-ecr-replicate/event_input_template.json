@@ -1,0 +1,24 @@
+{
+  "environmentVariablesOverride": [
+    {
+      "name": "ECR_SRC_REG_ID",
+      "type": "PLAINTEXT",
+      "value": <registryId>
+    },
+    {
+      "name": "ECR_SRC_REGION",
+      "type": "PLAINTEXT",
+      "value": <awsRegion>
+    },
+    {
+      "name": "ECR_REPO_NAME",
+      "type": "PLAINTEXT",
+      "value": <repoName>
+    },
+    {
+      "name": "ECR_REPO_TAG",
+      "type": "PLAINTEXT",
+      "value": <imageTag>
+    }
+ ]
+}

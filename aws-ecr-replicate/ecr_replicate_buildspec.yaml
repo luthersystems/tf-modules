@@ -1,0 +1,34 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+  build:
+    commands:
+      - |
+        check_create_repo()
+        {
+          dstRegion=$1
+          repoName=$2
+          #check repository in destation registry
+          if ! repoMsg=$(aws ecr describe-repositories --repository-names $repoName --region $dstRegion 2>&1); then
+            echo -n "$repoName does not exists in ECR@$dstRegion, creating... "
+            aws ecr create-repository --repository-name $repoName --region $dstRegion > /dev/null
+            echo "done."
+          fi
+        }
+        echo "login source registry"
+        $(aws ecr get-login --no-include-email --region $ECR_SRC_REGION)
+        srcImage="$ECR_SRC_REG_ID.dkr.ecr.$ECR_SRC_REGION.amazonaws.com/$ECR_REPO_NAME:$ECR_REPO_TAG"
+        echo "pull image"
+        docker pull $srcImage
+        targetRegions=$ECR_TARGET_REGIONS
+        IFS=","; for reg in $targetRegions; do
+          check_create_repo $reg $ECR_REPO_NAME
+          targetImage="$ECR_SRC_REG_ID.dkr.ecr.$reg.amazonaws.com/$ECR_REPO_NAME:$ECR_REPO_TAG"
+          docker tag $srcImage $targetImage
+          echo "login target registry in $reg"
+          aws ecr get-login --no-include-email --region $reg | bash
+          echo "push image to target region $reg"
+          docker push $targetImage
+        done
