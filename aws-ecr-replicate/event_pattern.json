@@ -1,0 +1,13 @@
+{
+  "source": [
+    "aws.ecr"
+  ],
+  "detail": {
+    "action-type": [
+      "PUSH"
+    ],
+    "result": [
+      "SUCCESS"
+    ]
+  }
+}
