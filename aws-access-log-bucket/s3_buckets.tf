@@ -53,6 +53,24 @@ resource "aws_s3_bucket" "logs" {
     }
   }
 
+  dynamic "replication_configuration" {
+    for_each = var.dr_bucket_replication ? [1] : []
+
+    content {
+      role = var.replication_role_arn
+
+      rules {
+        id     = "disaster-recovery"
+        status = "Enabled"
+
+        destination {
+          bucket        = var.replication_destination_arn
+          storage_class = "STANDARD"
+        }
+      }
+    }
+  }
+
   tags = {
     Name        = local.bucket_name
     Project     = module.luthername_s3_bucket_logs.luther_project
