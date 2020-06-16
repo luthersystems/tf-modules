@@ -43,6 +43,31 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 
+    dynamic "replication_configuration" {
+    for_each = var.dr_bucket_replication ? [1] : []
+
+    content {
+      role = var.replication_role_arn
+
+      rules {
+        id     = "disaster-recovery"
+        status = "Enabled"
+
+        destination {
+          bucket             = var.replication_destination_arn
+          replica_kms_key_id = var.destination_kms_key_arn
+          storage_class      = "STANDARD"
+        }
+
+        source_selection_criteria {
+          sse_kms_encrypted_objects {
+            enabled = true
+          }
+        }
+      }
+    }
+  }
+
   tags = {
     Name        = "luther-${module.luthername_s3_bucket.names[0]}"
     Project     = module.luthername_s3_bucket.luther_project
