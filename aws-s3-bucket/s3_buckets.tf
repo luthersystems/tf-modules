@@ -43,7 +43,7 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 
-    dynamic "replication_configuration" {
+  dynamic "replication_configuration" {
     for_each = var.dr_bucket_replication ? [1] : []
 
     content {
