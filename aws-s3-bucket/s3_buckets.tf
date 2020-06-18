@@ -1,3 +1,14 @@
+resource "random_string" "id" {
+  count   = var.random_identifier == "" ? 1 : 0
+  length  = 4
+  upper   = false
+  special = false
+}
+
+locals {
+  random_id = var.random_identifier == "" ? random_string.id.0.result : var.random_identifier
+}
+
 module "luthername_s3_bucket" {
   source                = "../luthername"
   luther_project        = var.luther_project
@@ -6,22 +17,7 @@ module "luthername_s3_bucket" {
   luther_env            = var.luther_env
   component             = var.component
   resource              = "s3"
-  id                    = var.random_identifier
-}
-
-data "template_file" "aws_s3_bucket_name_full" {
-  template = "luther-${module.luthername_s3_bucket.names[0]}"
-}
-
-# NOTE:  We define a template containing the ARN for resource
-# aws_s3_bucket.bucket because we need to reference the bucket in the policy
-# document which is passed in during the bucket's creation.
-data "template_file" "aws_s3_bucket_arn" {
-  template = "arn:aws:s3:::$${bucket}"
-
-  vars = {
-    bucket = data.template_file.aws_s3_bucket_name_full.rendered
-  }
+  id                    = local.random_id
 }
 
 resource "aws_s3_bucket" "bucket" {
@@ -68,12 +64,21 @@ resource "aws_s3_bucket" "bucket" {
     }
   }
 
-  tags = {
-    Name        = "luther-${module.luthername_s3_bucket.names[0]}"
-    Project     = module.luthername_s3_bucket.luther_project
-    Environment = module.luthername_s3_bucket.luther_env
-    Component   = module.luthername_s3_bucket.component
-    Resource    = module.luthername_s3_bucket.resource
-    ID          = module.luthername_s3_bucket.ids[0]
+  dynamic "lifecycle_rule" {
+    for_each = var.lifecycle_rules
+
+    content {
+      id      = lifecycle_rule.value.id
+      enabled = lifecycle_rule.value.enabled
+
+      expiration {
+        days = lifecycle_rule.value.expiration_days
+      }
+    }
   }
+
+  tags = merge(
+    module.luthername_s3_bucket.tags,
+    { Name = "luther-${module.luthername_s3_bucket.name}" }
+  )
 }

@@ -15,6 +15,7 @@ variable "component" {
 variable "random_identifier" {
   type        = string
   description = "A randomly generated string to mitigate namespace sniffing globally defined S3 bucket names"
+  default     = ""
 }
 
 variable "aws_kms_key_arn" {
@@ -48,4 +49,10 @@ variable "destination_kms_key_arn" {
   type        = string
   default     = ""
   description = "Destination kms key arn for S3 bucket replication"
+}
+
+variable "lifecycle_rules" {
+  type = list(map(string))
+
+  default = []
 }
