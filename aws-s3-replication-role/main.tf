@@ -76,7 +76,7 @@ data "aws_iam_policy_document" "replication" {
 
   statement {
     actions = [
-      "kms:GenerateDataKey",
+      "kms:Encrypt",
     ]
     resources = var.destination_kms_key_ids
 
