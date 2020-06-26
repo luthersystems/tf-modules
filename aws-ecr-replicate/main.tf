@@ -92,8 +92,8 @@ resource "aws_codebuild_project" "ecr_replicate" {
 
   logs_config {
     cloudwatch_logs {
-      group_name  = "log-group"
-      stream_name = "log-stream"
+      group_name  = "ecr_replicate"
+      stream_name = module.luthername_codebuild_ecr_replicate.name
     }
   }
 
@@ -118,7 +118,7 @@ data "aws_iam_policy_document" "event_ecr_replicate_assume_role" {
 }
 
 resource "aws_iam_role" "event_ecr_replicate" {
-  name = "eent-ecr-replicate"
+  name = "event-ecr-replicate"
 
   assume_role_policy = data.aws_iam_policy_document.event_ecr_replicate_assume_role.json
 }
