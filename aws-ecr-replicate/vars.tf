@@ -15,9 +15,6 @@ variable "replica_regions" {
   type = list(string)
 
   default = [
-    "eu-west-1",
-    "eu-west-2",
-    "eu-central-1",
-    "us-west-1"
+    "eu-west-1"
   ]
 }
