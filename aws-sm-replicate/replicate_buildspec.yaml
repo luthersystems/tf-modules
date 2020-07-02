@@ -1,0 +1,107 @@
+version: 0.2
+phases:
+  build:
+    commands:
+      - |
+        python - <<-EOF
+
+        import boto3
+        from os import environ
+
+        srcRegion = environ.get('SM_SRC_REGION')
+        if srcRegion == None:
+            raise Exception('Environment variable "SM_SRC_REGION" must be set')
+
+        targetRegion = environ.get('SM_TARGET_REGION')
+        if targetRegion == None:
+            raise Exception('Environment variable "SM_TARGET_REGION" must be set')
+
+        eventName = environ.get('SM_EVENT_NAME')
+        if eventName == None:
+            raise Exception('Environment variable "SM_EVENT_NAME" must be set')
+
+        validEvents = { "CreateSecret": True, "UpdateSecret": True, "PutSecretValue": True }
+
+        if not validEvents.get(eventName, False):
+            raise Exception('Unhandled event: ' + eventName)
+
+        secretId = environ.get('SM_SECRET_ID')
+        secretName = environ.get('SM_SECRET_NAME')
+
+        secretArn = secretId
+
+        if secretArn == None or secretArn == "":
+            secretArn = secretName
+
+        if secretArn == None or secretArn == "":
+            raise Exception('Environment variable "SM_SECRET_ID" or "SM_SECRET_NAME" must be set')
+
+        smSource = boto3.client('secretsmanager', region_name=srcRegion)
+
+        print('Retrieving new version of Secret "{0}"'.format(secretArn))
+        newSecret = smSource.get_secret_value(SecretId = secretArn)
+
+        secretName = newSecret['Name']
+        currentVersion = newSecret['VersionId']
+
+        def replicate_secret(targetRegion):
+            print('Replicating to: ' + targetRegion)
+            smTarget = boto3.client('secretsmanager', region_name=targetRegion)
+
+            replicaSecretExists = True
+            print('Replicating secret "{0}" (Version {1}) to region "{2}"'.format(secretName, currentVersion, targetRegion))
+            try:
+                smTarget.put_secret_value(
+                    SecretId = secretName,
+                    ClientRequestToken = currentVersion,
+                    SecretString = newSecret['SecretString']
+                )
+                pass
+            except smTarget.exceptions.ResourceNotFoundException:
+                print('Secret "{0}" does not exist in target region "{1}". Creating it now with default values'.format(secretName, targetRegion))
+                replicaSecretExists = False
+            except smTarget.exceptions.ResourceExistsException:
+                print('Secret version "{0}" has already been created, this must be a duplicate invocation'.format(currentVersion))
+                pass
+
+            if replicaSecretExists == False:
+                secretMeta = smSource.describe_secret(SecretId = secretArn)
+                if 'KmsKeyId' in secretMeta:
+                    replicaKmsKeyArn = environ.get('SM_TARGET_KMS_ARN')
+                    if replicaKmsKeyArn == None:
+                        raise Exception('Cannot create replica of a secret that uses a custom KMS key unless the "SM_TARGET_KMS_ARN" environment variable is set. Alternatively, you can also create the key manually in the replica region with the same name')
+
+                    print('Creating into region with KMS key: ' + replicaKmsKeyArn)
+                    smTarget.create_secret(
+                        Name = secretName,
+                        ClientRequestToken = currentVersion,
+                        KmsKeyId = replicaKmsKeyArn,
+                        SecretString = newSecret['SecretString'],
+                        Description = secretMeta.get('Description', '')
+                    )
+                else:
+                    print('Creating into region without KMS key')
+                    smTarget.create_secret(
+                        Name = secretName,
+                        ClientRequestToken = currentVersion,
+                        SecretString = newSecret['SecretString'],
+                        Description = secretMeta.get('Description', '')
+                    )
+            else:
+                secretMeta = smTarget.describe_secret(SecretId = secretName)
+                for previousVersion, labelList in secretMeta['VersionIdsToStages'].items():
+                    if 'AWSCURRENT' in labelList and previousVersion != currentVersion:
+                        print('Moving "AWSCURRENT" label from version "{0}" to new version "{1}"'.format(previousVersion, currentVersion))
+                        smTarget.update_secret_version_stage(
+                            SecretId = secretName,
+                            VersionStage = 'AWSCURRENT',
+                            MoveToVersionId = currentVersion,
+                            RemoveFromVersionId = previousVersion
+                        )
+                        break
+
+            print('Secret {0} replicated successfully to region "{1}"'.format(secretName, targetRegion))
+
+        replicate_secret(targetRegion)
+
+        EOF
