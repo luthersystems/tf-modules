@@ -171,7 +171,7 @@ module "luthername_event_ecr_replicate" {
   luther_env     = var.luther_env
   org_name       = "luther"
   component      = "storage"
-  subcomponent   = "replicate-region-"
+  subcomponent   = "ecr-replicate-"
   resource       = "event-rule"
   id             = "471c"
 
