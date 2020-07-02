@@ -1,0 +1,24 @@
+{
+  "environmentVariablesOverride": [
+    {
+      "name": "SM_SRC_REGION",
+      "type": "PLAINTEXT",
+      "value": <awsRegion>
+    },
+    {
+      "name": "SM_EVENT_NAME",
+      "type": "PLAINTEXT",
+      "value": <eventName>
+    },
+    {
+      "name": "SM_SECRET_NAME",
+      "type": "PLAINTEXT",
+      "value": <secretName>
+    },
+    {
+      "name": "SM_SECRET_ID",
+      "type": "PLAINTEXT",
+      "value": <secretId>
+    }
+ ]
+}

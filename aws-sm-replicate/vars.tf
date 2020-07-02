@@ -11,10 +11,14 @@ variable "luther_env" {
   type = string
 }
 
-variable "replica_regions" {
-  type = list(string)
+variable "replica_region" {
+  default = "eu-west-1"
+}
 
-  default = [
-    "eu-west-1"
-  ]
+variable "replica_kms_arn" {
+  default = ""
+}
+
+variable "source_kms_arn" {
+  default = ""
 }
