@@ -38,6 +38,10 @@ output "aws_region" {
   value = var.aws_region
 }
 
+output "az_location" {
+  value = var.az_location
+}
+
 output "luther_env" {
   value = var.luther_env
 }

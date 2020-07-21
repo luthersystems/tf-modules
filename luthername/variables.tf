@@ -4,6 +4,12 @@ variable "luther_project" {
 
 variable "aws_region" {
   type = string
+  default = ""
+}
+
+variable "az_location" {
+  type = string
+  default = ""
 }
 
 variable "luther_env" {
@@ -38,4 +44,9 @@ variable "replication" {
   type        = number
   default     = 1
   description = "DO NOT PROVIDE replication IF ALSO PROVIDING id"
+}
+
+variable "delim" {
+  type    = string
+  default = "-"
 }
