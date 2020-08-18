@@ -72,7 +72,7 @@ resource "aws_iam_role_policy_attachment" "codebuild_sm_replicate_sm_rw" {
 
 
 module "luthername_codebuild_sm_replicate" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=v23.1.1"
+  source         = "../luthername"
   luther_project = var.luther_project
   aws_region     = var.aws_region
   luther_env     = var.luther_env
@@ -192,7 +192,7 @@ resource "aws_cloudwatch_event_target" "sm_replicate" {
 }
 
 module "luthername_event_sm_replicate" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=v23.1.1"
+  source         = "../luthername"
   luther_project = var.luther_project
   aws_region     = var.aws_region
   luther_env     = var.luther_env

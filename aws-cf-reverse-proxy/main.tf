@@ -1,5 +1,5 @@
 module "luthername_site" {
-  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=v23.1.1"
+  source         = "../luthername"
   luther_project = var.luther_project
   aws_region     = var.aws_region
   luther_env     = var.luther_env

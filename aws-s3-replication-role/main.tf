@@ -1,6 +1,5 @@
 module "luthername_s3_replication" {
-  source = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=v23.2.0"
-
+  source         = "../luthername"
   luther_project = var.luther_project
   aws_region     = var.aws_region
   luther_env     = var.luther_env
