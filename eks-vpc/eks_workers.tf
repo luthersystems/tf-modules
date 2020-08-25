@@ -288,7 +288,7 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
 resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
   name = "alb-ingress-controller"
   # Policy taken from the guide here: https://aws.amazon.com/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/
-  # Original policy: https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.0.0/docs/examples/iam-policy.json
+  # Original policy: https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.9/docs/examples/iam-policy.json
   role = aws_iam_role.eks_worker.name
 
   policy = <<POLICY
@@ -317,6 +317,7 @@ resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
         "ec2:DescribeInstances",
         "ec2:DescribeInstanceStatus",
         "ec2:DescribeInternetGateways",
+        "ec2:DescribeNetworkInterfaces",
         "ec2:DescribeSecurityGroups",
         "ec2:DescribeSubnets",
         "ec2:DescribeTags",
@@ -330,6 +331,7 @@ resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
     {
       "Effect": "Allow",
       "Action": [
+        "elasticloadbalancing:AddListenerCertificates",
         "elasticloadbalancing:AddTags",
         "elasticloadbalancing:CreateListener",
         "elasticloadbalancing:CreateLoadBalancer",
@@ -340,8 +342,8 @@ resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
         "elasticloadbalancing:DeleteRule",
         "elasticloadbalancing:DeleteTargetGroup",
         "elasticloadbalancing:DeregisterTargets",
-        "elasticloadbalancing:DescribeListeners",
         "elasticloadbalancing:DescribeListenerCertificates",
+        "elasticloadbalancing:DescribeListeners",
         "elasticloadbalancing:DescribeLoadBalancers",
         "elasticloadbalancing:DescribeLoadBalancerAttributes",
         "elasticloadbalancing:DescribeRules",
@@ -356,11 +358,12 @@ resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
         "elasticloadbalancing:ModifyTargetGroup",
         "elasticloadbalancing:ModifyTargetGroupAttributes",
         "elasticloadbalancing:RegisterTargets",
+        "elasticloadbalancing:RemoveListenerCertificates",
         "elasticloadbalancing:RemoveTags",
         "elasticloadbalancing:SetIpAddressType",
         "elasticloadbalancing:SetSecurityGroups",
         "elasticloadbalancing:SetSubnets",
-        "elasticloadbalancing:SetWebACL"
+        "elasticloadbalancing:SetWebAcl"
       ],
       "Resource": "*"
     },
@@ -370,6 +373,13 @@ resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
         "iam:CreateServiceLinkedRole",
         "iam:GetServerCertificate",
         "iam:ListServerCertificates"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:DescribeUserPoolClient"
       ],
       "Resource": "*"
     },
@@ -395,6 +405,28 @@ resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
       "Effect": "Allow",
       "Action": [
         "waf:GetWebACL"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "wafv2:GetWebACL",
+        "wafv2:GetWebACLForResource",
+        "wafv2:AssociateWebACL",
+        "wafv2:DisassociateWebACL"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "shield:DescribeProtection",
+        "shield:GetSubscriptionState",
+        "shield:DeleteProtection",
+        "shield:CreateProtection",
+        "shield:DescribeSubscription",
+        "shield:ListProtections"
       ],
       "Resource": "*"
     }
