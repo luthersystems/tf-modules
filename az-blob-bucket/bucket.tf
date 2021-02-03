@@ -27,7 +27,7 @@ resource "azurerm_storage_account" "bucket" {
 
   account_kind             = "StorageV2"
   account_tier             = "Standard"
-  account_replication_type = "GZRS"
+  account_replication_type = "GRS"
 
   enable_https_traffic_only = true
 
