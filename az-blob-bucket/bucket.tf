@@ -25,7 +25,7 @@ resource "azurerm_storage_account" "bucket" {
 
   location = var.az_location
 
-  account_tier             = "Standard"
+  account_tier             = "Premium"
   account_replication_type = "GZRS"
 
   enable_https_traffic_only = true
