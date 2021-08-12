@@ -68,6 +68,11 @@ variable "aws_cloudwatch_alarm_actions_enabled" {
   default = "true"
 }
 
+variable "aws_cloudwatch_retention_days" {
+  type = number
+  default = 90
+}
+
 variable "aws_autorecovery_sns_arn" {
   type = string
 }

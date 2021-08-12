@@ -10,7 +10,7 @@ module "luthername_logs" {
 
 resource "aws_cloudwatch_log_group" "main" {
   name              = module.luthername_logs.names[0]
-  retention_in_days = 90
+  retention_in_days = var.aws_cloudwatch_retention_days
 
   tags = {
     Name         = module.luthername_logs.names[0]
