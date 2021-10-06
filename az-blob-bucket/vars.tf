@@ -25,3 +25,15 @@ variable "resource_group" {
 variable "az_location" {
   type = string
 }
+
+variable "blob_delete_retention_days" {
+  default = 7
+}
+
+variable "container_delete_retention_days" {
+  default = 7
+}
+
+variable "subnet_id" {
+  default = ""
+}

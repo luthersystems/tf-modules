@@ -3,3 +3,5 @@ provider "azurerm" {
 }
 
 provider "random" {}
+
+provider "http" {}
