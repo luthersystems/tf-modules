@@ -1,4 +1,4 @@
-image: hashicorp/terraform:0.12.23
+image: hashicorp/terraform:0.12.31
 
 pipelines:
   pull-requests:
