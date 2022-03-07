@@ -59,6 +59,8 @@ TEMPLATE
           "replica-index"                            = tostring(count.index)
           "failure-domain.beta.kubernetes.io/region" = var.aws_region
           "failure-domain.beta.kubernetes.io/zone"   = var.aws_availability_zones[count.index % length(var.aws_availability_zones)]
+          "topology.kubernetes.io/region"            = var.aws_region
+          "topology.kubernetes.io/zone"              = var.aws_availability_zones[count.index % length(var.aws_availability_zones)]
         },
       ),
     )
