@@ -13,7 +13,7 @@ module "aws_az_bucket_static" {
 }
 
 provider "azurerm" {
-  version = "~> 2.19.0"
+  version = "~> 2.59.0"
   features {}
 }
 
