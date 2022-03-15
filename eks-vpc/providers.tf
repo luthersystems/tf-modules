@@ -11,3 +11,5 @@ provider "null" {}
 provider "local" {}
 
 provider "external" {}
+
+provider "tls" {}
