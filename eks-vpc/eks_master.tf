@@ -46,14 +46,14 @@ output "aws_eks_cluster_endpoint" {
   value = aws_eks_cluster.app.endpoint
 }
 
-data "external" "oidc_thumbprint" {
-  program = ["bash", "${path.module}/files/thumbprint.sh", var.aws_region]
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.app.identity.0.oidc.0.issuer
 }
 
 resource "aws_iam_openid_connect_provider" "app" {
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.external.oidc_thumbprint.result.thumbprint]
-  url             = aws_eks_cluster.app.identity[0].oidc[0].issuer
+  thumbprint_list = [data.tls_certificate.eks.certificates.0.sha1_fingerprint]
+  url             = aws_eks_cluster.app.identity.0.oidc.0.issuer
 }
 
 locals {
