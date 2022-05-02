@@ -22,62 +22,77 @@ module "luthername_s3_bucket" {
 
 resource "aws_s3_bucket" "bucket" {
   bucket = "luther-${module.luthername_s3_bucket.names[0]}"
+
+  tags = merge(
+    module.luthername_s3_bucket.tags,
+    { Name = "luther-${module.luthername_s3_bucket.name}" }
+  )
+}
+
+resource "aws_s3_bucket_acl" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
   acl    = "private"
+}
 
-  versioning {
-    enabled = true
-    #mfa_delete = true
-  }
+resource "aws_s3_bucket_server_side_encryption_configuration" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = var.aws_kms_key_arn
-        sse_algorithm     = "aws:kms"
-      }
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = var.aws_kms_key_arn
+      sse_algorithm     = "aws:kms"
     }
   }
+}
 
-  dynamic "replication_configuration" {
-    for_each = var.dr_bucket_replication ? [1] : []
+resource "aws_s3_bucket_versioning" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 
-    content {
-      role = var.replication_role_arn
+resource "aws_s3_bucket_replication_configuration" "bucket" {
+  count      = var.dr_bucket_replication ? 1 : 0
+  bucket     = aws_s3_bucket.bucket.id
+  depends_on = [aws_s3_bucket_versioning.bucket]
+  role       = var.replication_role_arn
 
-      rules {
-        id     = "disaster-recovery"
+  rule {
+    id     = "disaster-recovery"
+    status = "Enabled"
+
+    destination {
+      bucket        = var.replication_destination_arn
+      storage_class = "STANDARD"
+
+      encryption_configuration {
+        replica_kms_key_id = var.destination_kms_key_arn
+      }
+    }
+
+    source_selection_criteria {
+      sse_kms_encrypted_objects {
         status = "Enabled"
-
-        destination {
-          bucket             = var.replication_destination_arn
-          replica_kms_key_id = var.destination_kms_key_arn
-          storage_class      = "STANDARD"
-        }
-
-        source_selection_criteria {
-          sse_kms_encrypted_objects {
-            enabled = true
-          }
-        }
       }
     }
   }
+}
 
-  dynamic "lifecycle_rule" {
+resource "aws_s3_bucket_lifecycle_configuration" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+  count  = length(var.lifecycle_rules) > 0 ? 1 : 0
+
+  dynamic "rule" {
     for_each = var.lifecycle_rules
 
     content {
-      id      = lifecycle_rule.value.id
-      enabled = lifecycle_rule.value.enabled
+      id     = lifecycle_rule.value.id
+      status = lifecycle_rule.value.enabled ? "Enabled" : "Disabled"
 
       expiration {
         days = lifecycle_rule.value.expiration_days
       }
     }
   }
-
-  tags = merge(
-    module.luthername_s3_bucket.tags,
-    { Name = "luther-${module.luthername_s3_bucket.name}" }
-  )
 }
