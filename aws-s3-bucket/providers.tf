@@ -1,3 +1,0 @@
-provider "aws" {}
-
-provider "random" {}

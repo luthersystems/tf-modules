@@ -81,10 +81,6 @@ module "luthername_codebuild_sm_replicate" {
   subcomponent   = "dr"
   resource       = "sm"
   id             = "427e"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_codebuild_project" "sm_replicate" {
@@ -201,10 +197,6 @@ module "luthername_event_sm_replicate" {
   subcomponent   = "sm-replicate-"
   resource       = "event-rule"
   id             = "b204"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_cloudwatch_event_rule" "sm_replicate" {

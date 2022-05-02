@@ -10,13 +10,13 @@ locals {
 }
 
 module "luthername_sa_bucket" {
-  source                = "../luthername"
-  luther_project        = var.luther_project
-  luther_env            = var.luther_env
-  component             = var.component
-  resource              = "sa"
-  id                    = local.random_id
-  delim                 = ""
+  source         = "../luthername"
+  luther_project = var.luther_project
+  luther_env     = var.luther_env
+  component      = var.component
+  resource       = "sa"
+  id             = local.random_id
+  delim          = ""
 }
 
 resource "azurerm_storage_account" "bucket" {
@@ -56,12 +56,12 @@ resource "azurerm_storage_account" "bucket" {
 }
 
 module "luthername_blob_bucket" {
-  source                = "../luthername"
-  luther_project        = var.luther_project
-  luther_env            = var.luther_env
-  component             = var.component
-  resource              = "blob"
-  id                    = local.random_id
+  source         = "../luthername"
+  luther_project = var.luther_project
+  luther_env     = var.luther_env
+  component      = var.component
+  resource       = "blob"
+  id             = local.random_id
 }
 
 resource "azurerm_storage_container" "bucket" {

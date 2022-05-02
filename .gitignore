@@ -231,3 +231,4 @@ secrets.tfvars
 terraform.tfstate.backup
 terraform.tfstate
 .tf-plans
+.terraform.lock.hcl

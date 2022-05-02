@@ -8,10 +8,6 @@ module "role_name" {
   component      = var.component
   resource       = "role"
   subcomponent   = var.service_account
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_iam_role" "role" {
