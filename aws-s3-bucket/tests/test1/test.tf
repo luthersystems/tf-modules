@@ -1,3 +1,18 @@
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+    }
+    random = {
+      source = "hashicorp/random"
+    }
+  }
+}
+
+provider "aws" {
+  region = "eu-west-2"
+}
+
 module "aws_s3_bucket_static" {
   source         = "../../"
   luther_project = "project"
@@ -18,9 +33,3 @@ module "aws_s3_bucket_static" {
     random = random
   }
 }
-
-provider "aws" {
-  region = "eu-west-2"
-}
-
-provider "random" {}

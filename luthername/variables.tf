@@ -3,12 +3,12 @@ variable "luther_project" {
 }
 
 variable "aws_region" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "az_location" {
-  type = string
+  type    = string
   default = ""
 }
 

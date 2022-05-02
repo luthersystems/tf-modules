@@ -1,6 +1,6 @@
 locals {
   aws_region_code = lookup(var.aws_region_short_code, var.aws_region, "")
-  az_region_code = lookup(var.az_location_short_code, var.az_location, "")
+  az_region_code  = lookup(var.az_location_short_code, var.az_location, "")
   prefix = join(var.delim, compact(
     [
       var.luther_project,

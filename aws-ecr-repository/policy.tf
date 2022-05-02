@@ -31,8 +31,8 @@ locals {
 # policy that has only readonly principals
 data "aws_iam_policy_document" "ro" {
   statement {
-    sid    = "readonlyAccess"
-    effect = "Allow"
+    sid     = "readonlyAccess"
+    effect  = "Allow"
     actions = local.ecr_actions_ro
 
     principals {
@@ -45,8 +45,8 @@ data "aws_iam_policy_document" "ro" {
 # policy that has only readwrite principals
 data "aws_iam_policy_document" "rw" {
   statement {
-    sid    = "readwriteAccess"
-    effect = "Allow"
+    sid     = "readwriteAccess"
+    effect  = "Allow"
     actions = local.ecr_actions_rw
 
     principals {
@@ -59,8 +59,8 @@ data "aws_iam_policy_document" "rw" {
 # policy that has both readonly and readwrite principals
 data "aws_iam_policy_document" "rorw" {
   statement {
-    sid    = "readonlyAccess"
-    effect = "Allow"
+    sid     = "readonlyAccess"
+    effect  = "Allow"
     actions = local.ecr_actions_ro
 
     principals {
@@ -70,8 +70,8 @@ data "aws_iam_policy_document" "rorw" {
   }
 
   statement {
-    sid    = "readwriteAccess"
-    effect = "Allow"
+    sid     = "readwriteAccess"
+    effect  = "Allow"
     actions = local.ecr_actions_rw
 
     principals {

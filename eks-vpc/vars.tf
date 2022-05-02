@@ -69,7 +69,7 @@ variable "aws_cloudwatch_alarm_actions_enabled" {
 }
 
 variable "aws_cloudwatch_retention_days" {
-  type = number
+  type    = number
   default = 90
 }
 

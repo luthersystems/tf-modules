@@ -61,10 +61,6 @@ module "luthername_codebuild_ecr_replicate" {
   subcomponent   = "dr"
   resource       = "ecr"
   id             = "desu"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_codebuild_project" "ecr_replicate" {
@@ -174,10 +170,6 @@ module "luthername_event_ecr_replicate" {
   subcomponent   = "ecr-replicate-"
   resource       = "event-rule"
   id             = "471c"
-
-  providers = {
-    template = template
-  }
 }
 
 resource "aws_cloudwatch_event_rule" "ecr_replicate" {

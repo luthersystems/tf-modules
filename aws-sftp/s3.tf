@@ -16,8 +16,8 @@ module "aws_s3_bucket_sftp" {
   random_identifier     = random_string.aws_s3_bucket_sftp.result
 
   providers = {
-    aws      = aws
-    template = template
+    aws    = aws
+    random = random
   }
 }
 

@@ -53,8 +53,8 @@ TEMPLATE
       merge(
         var.k8s_labels,
         {
-          "app.kubernetes.io/name"                   = module.luthername_pv.names[count.index]
-          "app.kubernetes.io/component"              = var.component
+          "app.kubernetes.io/name"      = module.luthername_pv.names[count.index]
+          "app.kubernetes.io/component" = var.component
           # TF 0.12 tweak - confirm whether a string is necessary here
           "replica-index"                            = tostring(count.index)
           "failure-domain.beta.kubernetes.io/region" = var.aws_region

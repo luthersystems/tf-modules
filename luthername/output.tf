@@ -67,5 +67,5 @@ output "replication" {
 }
 
 output "tags" {
-  value = {for k, v in local.all_tags : k => v if v != null}
+  value = { for k, v in local.all_tags : k => v if v != null }
 }
