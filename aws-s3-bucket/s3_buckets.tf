@@ -23,7 +23,6 @@ module "luthername_s3_bucket" {
 resource "aws_s3_bucket" "bucket" {
   bucket = "luther-${module.luthername_s3_bucket.names[0]}"
   acl    = "private"
-  region = var.aws_region
 
   versioning {
     enabled = true
