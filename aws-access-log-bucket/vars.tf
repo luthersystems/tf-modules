@@ -34,3 +34,8 @@ variable "replication_destination_arn" {
   default     = ""
   description = "Destination arn for S3 bucket replication"
 }
+
+variable "lifecycle_expiration_id" {
+  type    = string
+  default = "expiration"
+}

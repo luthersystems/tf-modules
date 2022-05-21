@@ -22,53 +22,6 @@ locals {
 
 resource "aws_s3_bucket" "logs" {
   bucket = local.bucket_name
-  acl    = "private"
-
-  versioning {
-    enabled = true
-    #mfa_delete = true
-  }
-
-  policy = data.aws_iam_policy_document.logs_alb.json
-
-  lifecycle_rule {
-    prefix  = "access_logs/"
-    enabled = true
-
-    expiration {
-      days = 30
-    }
-
-    noncurrent_version_expiration {
-      days = 60
-    }
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
-  dynamic "replication_configuration" {
-    for_each = var.dr_bucket_replication ? [1] : []
-
-    content {
-      role = var.replication_role_arn
-
-      rules {
-        id     = "disaster-recovery"
-        status = "Enabled"
-
-        destination {
-          bucket        = var.replication_destination_arn
-          storage_class = "STANDARD"
-        }
-      }
-    }
-  }
 
   tags = {
     Name        = local.bucket_name
@@ -77,6 +30,71 @@ resource "aws_s3_bucket" "logs" {
     Component   = module.luthername_s3_bucket_logs.component
     Resource    = module.luthername_s3_bucket_logs.resource
     ID          = module.luthername_s3_bucket_logs.ids[0]
+  }
+}
+
+resource "aws_s3_bucket_acl" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_policy" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  policy = data.aws_iam_policy_document.logs_alb.json
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_replication_configuration" "logs" {
+  count      = var.dr_bucket_replication ? 1 : 0
+  bucket     = aws_s3_bucket.logs.id
+  depends_on = [aws_s3_bucket_versioning.logs]
+  role       = var.replication_role_arn
+
+  rule {
+    id     = "disaster-recovery"
+    status = "Enabled"
+
+    destination {
+      bucket        = var.replication_destination_arn
+      storage_class = "STANDARD"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    id     = var.lifecycle_expiration_id
+    status = "Enabled"
+
+    filter {
+      prefix = "access_logs/"
+    }
+
+    expiration {
+      days = 30
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 60
+    }
   }
 }
 
