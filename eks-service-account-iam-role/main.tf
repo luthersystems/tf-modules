@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role_policy" "main" {
-  count  = var.policy == "" ? 0 : 1
+  count  = var.add_policy ? 1 : 0
   role   = aws_iam_role.role.name
   name   = var.policy_name
   policy = var.policy
