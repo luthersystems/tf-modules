@@ -44,3 +44,8 @@ variable "policy" {
   type    = string
   default = ""
 }
+
+variable "add_policy" {
+  type    = bool
+  default = false
+}

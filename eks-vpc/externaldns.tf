@@ -10,6 +10,7 @@ module "externaldns_public_service_account_iam_role" {
   oidc_provider_arn  = local.oidc_provider_arn
   service_account    = "external-dns-public"
   k8s_namespace      = "external-dns"
+  add_policy         = true
   policy             = data.aws_iam_policy_document.externaldns.json
 
   providers = {
@@ -34,6 +35,7 @@ module "externaldns_private_service_account_iam_role" {
   oidc_provider_arn  = local.oidc_provider_arn
   service_account    = "external-dns-private"
   k8s_namespace      = "external-dns"
+  add_policy         = true
   policy             = data.aws_iam_policy_document.externaldns.json
 
   providers = {

@@ -10,6 +10,7 @@ module "aws_lb_controller_service_account_iam_role" {
   oidc_provider_arn  = local.oidc_provider_arn
   service_account    = "aws-load-balancer-controller"
   k8s_namespace      = "aws-load-balancer-controller"
+  add_policy         = true
   policy             = local.aws_lb_controller_policy
 
   providers = {
