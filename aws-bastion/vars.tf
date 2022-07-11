@@ -92,11 +92,8 @@ variable "aws_cloudwatch_alarm_actions_enabled" {
 }
 
 variable "aws_autorecovery_sns_arn" {
-  type = string
-}
-
-variable "aws_autorestart_arn" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "cloudwatch_log_group" {

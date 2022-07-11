@@ -15,10 +15,7 @@ variable "aws_cloudwatch_alarm_actions_enabled" {
   default = "true"
 }
 
-variable "aws_autorestart_arn" {
-  type = string
-}
-
 variable "aws_autorecovery_sns_arn" {
-  type = string
+  type    = string
+  default = ""
 }
