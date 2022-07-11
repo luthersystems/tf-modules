@@ -9,18 +9,9 @@ module "luthername_logs" {
 }
 
 resource "aws_cloudwatch_log_group" "main" {
-  name              = module.luthername_logs.names[0]
+  name              = module.luthername_logs.name
   retention_in_days = var.aws_cloudwatch_retention_days
-
-  tags = {
-    Name         = module.luthername_logs.names[0]
-    Project      = module.luthername_logs.luther_project
-    Environment  = module.luthername_logs.luther_env
-    Organization = module.luthername_logs.org_name
-    Component    = module.luthername_logs.component
-    Resource     = module.luthername_logs.resource
-    ID           = module.luthername_logs.ids[0]
-  }
+  tags              = module.luthername_logs.tags
 }
 
 output "aws_cloudwatch_log_group" {
@@ -39,7 +30,8 @@ module "luthername_logs_subscription_filter" {
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "level_error" {
-  name            = module.luthername_logs_subscription_filter.names[0]
+  count           = var.aws_cloudwatch_log_subscription_filter_lambda_arn == "" ? 0 : 1
+  name            = module.luthername_logs_subscription_filter.name
   log_group_name  = aws_cloudwatch_log_group.main.name
   filter_pattern  = "?\"panic.go\" ?\"level=fatal\" ?\"level=panic\" ?\"level=error\" ?\"level=warn\" ?\"ERROR\" ?\"WARN\" ?\"FATAL\" ?\"CRITICAL\" ?\"NOTICE\" ?\"PANIC\""
   destination_arn = var.aws_cloudwatch_log_subscription_filter_lambda_arn

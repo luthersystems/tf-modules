@@ -45,10 +45,6 @@ resource "aws_route53_record" "bastion" {
   records = [module.aws_bastion.aws_instance_public_dns[0]]
 }
 
-locals {
-  aws_autorestart_arn = "arn:aws:swf:${var.aws_region}:${var.aws_account_id}:action/actions/AWS_EC2.InstanceId.Reboot/1.0"
-}
-
 module "aws_bastion" {
   source = "../aws-bastion"
 
@@ -68,7 +64,6 @@ module "aws_bastion" {
   aws_kms_key_arns                     = var.aws_kms_key_arns
   aws_cloudwatch_alarm_actions_enabled = var.aws_cloudwatch_alarm_actions_enabled
   aws_autorecovery_sns_arn             = var.aws_autorecovery_sns_arn
-  aws_autorestart_arn                  = local.aws_autorestart_arn
   ssh_port                             = var.bastion_ssh_port
   cloudwatch_log_group                 = aws_cloudwatch_log_group.main.name
   cloudwatch_log_group_arn             = aws_cloudwatch_log_group.main.arn

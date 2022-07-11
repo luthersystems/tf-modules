@@ -61,6 +61,7 @@ variable "volumes_aws_kms_key_id" {
 variable "aws_cloudwatch_log_subscription_filter_lambda_arn" {
   type        = string
   description = "A common lambda function that forwards important log messages to alert devs (e.g. via slack)"
+  default     = ""
 }
 
 variable "aws_cloudwatch_alarm_actions_enabled" {
@@ -74,7 +75,8 @@ variable "aws_cloudwatch_retention_days" {
 }
 
 variable "aws_autorecovery_sns_arn" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "ssh_public_keys_s3_bucket_arn" {

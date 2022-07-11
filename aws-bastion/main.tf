@@ -123,7 +123,6 @@ module "aws_instance_monitoring_actions_service" {
   instance_names                       = module.luthername_ec2.names
   aws_cloudwatch_alarm_actions_enabled = var.aws_cloudwatch_alarm_actions_enabled
   aws_autorecovery_sns_arn             = var.aws_autorecovery_sns_arn
-  aws_autorestart_arn                  = var.aws_autorestart_arn
 
   providers = {
     aws = aws
