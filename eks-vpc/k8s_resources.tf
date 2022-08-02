@@ -2,6 +2,7 @@ data "aws_iam_role" "assumed_role_admin" {
   name = "admin"
 }
 
+# deprecated - moved to ansible
 locals {
   config_map_aws_auth = <<CONFIGMAPAWSAUTH
 apiVersion: v1
