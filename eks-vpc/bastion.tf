@@ -121,6 +121,9 @@ locals {
     k8s_cluster_auth_config_map            = local.config_map_aws_auth
     k8s_cluster_storageclass_gp2_encrypted = local.storageclass_gp2_encrypted
     aws_load_balancer_controller_iam_role  = module.aws_lb_controller_service_account_iam_role.arn
+    eks_worker_iam_role_arn                = aws_iam_role.eks_worker.arn
+    k8s_admin_role_arn                     = data.aws_iam_role.assumed_role_admin.arn
+    storage_kms_key_id                     = var.volumes_aws_kms_key_id
   }
   k8s_facts_json = jsonencode(local.k8s_facts)
 
