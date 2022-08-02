@@ -79,8 +79,9 @@ module "aws_bastion" {
 # k8s resources defined by the uploaded files.
 resource "null_resource" "bastion_k8s_provisioning" {
   triggers = {
-    bastion_host    = module.aws_bastion.aws_instance_public_dns[0]
-    k8s_local_facts = local.k8s_local_facts
+    bastion_host      = module.aws_bastion.aws_instance_public_dns[0]
+    k8s_facts         = local.k8s_facts_json
+    externaldns_facts = local.externaldns_facts_json
   }
 
   connection {
@@ -90,37 +91,44 @@ resource "null_resource" "bastion_k8s_provisioning" {
     port = var.bastion_ssh_port
   }
 
+  provisioner "file" {
+    content     = local.k8s_facts_json
+    destination = "/home/ubuntu/k8s.fact"
+  }
+
+  provisioner "file" {
+    content     = local.externaldns_facts_json
+    destination = "/home/ubuntu/externaldns.fact"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "sudo mkdir -p /etc/ansible/facts.d",
-      local.k8s_local_facts,
+      "echo k8s.fact:; cat /home/ubuntu/k8s.fact",
+      "sudo mv /home/ubuntu/k8s.fact /etc/ansible/facts.d/k8s.fact",
+      "echo externaldns.fact:; cat /home/ubuntu/externaldns.fact",
+      "sudo mv /home/ubuntu/externaldns.fact /etc/ansible/facts.d/externaldns.fact",
     ]
   }
 }
 
 locals {
-  k8s_local_facts = <<LOCAL
-sudo tee /etc/ansible/facts.d/k8s.fact <<FACT
-{
-    "k8s_cluster_aws_region": ${jsonencode(var.aws_region)},
-    "k8s_cluster_name": ${jsonencode(aws_eks_cluster.app.name)},
-    "k8s_cluster_endpoint": ${jsonencode(aws_eks_cluster.app.endpoint)},
-    "k8s_cluster_version": ${jsonencode(aws_eks_cluster.app.version)},
-    "k8s_cluster_auth_config_map": ${jsonencode(local.config_map_aws_auth)},
-    "k8s_cluster_storageclass_gp2_encrypted": ${jsonencode(local.storageclass_gp2_encrypted)},
-    "aws_load_balancer_controller_iam_role": ${jsonencode(module.aws_lb_controller_service_account_iam_role.arn)}
-}
-FACT
+  k8s_facts = {
+    k8s_cluster_aws_region                 = var.aws_region
+    k8s_cluster_name                       = aws_eks_cluster.app.name
+    k8s_cluster_endpoint                   = aws_eks_cluster.app.endpoint
+    k8s_cluster_version                    = aws_eks_cluster.app.version
+    k8s_cluster_auth_config_map            = local.config_map_aws_auth
+    k8s_cluster_storageclass_gp2_encrypted = local.storageclass_gp2_encrypted
+    aws_load_balancer_controller_iam_role  = module.aws_lb_controller_service_account_iam_role.arn
+  }
+  k8s_facts_json = jsonencode(local.k8s_facts)
 
-# Facts used by the k8s_external_dns role in mars
-sudo tee /etc/ansible/facts.d/externaldns.fact <<FACT
-{
-  "public_service_account_iam_role_arn": "${module.externaldns_public_service_account_iam_role.arn}",
-  "private_service_account_iam_role_arn": "${module.externaldns_private_service_account_iam_role.arn}"
-}
-FACT
-LOCAL
-
+  externaldns_facts = {
+    public_service_account_iam_role_arn  = module.externaldns_public_service_account_iam_role.arn
+    private_service_account_iam_role_arn = module.externaldns_private_service_account_iam_role.arn
+  }
+  externaldns_facts_json = jsonencode(local.externaldns_facts)
 }
 
 resource "aws_security_group_rule" "bastion_egress_all" {
