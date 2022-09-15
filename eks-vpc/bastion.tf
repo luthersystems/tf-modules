@@ -134,6 +134,14 @@ locals {
   externaldns_facts_json = jsonencode(local.externaldns_facts)
 }
 
+output "k8s_facts" {
+  value = local.k8s_facts
+}
+
+output "externaldns_facts" {
+  value = local.externaldns_facts
+}
+
 resource "aws_security_group_rule" "bastion_egress_all" {
   type              = "egress"
   from_port         = 0
