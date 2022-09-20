@@ -115,3 +115,8 @@ variable "inspector_rules_package_arns" {
   type    = list(string)
   default = []
 }
+
+variable "public_api" {
+  type    = bool
+  default = false
+}
