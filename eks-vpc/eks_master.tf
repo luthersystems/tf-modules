@@ -22,7 +22,7 @@ resource "aws_eks_cluster" "app" {
 
   vpc_config {
     endpoint_private_access = true
-    endpoint_public_access  = false
+    endpoint_public_access  = var.public_api
     security_group_ids      = [aws_security_group.eks_master.id]
     subnet_ids              = aws_subnet.net.*.id
   }
