@@ -1,7 +1,7 @@
 resource "aws_inspector_resource_group" "environment" {
   tags = {
     # The tags are OR'd, so search for the bastion name or the ASG group name
-    "Name"                      = module.aws_bastion.name
+    "Name"                      = local.bastion_name
     "aws:autoscaling:groupName" = aws_autoscaling_group.eks_worker.name
   }
 }

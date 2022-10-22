@@ -29,12 +29,16 @@ variable "domain" {
   type = string
 }
 
+variable "use_bastion" {
+  default = true
+}
+
 variable "bastion_ssh_port" {
   default = 2222
 }
 
 variable "bastion_ami" {
-  type = string
+  default = ""
 }
 
 variable "bastion_aws_instance_type" {
@@ -80,7 +84,7 @@ variable "aws_autorecovery_sns_arn" {
 }
 
 variable "ssh_public_keys_s3_bucket_arn" {
-  type = string
+  default = ""
 }
 
 variable "common_static_s3_bucket_arn" {

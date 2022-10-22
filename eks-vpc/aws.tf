@@ -7,7 +7,7 @@ variable "aws_region" {
 }
 
 variable "aws_ssh_key_name" {
-  type = string
+  default = ""
 }
 
 variable "aws_region_short_code" {
