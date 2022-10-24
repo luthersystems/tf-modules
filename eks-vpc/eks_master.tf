@@ -189,13 +189,15 @@ resource "aws_security_group" "eks_master" {
 }
 
 resource "aws_security_group_rule" "eks_master_ingress_bastion" {
+  count = var.use_bastion ? 1 : 0
+
   description              = "Allow bastion to communicate with the cluster API Server"
   security_group_id        = aws_security_group.eks_master.id
   type                     = "ingress"
   protocol                 = "tcp"
   from_port                = 443
   to_port                  = 443
-  source_security_group_id = module.aws_bastion.aws_security_group_id
+  source_security_group_id = module.aws_bastion[0].aws_security_group_id
 }
 
 resource "aws_security_group_rule" "eks_master_ingress_worker_https" {

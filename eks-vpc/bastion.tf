@@ -20,16 +20,18 @@ data "template_file" "fqdn_bastion" {
 # bastion_dns_name for ssh provisioning.  Though it's better to use
 # bastion_provisioning_dns_name for ssh provisioning on the bastion.
 output "bastion_dns_name" {
-  value = aws_route53_record.bastion.name
+  value = var.use_bastion ? aws_route53_record.bastion[0].name : ""
 }
 
 # A better dns name to use for ssh provisioning on the bastion because it can
 # trigger reprovisioning if the bastion is replaced for any reason.
 output "bastion_provisioning_dns_name" {
-  value = module.aws_bastion.aws_instance_public_dns[0]
+  value = var.use_bastion ? module.aws_bastion[0].aws_instance_public_dns[0] : ""
 }
 
 resource "aws_route53_record" "bastion" {
+  count = var.use_bastion ? 1 : 0
+
   zone_id = data.aws_route53_zone.external.zone_id
   name    = data.template_file.fqdn_bastion.rendered
   type    = "CNAME"
@@ -42,10 +44,12 @@ resource "aws_route53_record" "bastion" {
   # If the expression in the following list itself returns a list, remove the
   # brackets to avoid interpretation as a list of lists. If the expression
   # returns a single list item then leave it as-is and remove this TODO comment.
-  records = [module.aws_bastion.aws_instance_public_dns[0]]
+  records = [module.aws_bastion[0].aws_instance_public_dns[0]]
 }
 
 module "aws_bastion" {
+  count = var.use_bastion ? 1 : 0
+
   source = "../aws-bastion"
 
   luther_project                       = var.luther_project
@@ -78,14 +82,16 @@ module "aws_bastion" {
 # tunnel).  Ansible playbooks are responsible for applying and destroying the
 # k8s resources defined by the uploaded files.
 resource "null_resource" "bastion_k8s_provisioning" {
+  count = var.use_bastion ? 1 : 0
+
   triggers = {
-    bastion_host      = module.aws_bastion.aws_instance_public_dns[0]
+    bastion_host      = module.aws_bastion[0].aws_instance_public_dns[0]
     k8s_facts         = local.k8s_facts_json
     externaldns_facts = local.externaldns_facts_json
   }
 
   connection {
-    host = module.aws_bastion.aws_instance_public_dns[0]
+    host = module.aws_bastion[0].aws_instance_public_dns[0]
     type = "ssh"
     user = "ubuntu"
     port = var.bastion_ssh_port
@@ -113,6 +119,8 @@ resource "null_resource" "bastion_k8s_provisioning" {
 }
 
 locals {
+  bastion_name = var.use_bastion ? module.aws_bastion[0].name : ""
+
   k8s_facts = {
     k8s_cluster_aws_region                 = var.aws_region
     k8s_cluster_name                       = aws_eks_cluster.app.name
@@ -143,12 +151,14 @@ output "externaldns_facts" {
 }
 
 resource "aws_security_group_rule" "bastion_egress_all" {
+  count = var.use_bastion ? 1 : 0
+
   type              = "egress"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = module.aws_bastion.aws_security_group_id
+  security_group_id = module.aws_bastion[0].aws_security_group_id
 }
 
 module "luthername_nsg_monitoring_temp" {

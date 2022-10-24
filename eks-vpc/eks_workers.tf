@@ -492,13 +492,15 @@ output "eks_worker_security_group_id" {
 }
 
 resource "aws_security_group_rule" "eks_worker_ingress_bastion_ssh" {
+  count = var.use_bastion ? 1 : 0
+
   description              = "Allow bastion to connect to the worker over SSH"
   security_group_id        = aws_security_group.eks_worker.id
   type                     = "ingress"
   protocol                 = "tcp"
   from_port                = 22
   to_port                  = 22
-  source_security_group_id = module.aws_bastion.aws_security_group_id
+  source_security_group_id = module.aws_bastion[0].aws_security_group_id
 }
 
 resource "aws_security_group_rule" "eks_worker_ingress_self" {
