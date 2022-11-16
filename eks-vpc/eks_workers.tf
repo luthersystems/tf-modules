@@ -175,6 +175,10 @@ output "aws_iam_role_eks_worker" {
   value = aws_iam_role.eks_worker.name
 }
 
+output "aws_iam_role_eks_worker_arn" {
+  value = aws_iam_role.eks_worker.arn
+}
+
 data "aws_iam_policy_document" "ec2_assume_role" {
   statement {
     effect  = "Allow"
