@@ -129,7 +129,7 @@ resource "aws_autoscaling_group" "eks_worker" {
   desired_capacity     = var.autoscaling_desired
   launch_configuration = aws_launch_configuration.eks_worker.id
   max_size             = var.autoscaling_desired
-  min_size             = 1
+  min_size             = var.autoscaling_desired
   name                 = module.luthername_eks_worker_autoscaling_group.name
   vpc_zone_identifier  = aws_subnet.net.*.id
 
@@ -173,6 +173,10 @@ resource "aws_iam_role" "eks_worker" {
 
 output "aws_iam_role_eks_worker" {
   value = aws_iam_role.eks_worker.name
+}
+
+output "aws_iam_role_eks_worker_arn" {
+  value = aws_iam_role.eks_worker.arn
 }
 
 data "aws_iam_policy_document" "ec2_assume_role" {
