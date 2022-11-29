@@ -14,8 +14,7 @@ module "externaldns_public_service_account_iam_role" {
   policy             = data.aws_iam_policy_document.externaldns.json
 
   providers = {
-    aws      = aws
-    template = template
+    aws = aws
   }
 }
 
@@ -39,8 +38,7 @@ module "externaldns_private_service_account_iam_role" {
   policy             = data.aws_iam_policy_document.externaldns.json
 
   providers = {
-    aws      = aws
-    template = template
+    aws = aws
   }
 }
 

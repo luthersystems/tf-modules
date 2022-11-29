@@ -14,8 +14,7 @@ module "aws_lb_controller_service_account_iam_role" {
   policy             = local.aws_lb_controller_policy
 
   providers = {
-    aws      = aws
-    template = template
+    aws = aws
   }
 }
 

@@ -2,17 +2,22 @@ data "aws_route53_zone" "external" {
   name = "${var.domain}."
 }
 
-data "template_file" "fqdn_bastion" {
-  # example: ics-de-dev-es.luthersystemsapp.com
-  template = "$${project}-$${region_code}-$${env}$${org_part}.$${domain}"
-
-  vars = {
+locals {
+  fqdn_bastion_vars = {
     project     = var.luther_project
     region_code = var.aws_region_short_code[var.aws_region]
     org_part    = "${var.org_name == "" ? "" : "-"}${var.org_name}"
     env         = var.luther_env
     domain      = var.domain
   }
+
+  fqdn_bastion_name = format("%s-%s-%s%s.%s",
+    local.fqdn_bastion_vars.project,
+    local.fqdn_bastion_vars.region_code,
+    local.fqdn_bastion_vars.env,
+    local.fqdn_bastion_vars.org_part,
+    local.fqdn_bastion_vars.domain,
+  )
 }
 
 # The common name of the bastion host.  Outputs the name from the route53
@@ -33,7 +38,7 @@ resource "aws_route53_record" "bastion" {
   count = var.use_bastion ? 1 : 0
 
   zone_id = data.aws_route53_zone.external.zone_id
-  name    = data.template_file.fqdn_bastion.rendered
+  name    = local.fqdn_bastion_name
   type    = "CNAME"
   ttl     = 300
   # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to

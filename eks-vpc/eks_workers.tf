@@ -222,7 +222,7 @@ data "aws_iam_policy_document" "s3_readonly" {
       "s3:GetObject",
     ]
 
-    resources = data.template_file.s3_prefixes.*.rendered
+    resources = local.s3_prefixes
   }
 
   statement {
@@ -253,15 +253,8 @@ data "aws_iam_policy_document" "s3_readonly" {
   }
 }
 
-data "template_file" "s3_prefixes" {
-  count = length(var.storage_s3_key_prefixes)
-
-  template = "$${bucket_arn}/$${prefix}"
-
-  vars = {
-    bucket_arn = var.storage_s3_bucket_arn
-    prefix     = var.storage_s3_key_prefixes[count.index]
-  }
+locals {
+  s3_prefixes = [for prefix in var.storage_s3_key_prefixes : format("%s/%s", var.storage_s3_bucket_arn, prefix)]
 }
 
 resource "aws_iam_role_policy" "eks_worker_cloudwatch_logs" {
