@@ -15,9 +15,6 @@ terraform {
     null = {
       source = "hashicorp/null"
     }
-    template = {
-      source = "hashicorp/template"
-    }
     tls = {
       source = "hashicorp/tls"
     }
