@@ -42,6 +42,10 @@ output "aws_eks_cluster_name" {
   value = aws_eks_cluster.app.name
 }
 
+output "aws_eks_cluster_arn" {
+  value = aws_eks_cluster.app.arn
+}
+
 output "aws_eks_cluster_endpoint" {
   value = aws_eks_cluster.app.endpoint
 }
