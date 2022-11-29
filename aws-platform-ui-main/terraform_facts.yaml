@@ -1,0 +1,7 @@
+# AUTO-GENERATED: DO NOT EDIT
+# facts set by terraform
+
+%{~ for k,v in escaped_facts ~}
+${k}: !unsafe ${yamlencode(v)}
+%{~ endfor ~}
+${yamlencode(facts)}
