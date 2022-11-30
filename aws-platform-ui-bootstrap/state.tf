@@ -21,7 +21,7 @@ resource "aws_kms_key" "tfstate" {
 resource "aws_kms_alias" "tfstate" {
   count = var.create_state_bucket ? 1 : 0
 
-  name          = "alias/tfstate"
+  name          = format("alias/%s", var.kms_alias_suffix)
   target_key_id = aws_kms_key.tfstate.0.arn
 }
 
