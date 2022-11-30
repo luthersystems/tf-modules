@@ -27,6 +27,8 @@ resource "aws_s3_bucket" "bucket" {
     module.luthername_s3_bucket.tags,
     { Name = "luther-${module.luthername_s3_bucket.name}" }
   )
+
+  force_destroy = var.force_destroy
 }
 
 resource "aws_s3_bucket_acl" "bucket" {
