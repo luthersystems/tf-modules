@@ -56,3 +56,7 @@ variable "lifecycle_rules" {
 
   default = []
 }
+
+variable "force_destroy" {
+  default = false
+}

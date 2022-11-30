@@ -40,6 +40,8 @@ module "aws_s3_bucket_tfstate" {
   component       = "tfstate"
   aws_kms_key_arn = aws_kms_key.tfstate.0.arn
 
+  force_destroy = true
+
   providers = {
     aws    = aws
     random = random
