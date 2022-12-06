@@ -131,7 +131,7 @@ resource "aws_autoscaling_group" "eks_worker" {
   max_size             = var.autoscaling_desired
   min_size             = var.autoscaling_desired
   name                 = module.luthername_eks_worker_autoscaling_group.name
-  vpc_zone_identifier  = aws_subnet.net.*.id
+  vpc_zone_identifier  = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
 
   target_group_arns = var.worker_asg_target_group_arns
 
