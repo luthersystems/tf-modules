@@ -125,6 +125,14 @@ module "luthername_eks_worker_autoscaling_group" {
   subcomponent   = "worker"
 }
 
+output "eks_worker_azs" {
+  value = local.eks_worker_azs
+}
+
+locals {
+  eks_worker_azs = slice(local.region_availability_zones, 0, var.autoscaling_desired)
+}
+
 resource "aws_autoscaling_group" "eks_worker" {
   desired_capacity     = var.autoscaling_desired
   launch_configuration = aws_launch_configuration.eks_worker.id

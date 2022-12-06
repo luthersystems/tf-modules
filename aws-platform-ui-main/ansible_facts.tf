@@ -27,6 +27,7 @@ locals {
     kubectl_eks_cluster_name                       = module.eks_vpc.k8s_facts.k8s_cluster_name
     kubectl_eks_cluster_endpoint                   = module.eks_vpc.k8s_facts.k8s_cluster_endpoint
     kubectl_eks_region                             = module.eks_vpc.k8s_facts.k8s_cluster_aws_region
+    eks_cluster_azs                                = module.eks_vpc.k8s_facts.k8s_cluster_azs
     eks_cluster_init_eks_worker_iam_role_arn       = module.eks_vpc.k8s_facts.eks_worker_iam_role_arn
     eks_cluster_init_k8s_admin_role_arn            = module.eks_vpc.k8s_facts.k8s_admin_role_arn
     eks_cluster_init_storage_kms_key_id            = module.eks_vpc.k8s_facts.storage_kms_key_id
