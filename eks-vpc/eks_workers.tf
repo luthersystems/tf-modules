@@ -125,13 +125,21 @@ module "luthername_eks_worker_autoscaling_group" {
   subcomponent   = "worker"
 }
 
+output "eks_worker_azs" {
+  value = local.eks_worker_azs
+}
+
+locals {
+  eks_worker_azs = slice(local.region_availability_zones, 0, var.autoscaling_desired)
+}
+
 resource "aws_autoscaling_group" "eks_worker" {
   desired_capacity     = var.autoscaling_desired
   launch_configuration = aws_launch_configuration.eks_worker.id
   max_size             = var.autoscaling_desired
   min_size             = var.autoscaling_desired
   name                 = module.luthername_eks_worker_autoscaling_group.name
-  vpc_zone_identifier  = aws_subnet.net.*.id
+  vpc_zone_identifier  = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
 
   target_group_arns = var.worker_asg_target_group_arns
 

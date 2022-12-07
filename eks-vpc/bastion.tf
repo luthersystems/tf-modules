@@ -131,6 +131,7 @@ locals {
     k8s_cluster_name                       = aws_eks_cluster.app.name
     k8s_cluster_endpoint                   = aws_eks_cluster.app.endpoint
     k8s_cluster_version                    = aws_eks_cluster.app.version
+    k8s_cluster_azs                        = local.eks_worker_azs
     k8s_cluster_auth_config_map            = local.config_map_aws_auth
     k8s_cluster_storageclass_gp2_encrypted = local.storageclass_gp2_encrypted
     aws_load_balancer_controller_iam_role  = module.aws_lb_controller_service_account_iam_role.arn
