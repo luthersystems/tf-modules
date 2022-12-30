@@ -60,3 +60,16 @@ variable "additional_ansible_facts" {
 variable "ansible_relative_path" {
   default = "../ansible"
 }
+
+variable "grafana_saml_admin_role_values" {
+  type    = list(string)
+  default = []
+}
+
+variable "grafana_saml_role_assertion" {
+  default = ""
+}
+
+variable "grafana_saml_metadata_xml" {
+  default = ""
+}

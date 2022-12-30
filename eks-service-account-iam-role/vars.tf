@@ -49,3 +49,7 @@ variable "add_policy" {
   type    = bool
   default = false
 }
+
+variable "id" {
+  default = ""
+}

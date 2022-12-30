@@ -8,6 +8,7 @@ module "role_name" {
   component      = var.component
   resource       = "role"
   subcomponent   = var.service_account
+  id             = var.id
 }
 
 resource "aws_iam_role" "role" {
