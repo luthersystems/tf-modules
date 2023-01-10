@@ -124,3 +124,7 @@ variable "public_api" {
   type    = bool
   default = false
 }
+
+variable "spot_price" {
+  default = ""
+}

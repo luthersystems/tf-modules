@@ -104,6 +104,7 @@ resource "aws_launch_configuration" "eks_worker" {
   security_groups             = [aws_security_group.eks_worker.id]
   user_data_base64            = base64gzip(local.user_data)
   key_name                    = var.aws_ssh_key_name
+  spot_price                  = var.spot_price
 
   lifecycle {
     create_before_destroy = true
