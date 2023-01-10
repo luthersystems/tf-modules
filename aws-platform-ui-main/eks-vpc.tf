@@ -29,6 +29,8 @@ module "eks_vpc" {
 
   storage_s3_bucket_arn = data.aws_s3_bucket.env_static.arn
 
+  spot_price = var.eks_worker_spot_price
+
   storage_s3_key_prefixes = [
     "${var.luther_env}/*",
     "phyla/*",

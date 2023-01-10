@@ -22,6 +22,10 @@ variable "eks_worker_count" {
   default = 1
 }
 
+variable "eks_worker_spot_price" {
+  default = ""
+}
+
 variable "eks_worker_instance_type" {
   type    = string
   default = "t3a.large"
