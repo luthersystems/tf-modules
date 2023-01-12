@@ -31,10 +31,7 @@ module "eks_vpc" {
 
   spot_price = var.eks_worker_spot_price
 
-  storage_s3_key_prefixes = [
-    "${var.luther_env}/*",
-    "phyla/*",
-  ]
+  disable_node_role = true
 
   public_api = true
 
@@ -72,73 +69,38 @@ output "eks_worker_role_arn" {
   value = module.eks_vpc.aws_iam_role_eks_worker_arn
 }
 
+output "eks_node_sa_role_arn" {
+  value = module.eks_vpc.aws_iam_role_eks_node_sa_arn
+}
+
 data "aws_iam_role" "admin" {
   name = "admin"
 }
 
-module "luthername_role_policy_app_kms" {
-  source = "../luthername"
-
-  luther_project = var.luther_project
-  aws_region     = local.region
-  luther_env     = var.luther_env
-  org_name       = var.org_name
-  component      = "app"
-  resource       = "iampolicy"
-  subcomponent   = "kms"
-}
-
-resource "aws_iam_role_policy" "app_kms" {
-  name   = module.luthername_role_policy_app_kms.name
-  role   = module.eks_vpc.aws_iam_role_eks_worker
-  policy = data.aws_iam_policy_document.app_kms.json
-}
-
-data "aws_iam_policy_document" "app_kms" {
-  statement {
-    actions = [
-      "kms:Decrypt",
-      "kms:Encrypt",
-      "kms:GenerateDataKey",
-    ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "kms:ViaService"
-      values = [
-        "ec2.${local.region}.amazonaws.com",
-        "s3.${local.region}.amazonaws.com",
-      ]
-
-    }
-
-    resources = [data.aws_kms_key.storage.arn]
-  }
-}
-
-resource "aws_iam_role_policy" "worker_ecr_mars_ro" {
-  name   = "ecr-mars-ro"
-  role   = module.eks_vpc.aws_iam_role_eks_worker
-  policy = data.aws_iam_policy_document.worker_ecr_mars_ro.json
-}
-
-locals {
-  ecr_actions_ro = [
-    "ecr:GetDownloadUrlForLayer",
-    "ecr:BatchGetImage",
-    "ecr:BatchCheckLayerAvailability",
-    "ecr:DescribeRepositories",
-    "ecr:DescribeImages",
-    "ecr:ListImages",
-  ]
-}
-
-data "aws_iam_policy_document" "worker_ecr_mars_ro" {
-  statement {
-    sid     = "readonlyAccess"
-    effect  = "Allow"
-    actions = local.ecr_actions_ro
-
-    resources = ["arn:aws:ecr:eu-west-2:967058059066:repository/luthersystems/mars"]
-  }
-}
+## TODO: move to separate module
+#resource "aws_iam_role_policy" "worker_ecr_mars_ro" {
+#  name   = "ecr-mars-ro"
+#  role   = module.eks_vpc.aws_iam_role_eks_node_sa
+#  policy = data.aws_iam_policy_document.worker_ecr_mars_ro.json
+#}
+#
+#locals {
+#  ecr_actions_ro = [
+#    "ecr:GetDownloadUrlForLayer",
+#    "ecr:BatchGetImage",
+#    "ecr:BatchCheckLayerAvailability",
+#    "ecr:DescribeRepositories",
+#    "ecr:DescribeImages",
+#    "ecr:ListImages",
+#  ]
+#}
+#
+#data "aws_iam_policy_document" "worker_ecr_mars_ro" {
+#  statement {
+#    sid     = "readonlyAccess"
+#    effect  = "Allow"
+#    actions = local.ecr_actions_ro
+#
+#    resources = ["arn:aws:ecr:eu-west-2:967058059066:repository/luthersystems/mars"]
+#  }
+#}

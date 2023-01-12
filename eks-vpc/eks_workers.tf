@@ -207,7 +207,7 @@ resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKSWorkerNodePolicy"
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.eks_worker.name
+  role       = module.eks_node_service_account_iam_role.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEC2ContainerRegistryReadOnly" {
@@ -216,6 +216,8 @@ resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEC2ContainerRegistry
 }
 
 resource "aws_iam_role_policy" "eks_worker_s3_readonly" {
+  count = var.disable_node_role ? 0 : 1
+
   name   = "s3-readonly"
   role   = aws_iam_role.eks_worker.name
   policy = data.aws_iam_policy_document.s3_readonly.json
@@ -292,6 +294,8 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
 }
 
 resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
+  count = var.disable_node_role ? 0 : 1
+
   name = "alb-ingress-controller"
   # Policy taken from the guide here: https://aws.amazon.com/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/
   # Original policy: https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.9/docs/examples/iam-policy.json
@@ -530,4 +534,44 @@ resource "aws_security_group_rule" "eks_worker_ingress_eks_master" {
   from_port                = 0
   to_port                  = 65535
   source_security_group_id = aws_security_group.eks_master.id
+}
+
+output "aws_iam_role_eks_node_sa_arn" {
+  value = module.eks_node_service_account_iam_role.arn
+}
+
+output "aws_iam_role_eks_node_sa" {
+  value = module.eks_node_service_account_iam_role.name
+}
+
+resource "random_string" "eks_node" {
+  length  = 4
+  upper   = false
+  special = false
+}
+
+module "eks_node_service_account_iam_role" {
+  source = "../eks-service-account-iam-role"
+
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  component      = "k8s"
+
+  oidc_provider_name = local.oidc_provider_name
+  oidc_provider_arn  = local.oidc_provider_arn
+  service_account    = "aws-node"
+  k8s_namespace      = "kube-system"
+  id                 = random_string.eks_node.result
+
+  providers = {
+    aws = aws
+  }
+}
+
+resource "aws_eks_addon" "vpc-cni" {
+  cluster_name             = aws_eks_cluster.app.name
+  addon_name               = "vpc-cni"
+  resolve_conflicts        = "OVERWRITE"
+  service_account_role_arn = module.eks_node_service_account_iam_role.arn
 }

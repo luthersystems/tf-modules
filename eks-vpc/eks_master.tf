@@ -158,6 +158,40 @@ data "aws_iam_policy_document" "attach_volumes" {
   }
 }
 
+data "aws_iam_policy_document" "kms_ebs" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "kms:CreateGrant",
+      "kms:ListGrants",
+      "kms:RevokeGrant",
+    ]
+
+    resources = [data.aws_kms_key.volumes.arn]
+
+    condition {
+      test     = "Bool"
+      variable = "kms:GrantIsForAWSResource"
+      values   = [true]
+    }
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey",
+    ]
+
+    resources = [data.aws_kms_key.volumes.arn]
+  }
+}
+
 module "luthername_eks_master_nsg" {
   source         = "../luthername"
   luther_project = var.luther_project

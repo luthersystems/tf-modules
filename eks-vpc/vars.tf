@@ -104,6 +104,7 @@ variable "storage_s3_bucket_arn" {
 # To access all keys in the bucket pass the list ["*"]
 variable "storage_s3_key_prefixes" {
   type = list(string)
+  default = []
 }
 
 variable "autoscaling_desired" {
@@ -127,4 +128,8 @@ variable "public_api" {
 
 variable "spot_price" {
   default = ""
+}
+
+variable "disable_node_role" {
+  default = false
 }
