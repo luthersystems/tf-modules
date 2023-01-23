@@ -207,7 +207,7 @@ resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKSWorkerNodePolicy"
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = module.eks_node_service_account_iam_role.name
+  role       = var.disable_node_role ? module.eks_node_service_account_iam_role.name : aws_iam_role.eks_worker.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEC2ContainerRegistryReadOnly" {

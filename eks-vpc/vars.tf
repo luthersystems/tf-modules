@@ -103,7 +103,7 @@ variable "storage_s3_bucket_arn" {
 
 # To access all keys in the bucket pass the list ["*"]
 variable "storage_s3_key_prefixes" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
