@@ -503,8 +503,6 @@ data "aws_iam_policy_document" "kms_ebs" {
 }
 
 resource "aws_eks_addon" "ebs-csi" {
-  count = 1
-
   cluster_name             = aws_eks_cluster.app.name
   addon_name               = "aws-ebs-csi-driver"
   resolve_conflicts        = "OVERWRITE"
