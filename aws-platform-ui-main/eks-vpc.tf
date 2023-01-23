@@ -76,31 +76,3 @@ output "eks_node_sa_role_arn" {
 data "aws_iam_role" "admin" {
   name = "admin"
 }
-
-## TODO: move to separate module
-#resource "aws_iam_role_policy" "worker_ecr_mars_ro" {
-#  name   = "ecr-mars-ro"
-#  role   = module.eks_vpc.aws_iam_role_eks_node_sa
-#  policy = data.aws_iam_policy_document.worker_ecr_mars_ro.json
-#}
-#
-#locals {
-#  ecr_actions_ro = [
-#    "ecr:GetDownloadUrlForLayer",
-#    "ecr:BatchGetImage",
-#    "ecr:BatchCheckLayerAvailability",
-#    "ecr:DescribeRepositories",
-#    "ecr:DescribeImages",
-#    "ecr:ListImages",
-#  ]
-#}
-#
-#data "aws_iam_policy_document" "worker_ecr_mars_ro" {
-#  statement {
-#    sid     = "readonlyAccess"
-#    effect  = "Allow"
-#    actions = local.ecr_actions_ro
-#
-#    resources = ["arn:aws:ecr:eu-west-2:967058059066:repository/luthersystems/mars"]
-#  }
-#}
