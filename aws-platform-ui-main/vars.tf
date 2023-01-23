@@ -77,3 +77,7 @@ variable "grafana_saml_role_assertion" {
 variable "grafana_saml_metadata_xml" {
   default = ""
 }
+
+variable "disable_node_role" {
+  default = true
+}

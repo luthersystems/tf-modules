@@ -31,7 +31,7 @@ module "eks_vpc" {
 
   spot_price = var.eks_worker_spot_price
 
-  disable_node_role = true
+  disable_node_role = var.disable_node_role
 
   public_api = true
 
