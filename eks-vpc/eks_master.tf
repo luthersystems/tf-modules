@@ -120,6 +120,8 @@ data "aws_kms_key" "volumes" {
 }
 
 resource "aws_iam_role_policy" "eks_master_attach_volumes" {
+  count = var.disable_node_role ? 0 : 1
+
   role   = aws_iam_role.eks_master.name
   policy = data.aws_iam_policy_document.attach_volumes.json
 }
@@ -155,40 +157,6 @@ data "aws_iam_policy_document" "attach_volumes" {
       variable = "kms:ViaService"
       values   = ["ec2.${var.aws_region}.amazonaws.com"]
     }
-  }
-}
-
-data "aws_iam_policy_document" "kms_ebs" {
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "kms:CreateGrant",
-      "kms:ListGrants",
-      "kms:RevokeGrant",
-    ]
-
-    resources = [data.aws_kms_key.volumes.arn]
-
-    condition {
-      test     = "Bool"
-      variable = "kms:GrantIsForAWSResource"
-      values   = [true]
-    }
-  }
-
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "kms:Encrypt",
-      "kms:Decrypt",
-      "kms:ReEncrypt*",
-      "kms:GenerateDataKey*",
-      "kms:DescribeKey",
-    ]
-
-    resources = [data.aws_kms_key.volumes.arn]
   }
 }
 
