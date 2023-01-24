@@ -33,6 +33,9 @@ module "eks_vpc" {
 
   disable_node_role = var.disable_node_role
 
+  cni_addon = var.cni_addon
+  csi_addon = var.csi_addon
+
   public_api = true
 
   providers = {

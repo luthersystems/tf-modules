@@ -81,3 +81,11 @@ variable "grafana_saml_metadata_xml" {
 variable "disable_node_role" {
   default = true
 }
+
+variable "cni_addon" {
+  default = true
+}
+
+variable "csi_addon" {
+  default = true
+}

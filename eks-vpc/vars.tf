@@ -133,3 +133,11 @@ variable "spot_price" {
 variable "disable_node_role" {
   default = false
 }
+
+variable "cni_addon" {
+  default = false
+}
+
+variable "csi_addon" {
+  default = false
+}
