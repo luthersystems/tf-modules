@@ -424,8 +424,6 @@ module "eks_node_service_account_iam_role" {
 }
 
 resource "aws_eks_addon" "vpc-cni" {
-  count = var.cni_addon ? 1 : 0
-
   cluster_name             = aws_eks_cluster.app.name
   addon_name               = "vpc-cni"
   resolve_conflicts        = "OVERWRITE"
@@ -518,6 +516,10 @@ resource "aws_eks_addon" "ebs-csi" {
   addon_name               = "aws-ebs-csi-driver"
   resolve_conflicts        = "OVERWRITE"
   service_account_role_arn = module.ebs_csi_controller_service_account_iam_role.arn
+
+  depends_on = [
+    aws_eks_addon.vpc-cni
+  ]
 }
 
 resource "aws_iam_role_policy_attachment" "ebs_controllerr_csi_AmazonEBSCSIDriverPolicy" {

@@ -135,7 +135,8 @@ variable "disable_node_role" {
 }
 
 variable "cni_addon" {
-  default = false
+  # TODO: delete
+  default = true
 }
 
 variable "csi_addon" {
