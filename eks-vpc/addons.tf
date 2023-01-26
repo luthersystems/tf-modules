@@ -122,7 +122,7 @@ resource "aws_iam_role_policy" "ebs_controller_csi_kms" {
 
 
 resource "aws_eks_addon" "ebs-csi" {
-  count = var.csi_addon ? 1 : 0
+  count = var.csi_addon && length(var.csi_addon_version[var.kubernetes_version]) > 0 ? 1 : 0
 
   cluster_name             = aws_eks_cluster.app.name
   addon_name               = "aws-ebs-csi-driver"

@@ -154,6 +154,7 @@ variable "csi_addon" {
 variable "cni_addon_version" {
   type = map(string)
   default = {
+    "1.21" = "v1.9.3-eksbuild.1"
     "1.22" = "v1.10.2-eksbuild.1"
     "1.23" = "v1.11.2-eksbuild.1"
     "1.24" = "v1.11.4-eksbuild.1"
@@ -163,6 +164,7 @@ variable "cni_addon_version" {
 variable "csi_addon_version" {
   type = map(string)
   default = {
+    "1.21" = ""
     "1.22" = "v1.5.2-eksbuild.1"
     "1.23" = "v1.10.0-eksbuild.1"
     "1.24" = "v1.13.0-eksbuild.1"
@@ -172,6 +174,7 @@ variable "csi_addon_version" {
 variable "kubeproxy_addon_version" {
   type = map(string)
   default = {
+    "1.21" = "v1.21.2-eksbuild.2"
     "1.22" = "v1.22.6-eksbuild.1"
     "1.23" = "v1.23.7-eksbuild.1"
     "1.24" = "v1.24.7-eksbuild.2"
@@ -181,6 +184,7 @@ variable "kubeproxy_addon_version" {
 variable "coredns_addon_version" {
   type = map(string)
   default = {
+    "1.21" = "v1.8.4-eksbuild.1"
     "1.22" = "v1.8.7-eksbuild.1"
     "1.23" = "v1.8.7-eksbuild.2"
     "1.24" = "v1.8.7-eksbuild.3"
