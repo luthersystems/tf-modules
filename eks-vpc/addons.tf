@@ -152,7 +152,7 @@ resource "aws_eks_addon" "coredns" {
   cluster_name      = aws_eks_cluster.app.name
   addon_name        = "coredns"
   addon_version     = var.coredns_addon_version[var.kubernetes_version]
-  resolve_conflicts = "PRESERVE" # keep DNS settings in Corefile on update
+  resolve_conflicts = "OVERWRITE"
 
   depends_on = [aws_eks_addon.vpc_cni]
 }
