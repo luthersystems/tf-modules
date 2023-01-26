@@ -87,13 +87,13 @@ variable "cni_addon" {
 }
 
 variable "disable_csi_node_role" {
-  default = false
+  default = true
 }
 
 variable "csi_addon" {
-  default = false
+  default = true
 }
 
 variable "coredns_addon" {
-  default = false
+  default = true
 }

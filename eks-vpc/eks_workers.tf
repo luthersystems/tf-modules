@@ -82,7 +82,7 @@ output "docker_log_opts" {
   value = jsonencode(local.docker_log_opts)
 }
 
-module "luthername_eks_worker_launch_configuration" {
+module "luthername_eks_worker_launch_template" {
   source         = "../luthername"
   luther_project = var.luther_project
   aws_region     = var.aws_region
@@ -93,26 +93,6 @@ module "luthername_eks_worker_launch_configuration" {
 
   # This id is a hack because ASG uses it as a prefix
   id = "worker-"
-}
-
-resource "aws_launch_configuration" "eks_worker" {
-  associate_public_ip_address = true
-  iam_instance_profile        = aws_iam_instance_profile.eks_worker.name
-  image_id                    = data.aws_ami.eks_worker.id
-  instance_type               = var.worker_instance_type
-  name_prefix                 = module.luthername_eks_worker_launch_configuration.name
-  security_groups             = [aws_security_group.eks_worker.id]
-  user_data_base64            = base64gzip(local.user_data)
-  key_name                    = var.aws_ssh_key_name
-  spot_price                  = var.spot_price
-
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes = [
-      key_name,
-      image_id,
-    ]
-  }
 }
 
 module "luthername_eks_worker_autoscaling_group" {
@@ -137,12 +117,17 @@ locals {
 resource "aws_autoscaling_group" "eks_worker" {
   count = var.managed_nodes ? 0 : 1
 
-  desired_capacity     = var.autoscaling_desired
-  launch_configuration = aws_launch_configuration.eks_worker.id
-  max_size             = var.autoscaling_desired
-  min_size             = var.autoscaling_desired
-  name                 = module.luthername_eks_worker_autoscaling_group.name
-  vpc_zone_identifier  = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
+  desired_capacity = var.autoscaling_desired
+
+  launch_template {
+    id      = aws_launch_template.eks_worker.id
+    version = aws_launch_template.eks_worker.default_version
+  }
+
+  max_size            = var.autoscaling_desired
+  min_size            = var.autoscaling_desired
+  name                = module.luthername_eks_worker_autoscaling_group.name
+  vpc_zone_identifier = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
 
   target_group_arns = var.worker_asg_target_group_arns
 
@@ -160,14 +145,66 @@ resource "aws_autoscaling_group" "eks_worker" {
     value               = "owned"
     propagate_at_launch = true
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_worker_AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.eks_worker_AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.eks_node_sa_AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.eks_worker_AmazonEKS_CNI_Policy
+  ]
 }
 
 locals {
-  eks_worker_asg_name = var.managed_nodes ? aws_eks_node_group.eks_worker[0].resources.*.autoscaling_groups[0].name : aws_autoscaling_group.eks_worker[0].name
+  eks_worker_asg_name = var.managed_nodes ? aws_eks_node_group.eks_worker[0].resources[0].autoscaling_groups[0].name : aws_autoscaling_group.eks_worker[0].name
 }
 
 output "eks_worker_asg_name" {
   value = local.eks_worker_asg_name
+}
+
+resource "aws_launch_template" "eks_worker" {
+  #network_interfaces {
+  #  associate_public_ip_address = true
+  #}
+
+  dynamic "iam_instance_profile" {
+    for_each = var.managed_nodes ? [] : [var.managed_nodes]
+
+    content {
+      name = aws_iam_instance_profile.eks_worker[0].name
+    }
+  }
+
+  image_id               = data.aws_ami.eks_worker.id
+  instance_type          = var.worker_instance_type
+  name_prefix            = module.luthername_eks_worker_launch_template.name
+  vpc_security_group_ids = [aws_security_group.eks_worker.id]
+  user_data              = base64gzip(local.user_data)
+  key_name               = var.aws_ssh_key_name
+
+  dynamic "instance_market_options" {
+    for_each = !var.managed_nodes && length(var.spot_price) > 0 ? [var.spot_price] : []
+
+    content {
+      market_type = "spot"
+
+      spot_options {
+        max_price = var.spot_price
+      }
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = [
+      key_name,
+      image_id,
+    ]
+  }
+
+  monitoring {
+    enabled = true
+  }
 }
 
 resource "aws_eks_node_group" "eks_worker" {
@@ -175,10 +212,8 @@ resource "aws_eks_node_group" "eks_worker" {
 
   cluster_name    = aws_eks_cluster.app.name
   node_group_name = module.luthername_eks_worker_autoscaling_group.name
-  node_role_arn   = aws_iam_role.eks_worker.name
+  node_role_arn   = aws_iam_role.eks_worker.arn
   subnet_ids      = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
-
-  instance_types = [var.worker_instance_type]
 
   capacity_type = length(var.spot_price) > 0 ? "SPOT" : "ON_DEMAND"
 
@@ -192,13 +227,17 @@ resource "aws_eks_node_group" "eks_worker" {
     max_unavailable = 1
   }
 
+  launch_template {
+    id      = aws_launch_template.eks_worker.id
+    version = aws_launch_template.eks_worker.default_version
+  }
+
   depends_on = [
     aws_iam_role_policy_attachment.eks_worker_AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.eks_worker_AmazonEC2ContainerRegistryReadOnly
-    # TODO: CNI?
+    aws_iam_role_policy_attachment.eks_worker_AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.eks_node_sa_AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.eks_worker_AmazonEKS_CNI_Policy
   ]
-
-  version = aws_eks_cluster.app.version
 
   tags = module.luthername_eks_worker_autoscaling_group.tags
 }
@@ -351,6 +390,8 @@ module "luthername_eks_worker_profile" {
 }
 
 resource "aws_iam_instance_profile" "eks_worker" {
+  count = var.managed_nodes ? 0 : 1
+
   name = module.luthername_eks_worker_profile.name
   role = aws_iam_role.eks_worker.name
 }
