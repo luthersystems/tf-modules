@@ -159,6 +159,8 @@ resource "aws_eks_addon" "kube_proxy" {
 }
 
 resource "aws_eks_addon" "coredns" {
+  count = var.coredns_addon ? 1 : 0
+
   cluster_name      = aws_eks_cluster.app.name
   addon_name        = "coredns"
   addon_version     = var.coredns_addon_version[var.kubernetes_version]

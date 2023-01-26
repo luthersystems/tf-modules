@@ -135,6 +135,8 @@ locals {
 }
 
 resource "aws_autoscaling_group" "eks_worker" {
+  count = var.managed_nodes ? 0 : 1
+
   desired_capacity     = var.autoscaling_desired
   launch_configuration = aws_launch_configuration.eks_worker.id
   max_size             = var.autoscaling_desired
@@ -160,8 +162,45 @@ resource "aws_autoscaling_group" "eks_worker" {
   }
 }
 
+locals {
+  eks_worker_asg_name = var.managed_nodes ? aws_eks_node_group.eks_worker[0].resources.*.autoscaling_groups[0].name : aws_autoscaling_group.eks_worker[0].name
+}
+
 output "eks_worker_asg_name" {
-  value = aws_autoscaling_group.eks_worker.name
+  value = local.eks_worker_asg_name
+}
+
+resource "aws_eks_node_group" "eks_worker" {
+  count = var.managed_nodes ? 1 : 0
+
+  cluster_name    = aws_eks_cluster.app.name
+  node_group_name = module.luthername_eks_worker_autoscaling_group.name
+  node_role_arn   = aws_iam_role.eks_worker.name
+  subnet_ids      = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
+
+  instance_types = [var.worker_instance_type]
+
+  capacity_type = length(var.spot_price) > 0 ? "SPOT" : "ON_DEMAND"
+
+  scaling_config {
+    desired_size = var.autoscaling_desired
+    max_size     = var.autoscaling_desired
+    min_size     = var.autoscaling_desired
+  }
+
+  update_config {
+    max_unavailable = 1
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_worker_AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.eks_worker_AmazonEC2ContainerRegistryReadOnly
+    # TODO: CNI?
+  ]
+
+  version = aws_eks_cluster.app.version
+
+  tags = module.luthername_eks_worker_autoscaling_group.tags
 }
 
 module "luthername_eks_worker_role" {

@@ -151,6 +151,14 @@ variable "csi_addon" {
   default = false
 }
 
+variable "coredns_addon" {
+  default = false
+}
+
+variable "managed_nodes" {
+  default = false
+}
+
 variable "cni_addon_version" {
   type = map(string)
   default = {

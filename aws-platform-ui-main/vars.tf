@@ -93,3 +93,7 @@ variable "disable_csi_node_role" {
 variable "csi_addon" {
   default = false
 }
+
+variable "coredns_addon" {
+  default = false
+}

@@ -31,12 +31,15 @@ module "eks_vpc" {
 
   spot_price = var.eks_worker_spot_price
 
+  managed_nodes = true
+
   disable_s3_node_role  = true
   disable_cni_node_role = var.disable_cni_node_role
   disable_csi_node_role = var.disable_csi_node_role
 
   cni_addon = var.cni_addon
   csi_addon = var.csi_addon
+  coredns_addon = var.coredns_addon
 
   public_api = true
 
