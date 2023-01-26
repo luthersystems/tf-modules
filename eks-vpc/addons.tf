@@ -133,8 +133,6 @@ resource "aws_eks_addon" "vpc_cni" {
   addon_version            = var.cni_addon_version[var.kubernetes_version]
   resolve_conflicts        = "OVERWRITE"
   service_account_role_arn = module.eks_node_service_account_iam_role.arn
-
-  depends_on = [time_sleep.k8s_ready_wait]
 }
 
 resource "aws_eks_addon" "kube_proxy" {
@@ -142,8 +140,6 @@ resource "aws_eks_addon" "kube_proxy" {
   addon_name        = "kube-proxy"
   addon_version     = var.kubeproxy_addon_version[var.kubernetes_version]
   resolve_conflicts = "OVERWRITE"
-
-  depends_on = [aws_eks_addon.vpc_cni]
 }
 
 resource "aws_eks_addon" "coredns" {
@@ -154,7 +150,7 @@ resource "aws_eks_addon" "coredns" {
   addon_version     = var.coredns_addon_version[var.kubernetes_version]
   resolve_conflicts = "OVERWRITE"
 
-  depends_on = [aws_eks_addon.vpc_cni]
+  depends_on = [time_sleep.k8s_ready_wait]
 }
 
 resource "aws_eks_addon" "ebs-csi" {
@@ -166,5 +162,5 @@ resource "aws_eks_addon" "ebs-csi" {
   resolve_conflicts        = "OVERWRITE"
   service_account_role_arn = module.ebs_csi_controller_service_account_iam_role.arn
 
-  depends_on = [aws_eks_addon.coredns]
+  depends_on = [time_sleep.k8s_ready_wait]
 }
