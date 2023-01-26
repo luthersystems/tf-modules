@@ -121,6 +121,22 @@ resource "aws_iam_role_policy" "ebs_controller_csi_kms" {
 }
 
 
+resource "time_sleep" "k8s_ready_wait" {
+  depends_on = [aws_autoscaling_group.eks_worker]
+
+  create_duration = "3m"
+}
+
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name             = aws_eks_cluster.app.name
+  addon_name               = "vpc-cni"
+  addon_version            = var.cni_addon_version[var.kubernetes_version]
+  resolve_conflicts        = "OVERWRITE"
+  service_account_role_arn = module.eks_node_service_account_iam_role.arn
+
+  depends_on = [time_sleep.k8s_ready_wait]
+}
+
 resource "aws_eks_addon" "ebs-csi" {
   count = var.csi_addon && length(var.csi_addon_version[var.kubernetes_version]) > 0 ? 1 : 0
 
@@ -131,16 +147,6 @@ resource "aws_eks_addon" "ebs-csi" {
   service_account_role_arn = module.ebs_csi_controller_service_account_iam_role.arn
 
   depends_on = [aws_eks_addon.vpc_cni]
-}
-
-resource "aws_eks_addon" "vpc_cni" {
-  cluster_name             = aws_eks_cluster.app.name
-  addon_name               = "vpc-cni"
-  addon_version            = var.cni_addon_version[var.kubernetes_version]
-  resolve_conflicts        = "OVERWRITE"
-  service_account_role_arn = module.eks_node_service_account_iam_role.arn
-
-  depends_on = [aws_autoscaling_group.eks_worker]
 }
 
 resource "aws_eks_addon" "kube_proxy" {
