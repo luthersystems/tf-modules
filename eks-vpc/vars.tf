@@ -130,7 +130,15 @@ variable "spot_price" {
   default = ""
 }
 
-variable "disable_node_role" {
+variable "disable_s3_node_role" {
+  default = false
+}
+
+variable "disable_cni_node_role" {
+  default = false
+}
+
+variable "disable_csi_node_role" {
   default = false
 }
 
@@ -141,4 +149,40 @@ variable "cni_addon" {
 
 variable "csi_addon" {
   default = false
+}
+
+variable "cni_addon_version" {
+  type = map(string)
+  default = {
+    "1.22" = "v1.10.2-eksbuild.1"
+    "1.23" = "v1.11.2-eksbuild.1"
+    "1.24" = "v1.11.4-eksbuild.1"
+  }
+}
+
+variable "csi_addon_version" {
+  type = map(string)
+  default = {
+    "1.22" = "v1.5.2-eksbuild.1"
+    "1.23" = "v1.10.0-eksbuild.1"
+    "1.24" = "v1.13.0-eksbuild.1"
+  }
+}
+
+variable "kubeproxy_addon_version" {
+  type = map(string)
+  default = {
+    "1.22" = "v1.22.6-eksbuild.1"
+    "1.23" = "v1.23.7-eksbuild.1"
+    "1.24" = "v1.24.7-eksbuild.2"
+  }
+}
+
+variable "coredns_addon_version" {
+  type = map(string)
+  default = {
+    "1.22" = "v1.8.7-eksbuild.1"
+    "1.23" = "v1.8.7-eksbuild.2"
+    "1.24" = "v1.8.7-eksbuild.3"
+  }
 }

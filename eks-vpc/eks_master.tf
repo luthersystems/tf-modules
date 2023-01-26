@@ -120,7 +120,7 @@ data "aws_kms_key" "volumes" {
 }
 
 resource "aws_iam_role_policy" "eks_master_attach_volumes" {
-  count = var.disable_node_role ? 0 : 1
+  count = var.disable_csi_node_role ? 0 : 1
 
   role   = aws_iam_role.eks_master.name
   policy = data.aws_iam_policy_document.attach_volumes.json
