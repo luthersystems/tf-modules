@@ -129,14 +129,18 @@ resource "aws_eks_addon" "ebs-csi" {
   addon_version            = var.csi_addon_version[var.kubernetes_version]
   resolve_conflicts        = "OVERWRITE"
   service_account_role_arn = module.ebs_csi_controller_service_account_iam_role.arn
+
+  depends_on = [aws_eks_addon.vpc_cni]
 }
 
-resource "aws_eks_addon" "vpc-cni" {
+resource "aws_eks_addon" "vpc_cni" {
   cluster_name             = aws_eks_cluster.app.name
   addon_name               = "vpc-cni"
   addon_version            = var.cni_addon_version[var.kubernetes_version]
   resolve_conflicts        = "OVERWRITE"
   service_account_role_arn = module.eks_node_service_account_iam_role.arn
+
+  depends_on = [aws_autoscaling_group.eks_worker]
 }
 
 resource "aws_eks_addon" "kube_proxy" {
@@ -144,11 +148,15 @@ resource "aws_eks_addon" "kube_proxy" {
   addon_name        = "kube-proxy"
   addon_version     = var.kubeproxy_addon_version[var.kubernetes_version]
   resolve_conflicts = "OVERWRITE"
+
+  depends_on = [aws_eks_addon.vpc_cni]
 }
 
-resource "aws_eks_addon" "core_dns" {
+resource "aws_eks_addon" "coredns" {
   cluster_name      = aws_eks_cluster.app.name
   addon_name        = "coredns"
   addon_version     = var.coredns_addon_version[var.kubernetes_version]
   resolve_conflicts = "OVERWRITE"
+
+  depends_on = [aws_eks_addon.vpc_cni]
 }
