@@ -120,7 +120,6 @@ resource "aws_iam_role_policy" "ebs_controller_csi_kms" {
   policy = data.aws_iam_policy_document.kms_ebs.json
 }
 
-
 resource "time_sleep" "k8s_ready_wait" {
   depends_on = [aws_autoscaling_group.eks_worker, aws_eks_node_group.eks_worker]
 

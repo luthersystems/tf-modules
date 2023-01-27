@@ -168,7 +168,7 @@ resource "aws_launch_template" "eks_worker" {
     for_each = var.managed_nodes ? [] : [var.managed_nodes]
 
     content {
-      associate_public_ip_address =true
+      associate_public_ip_address = true
     }
   }
 
