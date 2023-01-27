@@ -17,9 +17,6 @@ module "eks_vpc" {
   worker_instance_type = var.eks_worker_instance_type
 
   aws_account_id = local.account_id
-
-  use_bastion = false
-
   domain = var.domain
 
   aws_kms_key_arns       = concat([data.aws_kms_key.storage.arn], var.shared_asset_kms_key_arns)
@@ -30,16 +27,6 @@ module "eks_vpc" {
   storage_s3_bucket_arn = data.aws_s3_bucket.env_static.arn
 
   spot_price = var.eks_worker_spot_price
-
-  managed_nodes = true
-
-  disable_s3_node_role  = true
-  disable_cni_node_role = var.disable_cni_node_role
-  disable_csi_node_role = var.disable_csi_node_role
-
-  cni_addon = var.cni_addon
-  csi_addon = var.csi_addon
-  coredns_addon = var.coredns_addon
 
   public_api = true
 

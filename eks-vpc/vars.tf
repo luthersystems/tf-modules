@@ -30,7 +30,7 @@ variable "domain" {
 }
 
 variable "use_bastion" {
-  default = true
+  default = false
 }
 
 variable "bastion_ssh_port" {
@@ -131,32 +131,31 @@ variable "spot_price" {
 }
 
 variable "disable_s3_node_role" {
-  default = false
+  default = true
 }
 
 variable "disable_cni_node_role" {
-  default = false
+  default = true
 }
 
 variable "disable_csi_node_role" {
-  default = false
+  default = true
 }
 
 variable "cni_addon" {
-  # TODO: delete
   default = true
 }
 
 variable "csi_addon" {
-  default = false
+  default = true
 }
 
 variable "coredns_addon" {
-  default = false
+  default = true
 }
 
 variable "managed_nodes" {
-  default = false
+  default = true
 }
 
 variable "cni_addon_version" {
