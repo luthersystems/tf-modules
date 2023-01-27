@@ -163,9 +163,15 @@ output "eks_worker_asg_name" {
 }
 
 resource "aws_launch_template" "eks_worker" {
-  #network_interfaces {
-  #  associate_public_ip_address = true
-  #}
+
+  dynamic "network_interfaces" {
+    for_each = var.managed_nodes ? [] : [var.managed_nodes]
+
+    content {
+      associate_public_ip_address =true
+    }
+  }
+
 
   dynamic "iam_instance_profile" {
     for_each = var.managed_nodes ? [] : [var.managed_nodes]
