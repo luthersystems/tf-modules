@@ -17,7 +17,8 @@ module "eks_vpc" {
   worker_instance_type = var.eks_worker_instance_type
 
   aws_account_id = local.account_id
-  domain         = var.domain
+
+  domain = var.domain
 
   aws_kms_key_arns       = concat([data.aws_kms_key.storage.arn], var.shared_asset_kms_key_arns)
   volumes_aws_kms_key_id = data.aws_kms_key.storage.id
