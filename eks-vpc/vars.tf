@@ -130,6 +130,10 @@ variable "spot_price" {
   default = ""
 }
 
+variable "disable_alb_node_role" {
+  default = true
+}
+
 variable "disable_s3_node_role" {
   default = true
 }

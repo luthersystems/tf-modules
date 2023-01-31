@@ -82,11 +82,15 @@ variable "disable_cni_node_role" {
   default = true
 }
 
-variable "cni_addon" {
+variable "disable_csi_node_role" {
   default = true
 }
 
-variable "disable_csi_node_role" {
+variable "disable_alb_node_role" {
+  default = true
+}
+
+variable "cni_addon" {
   default = true
 }
 
