@@ -36,13 +36,13 @@ module "luthername_net" {
   org_name       = var.org_name
   component      = "project"
   resource       = "net"
-  replication    = length(local.region_availability_zones)
+  replication    = length(local.eks_worker_azs)
 }
 
 # ip addresses in block 10.0.0.0/18 belong to third-party resources used by
 # both org1 and org2.
 resource "aws_subnet" "net" {
-  count      = length(local.region_availability_zones)
+  count      = length(local.eks_worker_azs)
   vpc_id     = aws_vpc.main.id
   cidr_block = cidrsubnet("10.0.0.0/16", 8, count.index + 1)
   availability_zone = element(
@@ -74,7 +74,7 @@ output "net_subnet_ids" {
 # ip addresses in block 10.0.0.0/18 belong to third-party resources used by
 # both org1 and org2.
 resource "aws_subnet" "net_private" {
-  count  = length(local.region_availability_zones)
+  count  = length(local.eks_worker_azs)
   vpc_id = aws_vpc.main.id
   cidr_block = cidrsubnet(
     "10.0.0.0/16",
@@ -141,13 +141,13 @@ resource "aws_route" "main_igw" {
 }
 
 resource "aws_route_table_association" "main_igw" {
-  count          = length(local.region_availability_zones)
+  count          = length(local.eks_worker_azs)
   subnet_id      = aws_subnet.net[count.index].id
   route_table_id = aws_route_table.main.id
 }
 
 resource "aws_route_table_association" "net_private_main_igw" {
-  count          = length(local.region_availability_zones)
+  count          = length(local.eks_worker_azs)
   subnet_id      = aws_subnet.net_private[count.index].id
   route_table_id = aws_route_table.main.id
 }
