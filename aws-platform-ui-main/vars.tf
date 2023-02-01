@@ -101,3 +101,7 @@ variable "csi_addon" {
 variable "coredns_addon" {
   default = true
 }
+
+variable "managed_nodes" {
+  default = false
+}

@@ -31,6 +31,8 @@ module "eks_vpc" {
 
   public_api = true
 
+  managed_nodes = var.managed_nodes
+
   disable_cni_node_role = var.disable_cni_node_role
   disable_csi_node_role = var.disable_csi_node_role
   disable_alb_node_role = var.disable_alb_node_role
