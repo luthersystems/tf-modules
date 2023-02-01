@@ -185,7 +185,7 @@ resource "aws_launch_template" "eks_worker" {
   image_id               = data.aws_ami.eks_worker.id
   instance_type          = var.worker_instance_type
   name_prefix            = module.luthername_eks_worker_launch_template.name
-  vpc_security_group_ids = [aws_security_group.eks_worker.id]
+  vpc_security_group_ids = var.managed_nodes ? [aws_security_group.eks_worker.id] : []
   user_data              = base64gzip(local.user_data)
   key_name               = var.aws_ssh_key_name
 
