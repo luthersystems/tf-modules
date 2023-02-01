@@ -50,9 +50,9 @@ resource "aws_subnet" "net" {
     count.index,
   )
 
-  # TODO: Don't expose machines to the internet.  Requires ansible to
-  # provision machines from inside the VPC (running inside or through a proxy).
-  map_public_ip_on_launch = true
+  # Setting to false requires ansible to provision machines from inside the
+  # VPC (running inside or through a proxy).
+  map_public_ip_on_launch = var.public_worker_ip
 
   tags = {
     "Name"                                                            = module.luthername_net.names[count.index]

@@ -201,3 +201,8 @@ variable "coredns_addon_version" {
     "1.24" = "v1.8.7-eksbuild.3"
   }
 }
+
+variable "public_worker_ip" {
+  type    = bool
+  default = false
+}
