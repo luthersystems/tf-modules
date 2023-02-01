@@ -164,12 +164,14 @@ output "eks_worker_asg_name" {
 
 resource "aws_launch_template" "eks_worker" {
 
+  update_default_version = true
+
   dynamic "network_interfaces" {
     for_each = var.managed_nodes ? [] : [var.managed_nodes]
 
     content {
       associate_public_ip_address = true
-      security_groups = [aws_security_group.eks_worker.id]
+      security_groups             = [aws_security_group.eks_worker.id]
     }
   }
 
