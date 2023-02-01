@@ -169,6 +169,7 @@ resource "aws_launch_template" "eks_worker" {
 
     content {
       associate_public_ip_address = true
+      security_groups = [aws_security_group.eks_worker.id]
     }
   }
 
