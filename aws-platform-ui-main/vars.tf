@@ -105,3 +105,7 @@ variable "coredns_addon" {
 variable "managed_nodes" {
   default = false
 }
+
+variable "public_worker_ip" {
+  default = true
+}

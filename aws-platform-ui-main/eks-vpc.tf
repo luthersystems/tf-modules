@@ -41,6 +41,8 @@ module "eks_vpc" {
   csi_addon     = var.csi_addon
   coredns_addon = var.coredns_addon
 
+  public_worker_ip = var.public_worker_ip
+
   providers = {
     aws.cloudwatch = aws
     aws            = aws
