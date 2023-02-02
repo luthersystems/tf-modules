@@ -76,18 +76,18 @@ locals {
     }
   }
 
-  upgrade_overrides = try(local.upgrade_stages_settings[var.upgrade_stage], {})
+  upgrade_overrides = try(local.upgrade_stages_settings[var.upgrade_stage], null)
 
-  kubernetes_version = var.kubernetes_version
+  kubernetes_version = try(local.upgrade_overrides.kubernetes_version, var.kubernetes_version)
 
-  managed_nodes = var.managed_nodes || local.upgrade_overrides.managed_nodes
+  managed_nodes = try(local.upgrade_overrides.managed_nodes, var.managed_nodes)
 
-  kubeproxy_addon = (var.kubeproxy_addon && length(var.kubeproxy_addon_version[local.kubernetes_version]) > 0) || local.upgrade_overrides.kubeproxy_addon
-  cni_addon       = (var.cni_addon && length(var.coredns_addon_version[local.kubernetes_version]) > 0) || local.upgrade_overrides.cni_addon
-  csi_addon       = (var.csi_addon && length(var.csi_addon_version[local.kubernetes_version]) > 0) || local.upgrade_overrides.csi_addon
-  coredns_addon   = (var.coredns_addon && length(var.coredns_addon_version[local.kubernetes_version]) > 0) || local.upgrade_overrides.coredns_addon
+  kubeproxy_addon = try(local.upgrade_overrides.kubeproxy_addon, var.kubeproxy_addon && length(var.kubeproxy_addon_version[local.kubernetes_version]) > 0)
+  cni_addon       = try(local.upgrade_overrides.cni_addon, var.cni_addon && length(var.coredns_addon_version[local.kubernetes_version]) > 0)
+  csi_addon       = try(local.upgrade_overrides.csi_addon, var.csi_addon && length(var.csi_addon_version[local.kubernetes_version]) > 0)
+  coredns_addon   = try(local.upgrade_overrides.coredns_addon, var.coredns_addon && length(var.coredns_addon_version[local.kubernetes_version]) > 0)
 
-  disable_alb_node_role = var.disable_alb_node_role || local.upgrade_overrides.disable_alb_node_role
-  disable_cni_node_role = var.disable_cni_node_role || local.upgrade_overrides.disable_cni_node_role
-  disable_csi_node_role = var.disable_csi_node_role || local.upgrade_overrides.disable_csi_node_role
+  disable_alb_node_role = try(local.upgrade_overrides.disable_alb_node_role, var.disable_alb_node_role)
+  disable_cni_node_role = try(local.upgrade_overrides.disable_cni_node_role, var.disable_cni_node_role)
+  disable_csi_node_role = try(local.upgrade_overrides.disable_csi_node_role, var.disable_csi_node_role)
 }

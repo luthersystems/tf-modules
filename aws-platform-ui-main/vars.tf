@@ -109,3 +109,7 @@ variable "managed_nodes" {
 variable "public_worker_ip" {
   default = true
 }
+
+variable "upgrade_stage" {
+  default = ""
+}

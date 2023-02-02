@@ -43,6 +43,8 @@ module "eks_vpc" {
 
   public_worker_ip = var.public_worker_ip
 
+  upgrade_stage = var.upgrade_stage
+
   providers = {
     aws.cloudwatch = aws
     aws            = aws
