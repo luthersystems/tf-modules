@@ -115,7 +115,7 @@ locals {
 }
 
 resource "aws_autoscaling_group" "eks_worker" {
-  count = var.managed_nodes ? 0 : 1
+  count = local.managed_nodes ? 0 : 1
 
   desired_capacity = var.autoscaling_desired
 
@@ -155,7 +155,7 @@ resource "aws_autoscaling_group" "eks_worker" {
 }
 
 locals {
-  eks_worker_asg_name = var.managed_nodes ? aws_eks_node_group.eks_worker[0].resources[0].autoscaling_groups[0].name : aws_autoscaling_group.eks_worker[0].name
+  eks_worker_asg_name = local.managed_nodes ? aws_eks_node_group.eks_worker[0].resources[0].autoscaling_groups[0].name : aws_autoscaling_group.eks_worker[0].name
 }
 
 output "eks_worker_asg_name" {
@@ -167,7 +167,7 @@ resource "aws_launch_template" "eks_worker" {
   update_default_version = true
 
   dynamic "network_interfaces" {
-    for_each = var.managed_nodes ? [] : [var.managed_nodes]
+    for_each = local.managed_nodes ? [] : [local.managed_nodes]
 
     content {
       associate_public_ip_address = true
@@ -177,7 +177,7 @@ resource "aws_launch_template" "eks_worker" {
 
 
   dynamic "iam_instance_profile" {
-    for_each = var.managed_nodes ? [] : [var.managed_nodes]
+    for_each = local.managed_nodes ? [] : [local.managed_nodes]
 
     content {
       name = aws_iam_instance_profile.eks_worker[0].name
@@ -187,12 +187,12 @@ resource "aws_launch_template" "eks_worker" {
   image_id               = data.aws_ami.eks_worker.id
   instance_type          = var.worker_instance_type
   name_prefix            = module.luthername_eks_worker_launch_template.name
-  vpc_security_group_ids = var.managed_nodes ? [aws_security_group.eks_worker.id] : []
+  vpc_security_group_ids = local.managed_nodes ? [aws_security_group.eks_worker.id] : []
   user_data              = base64gzip(local.user_data)
   key_name               = var.aws_ssh_key_name
 
   dynamic "instance_market_options" {
-    for_each = !var.managed_nodes && length(var.spot_price) > 0 ? [var.spot_price] : []
+    for_each = !local.managed_nodes && length(var.spot_price) > 0 ? [var.spot_price] : []
 
     content {
       market_type = "spot"
@@ -217,7 +217,7 @@ resource "aws_launch_template" "eks_worker" {
 }
 
 resource "aws_eks_node_group" "eks_worker" {
-  count = var.managed_nodes ? 1 : 0
+  count = local.managed_nodes ? 1 : 0
 
   cluster_name    = aws_eks_cluster.app.name
   node_group_name = module.luthername_eks_worker_autoscaling_group.name
@@ -293,7 +293,7 @@ resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKSWorkerNodePolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKS_CNI_Policy" {
-  count = var.disable_cni_node_role ? 0 : 1
+  count = local.disable_cni_node_role ? 0 : 1
 
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = aws_iam_role.eks_worker.name
@@ -388,7 +388,7 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
 }
 
 resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
-  count = var.disable_alb_node_role ? 0 : 1
+  count = local.disable_alb_node_role ? 0 : 1
 
   name = "alb-ingress-controller"
   # Policy taken from the guide here: https://aws.amazon.com/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/
@@ -550,7 +550,7 @@ module "luthername_eks_worker_profile" {
 }
 
 resource "aws_iam_instance_profile" "eks_worker" {
-  count = var.managed_nodes ? 0 : 1
+  count = local.managed_nodes ? 0 : 1
 
   name = module.luthername_eks_worker_profile.name
   role = aws_iam_role.eks_worker.name

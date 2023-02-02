@@ -130,11 +130,11 @@ variable "spot_price" {
   default = ""
 }
 
-variable "disable_alb_node_role" {
+variable "disable_s3_node_role" {
   default = true
 }
 
-variable "disable_s3_node_role" {
+variable "disable_alb_node_role" {
   default = true
 }
 
@@ -143,6 +143,10 @@ variable "disable_cni_node_role" {
 }
 
 variable "disable_csi_node_role" {
+  default = true
+}
+
+variable "kubeproxy_addon" {
   default = true
 }
 
@@ -163,7 +167,6 @@ variable "managed_nodes" {
 }
 
 variable "cni_addon_version" {
-  type = map(string)
   default = {
     "1.21" = "v1.9.3-eksbuild.1"
     "1.22" = "v1.10.2-eksbuild.1"
@@ -173,7 +176,6 @@ variable "cni_addon_version" {
 }
 
 variable "csi_addon_version" {
-  type = map(string)
   default = {
     "1.21" = ""
     "1.22" = "v1.5.2-eksbuild.1"
@@ -183,7 +185,6 @@ variable "csi_addon_version" {
 }
 
 variable "kubeproxy_addon_version" {
-  type = map(string)
   default = {
     "1.21" = "v1.21.2-eksbuild.2"
     "1.22" = "v1.22.6-eksbuild.1"
@@ -193,7 +194,6 @@ variable "kubeproxy_addon_version" {
 }
 
 variable "coredns_addon_version" {
-  type = map(string)
   default = {
     "1.21" = "v1.8.4-eksbuild.1"
     "1.22" = "v1.8.7-eksbuild.1"
@@ -203,6 +203,17 @@ variable "coredns_addon_version" {
 }
 
 variable "public_worker_ip" {
-  type    = bool
-  default = false
+  default = true
+}
+
+#
+# Helper to upgrade from 1.21 to 1.23
+#
+variable "upgrade_stage" {
+  default = ""
+
+  validation {
+    condition     = contains(["do_1.21", "prep_1.22", "do_1.22", "prep_1.23", "do_1.23", "finish_1.23"], var.upgrade_stage)
+    error_message = "Invalid upgrade stage."
+  }
 }

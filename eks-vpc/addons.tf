@@ -123,41 +123,45 @@ resource "aws_iam_role_policy" "ebs_controller_csi_kms" {
 resource "time_sleep" "k8s_ready_wait" {
   depends_on = [aws_autoscaling_group.eks_worker, aws_eks_node_group.eks_worker]
 
-  create_duration = var.managed_nodes ? "1s" : "3m"
+  create_duration = local.managed_nodes ? "1s" : "3m"
 }
 
 resource "aws_eks_addon" "vpc_cni" {
+  count = local.cni_addon ? 1 : 0
+
   cluster_name             = aws_eks_cluster.app.name
   addon_name               = "vpc-cni"
-  addon_version            = var.cni_addon_version[var.kubernetes_version]
+  addon_version            = var.cni_addon_version[local.kubernetes_version]
   resolve_conflicts        = "OVERWRITE"
   service_account_role_arn = module.eks_node_service_account_iam_role.arn
 }
 
 resource "aws_eks_addon" "kube_proxy" {
+  count = local.kubeproxy_addon ? 1 : 0
+
   cluster_name      = aws_eks_cluster.app.name
   addon_name        = "kube-proxy"
-  addon_version     = var.kubeproxy_addon_version[var.kubernetes_version]
+  addon_version     = var.kubeproxy_addon_version[local.kubernetes_version]
   resolve_conflicts = "OVERWRITE"
 }
 
 resource "aws_eks_addon" "coredns" {
-  count = var.coredns_addon ? 1 : 0
+  count = local.coredns_addon ? 1 : 0
 
   cluster_name      = aws_eks_cluster.app.name
   addon_name        = "coredns"
-  addon_version     = var.coredns_addon_version[var.kubernetes_version]
+  addon_version     = var.coredns_addon_version[local.kubernetes_version]
   resolve_conflicts = "OVERWRITE"
 
   depends_on = [time_sleep.k8s_ready_wait]
 }
 
 resource "aws_eks_addon" "ebs-csi" {
-  count = var.csi_addon && length(var.csi_addon_version[var.kubernetes_version]) > 0 ? 1 : 0
+  count = local.csi_addon ? 1 : 0
 
   cluster_name             = aws_eks_cluster.app.name
   addon_name               = "aws-ebs-csi-driver"
-  addon_version            = var.csi_addon_version[var.kubernetes_version]
+  addon_version            = var.csi_addon_version[local.kubernetes_version]
   resolve_conflicts        = "OVERWRITE"
   service_account_role_arn = module.ebs_csi_controller_service_account_iam_role.arn
 

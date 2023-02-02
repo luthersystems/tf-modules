@@ -18,7 +18,7 @@ resource "aws_eks_cluster" "app" {
   name                      = module.luthername_eks_cluster.names[0]
   role_arn                  = aws_iam_role.eks_master.arn
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
-  version                   = var.kubernetes_version
+  version                   = local.kubernetes_version
 
   vpc_config {
     endpoint_private_access = true
@@ -120,7 +120,7 @@ data "aws_kms_key" "volumes" {
 }
 
 resource "aws_iam_role_policy" "eks_master_attach_volumes" {
-  count = var.disable_csi_node_role ? 0 : 1
+  count = local.disable_csi_node_role ? 0 : 1
 
   role   = aws_iam_role.eks_master.name
   policy = data.aws_iam_policy_document.attach_volumes.json
