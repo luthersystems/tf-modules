@@ -1,6 +1,8 @@
 # k8s upgrade helper vars
 locals {
 
+  upgrade_stages = ["do_1.21", "prep_1.22", "do_1.22", "prep_1.23", "do_1.23", "finish_1.23"]
+
   upgrade_stages_settings = {
 
     "do_1.21" = {
@@ -76,7 +78,9 @@ locals {
     }
   }
 
-  upgrade_overrides = try(local.upgrade_stages_settings[var.upgrade_stage], null)
+  upgrade_stage = try(local.upgrade_stages[var.k8s1_21to1_23_upgrade_step - 1], "")
+
+  upgrade_overrides = try(local.upgrade_stages_settings[local.upgrade_stage], null)
 
   kubernetes_version = try(local.upgrade_overrides.kubernetes_version, var.kubernetes_version)
 
@@ -90,4 +94,8 @@ locals {
   disable_alb_node_role = try(local.upgrade_overrides.disable_alb_node_role, var.disable_alb_node_role)
   disable_cni_node_role = try(local.upgrade_overrides.disable_cni_node_role, var.disable_cni_node_role)
   disable_csi_node_role = try(local.upgrade_overrides.disable_csi_node_role, var.disable_csi_node_role)
+}
+
+output "upgrade_stage" {
+  value = local.upgrade_stage
 }

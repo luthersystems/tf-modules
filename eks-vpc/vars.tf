@@ -209,11 +209,6 @@ variable "public_worker_ip" {
 #
 # Helper to upgrade from 1.21 to 1.23
 #
-variable "upgrade_stage" {
-  default = ""
-
-  validation {
-    condition     = contains(["do_1.21", "prep_1.22", "do_1.22", "prep_1.23", "do_1.23", "finish_1.23"], var.upgrade_stage)
-    error_message = "Invalid upgrade stage."
-  }
+variable "k8s1_21to1_23_upgrade_step" {
+  default = 0
 }

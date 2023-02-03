@@ -31,19 +31,7 @@ module "eks_vpc" {
 
   public_api = true
 
-  managed_nodes = var.managed_nodes
-
-  disable_cni_node_role = var.disable_cni_node_role
-  disable_csi_node_role = var.disable_csi_node_role
-  disable_alb_node_role = var.disable_alb_node_role
-
-  cni_addon     = var.cni_addon
-  csi_addon     = var.csi_addon
-  coredns_addon = var.coredns_addon
-
-  public_worker_ip = var.public_worker_ip
-
-  upgrade_stage = var.upgrade_stage
+  k8s1_21to1_23_upgrade_step = var.k8s1_21to1_23_upgrade_step
 
   providers = {
     aws.cloudwatch = aws

@@ -78,38 +78,6 @@ variable "grafana_saml_metadata_xml" {
   default = ""
 }
 
-variable "disable_cni_node_role" {
-  default = true
-}
-
-variable "disable_csi_node_role" {
-  default = true
-}
-
-variable "disable_alb_node_role" {
-  default = true
-}
-
-variable "cni_addon" {
-  default = true
-}
-
-variable "csi_addon" {
-  default = true
-}
-
-variable "coredns_addon" {
-  default = true
-}
-
-variable "managed_nodes" {
-  default = false
-}
-
-variable "public_worker_ip" {
-  default = true
-}
-
-variable "upgrade_stage" {
-  default = ""
+variable "k8s1_21to1_23_upgrade_step" {
+  default = 0
 }
