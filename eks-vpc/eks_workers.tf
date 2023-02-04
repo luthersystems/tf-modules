@@ -214,15 +214,22 @@ resource "aws_launch_template" "eks_worker" {
   monitoring {
     enabled = true
   }
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = module.luthername_eks_worker_autoscaling_group.tags
+  }
 }
 
 resource "aws_eks_node_group" "eks_worker" {
   count = local.managed_nodes ? 1 : 0
 
-  cluster_name    = aws_eks_cluster.app.name
-  node_group_name = module.luthername_eks_worker_autoscaling_group.name
-  node_role_arn   = aws_iam_role.eks_worker.arn
-  subnet_ids      = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
+  node_group_name_prefix = module.luthername_eks_worker_autoscaling_group.name
+
+  cluster_name  = aws_eks_cluster.app.name
+  node_role_arn = aws_iam_role.eks_worker.arn
+  subnet_ids    = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
 
   capacity_type = length(var.spot_price) > 0 ? "SPOT" : "ON_DEMAND"
 
