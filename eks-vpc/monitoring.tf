@@ -73,9 +73,42 @@ groups:
 EOT
 }
 
-# TODO: slack alert lambda, SNS publish permissions
+data "aws_iam_policy_document" "alerts_publish" {
+  statement {
+    sid = "Allow_Publish_Alarms"
+
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["aps.${data.aws_partition.current.dns_suffix}"]
+    }
+
+    actions = [
+      "sns:Publish",
+      "sns:GetTopicAttributes",
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceAccount"
+      values   = [var.aws_account_id]
+    }
+
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+      values   = [aws_prometheus_workspace.k8s[0].arn]
+    }
+  }
+}
+
+# TODO: slack alert lambda
+
 resource "aws_sns_topic" "alerts" {
   count = var.monitoring ? 1 : 0
+
+  policy = data.aws_iam_policy_document.alerts_publish.json
 
   name = module.luthername_prometheus.name
 }
