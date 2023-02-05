@@ -212,3 +212,20 @@ variable "public_worker_ip" {
 variable "k8s1_21to1_23_upgrade_step" {
   default = 0
 }
+
+variable "monitoring" {
+  default = false
+}
+
+variable "grafana_saml_admin_role_values" {
+  type    = list(string)
+  default = []
+}
+
+variable "grafana_saml_role_assertion" {
+  default = ""
+}
+
+variable "grafana_saml_metadata_xml" {
+  default = ""
+}
