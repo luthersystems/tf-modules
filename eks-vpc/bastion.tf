@@ -138,6 +138,9 @@ locals {
     eks_worker_iam_role_arn                = aws_iam_role.eks_worker.arn
     k8s_admin_role_arn                     = data.aws_iam_role.assumed_role_admin.arn
     storage_kms_key_id                     = var.volumes_aws_kms_key_id
+
+    prometheus_service_account_iam_role_arn = module.prometheus_service_account_iam_role.arn
+    prometheus_workspace_id                 = try(aws_prometheus_workspace.k8s[0].id, "")
   }
   k8s_facts_json = jsonencode(local.k8s_facts)
 
