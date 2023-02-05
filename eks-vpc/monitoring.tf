@@ -22,6 +22,127 @@ resource "aws_prometheus_workspace" "k8s" {
   tags  = module.luthername_prometheus.tags
 }
 
+resource "aws_prometheus_rule_group_namespace" "alert_rules" {
+  count = var.monitoring ? 1 : 0
+
+  name         = "alert-rules"
+  workspace_id = aws_prometheus_workspace.k8s[0].id
+  data         = <<EOT
+groups:
+  - name: service
+    rules:
+    - alert: LowDataVolumeSpace
+      # used > 80%
+      expr: (kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes) < 0.2
+      for: 5m
+      labels:
+        project: "${var.luther_project}"
+        environment: "${var.luther_env}"
+        severity: page
+      annotations:
+        summary: "Service data volume usage above 80%"
+    - alert: LowRootVolumeSpace
+      # used > 80%
+      expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.2
+      for: 1m
+      labels:
+        project: "${var.luther_project}"
+        environment: "${var.luther_env}"
+        severity: page
+      annotations:
+        summary: "Instance(s) root volume usage above 80%"
+    - alert: LowInstanceMemory
+      # used > 80%
+      expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.2
+      for: 1m
+      labels:
+        project: "${var.luther_project}"
+        environment: "${var.luther_env}"
+        severity: page
+      annotations:
+        summary: "Instance(s) memory usage above 80%"
+    - alert: ServiceDown
+      expr: up != 1
+      for: 2m
+      labels:
+        project: "${var.luther_project}"
+        environment: "${var.luther_env}"
+        severity: page
+      annotations:
+        summary: "Service(s) could not be scraped"
+EOT
+}
+
+# TODO: slack alert lambda, SNS publish permissions
+resource "aws_sns_topic" "alerts" {
+  count = var.monitoring ? 1 : 0
+
+  name = module.luthername_prometheus.name
+}
+
+resource "aws_prometheus_alert_manager_definition" "alerts" {
+  count = var.monitoring ? 1 : 0
+
+  workspace_id = aws_prometheus_workspace.k8s[0].id
+  definition   = <<EOT
+template_files:
+  slack.luther.text.tmpl: !unsafe |
+    {{ define "slack.luther.text" -}}
+    {{ with $data := . -}}
+
+    {{ if eq .Status "firing" -}}
+    <!channel>: :scream_cat: {{len .Alerts.Firing}} active alerts in the group{{range .Alerts.Firing}} :fire:{{end}}
+    {{- else -}}
+    :disappointed_relieved: All alerts in the group are resolved
+    {{- end }}
+
+    {{- range $ann := .CommonAnnotations.SortedPairs }}
+    - *{{.Name}}*: {{.Value}}
+    {{- end }}
+    {{- if gt (len .Alerts) 1 }}
+    {{- range $alert := .Alerts }}
+    {{ if eq .Status "firing" }}:fire:{{ else }}:ok_hand:{{ end }} {{(.Labels.Remove $data.CommonLabels.Names).Values | join " "}}
+    {{- range $ann := (.Annotations.Remove $data.CommonAnnotations.Names).SortedPairs}}
+    - *{{.Name}}*: {{.Value}}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+  slack.luther.title.tmpl: !unsafe |
+    {{ define "slack.luther.title" -}}
+    [{{ .GroupLabels.project }}-{{ .GroupLabels.environment }}]
+    {{- range .GroupLabels.SortedPairs }}
+    {{- if or (eq .Name "project") (eq .Name "environment") }}{{ else }} {{ .Value }}{{ end }}{{ end }}
+    {{- if gt (len .CommonLabels) (len .GroupLabels)}} ({{(.CommonLabels.Remove .GroupLabels.Names).Values | join " "}}){{end}}
+    {{- end }}
+alertmanager_config: |
+  global:
+  templates:
+    - 'slack.luther.text.tmpl'
+    - 'slack.luther.title.tmpl'
+  route:
+    receiver: slack_alerts
+    group_wait: 15s
+    group_interval: 5m
+    group_by:
+      - project
+      - environment
+      - alertname
+  receivers:
+    - name: slack_alerts
+      sns_configs:
+      - topic_arn: ${aws_sns_topic.alerts[0].arn}
+        sigv4:
+          region: ${var.aws_region}
+        message: '{% raw %}{{ template "slack.luther.text" . }}{% endraw %}'
+        subject: '{% raw %}{{ template "slack.luther.title" . }}{% endraw %}'
+        attributes:
+          key: severity
+          value: SEV2
+EOT
+}
+
 output "prometheus_workspace_id" {
   value = try(aws_prometheus_workspace.k8s[0].id, null)
 }
