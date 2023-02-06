@@ -34,12 +34,12 @@ module "eks_vpc" {
   k8s1_21to1_23_upgrade_step = var.k8s1_21to1_23_upgrade_step
 
   providers = {
-    aws.cloudwatch = aws
-    aws            = aws
-    null           = null
-    local          = local
-    external       = external
-    tls            = tls
+    aws           = aws
+    aws.us-east-1 = aws
+    null          = null
+    local         = local
+    external      = external
+    tls           = tls
   }
 }
 
