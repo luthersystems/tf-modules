@@ -335,18 +335,26 @@ module "grafana_frontend_url" {
   resource       = ""
 }
 
+locals {
+  human_grafana_domain = var.use_human_grafana_domain ? "${module.grafana_frontend_url.name}.${var.domain}" : ""
+}
+
 module "grafana_frontend" {
-  count = var.monitoring ? 1 : 0
+  count = var.monitoring && var.use_human_grafana_domain ? 1 : 0
 
   source            = "../aws-cf-reverse-proxy"
   luther_env        = var.luther_env
   luther_project    = var.luther_project
   app_naked_domain  = var.domain
-  app_target_domain = "${module.grafana_frontend_url.name}.${var.domain}"
+  app_target_domain = local.human_grafana_domain
   origin_url        = aws_grafana_workspace.grafana[0].endpoint
 
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1
   }
+}
+
+output "human_grafana_domain" {
+  value = local.human_grafana_domain
 }
