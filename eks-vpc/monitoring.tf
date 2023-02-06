@@ -329,11 +329,10 @@ module "grafana_frontend_url" {
   org_name       = ""
   component      = "mon"
   resource       = ""
-  id             = " "
 }
 
 locals {
-  human_grafana_domain = var.use_human_grafana_domain ? "${module.grafana_frontend_url.name}.${var.domain}" : ""
+  human_grafana_domain = var.use_human_grafana_domain ? "${module.grafana_frontend_url.prefix}.${var.domain}" : ""
 }
 
 module "grafana_frontend" {
