@@ -74,6 +74,7 @@ EOT
 }
 
 data "aws_iam_policy_document" "alerts_publish" {
+
   statement {
     sid = "Allow_Publish_Alarms"
 
@@ -100,6 +101,8 @@ data "aws_iam_policy_document" "alerts_publish" {
       variable = "aws:SourceArn"
       values   = [aws_prometheus_workspace.k8s[0].arn]
     }
+
+    resources = [aws_sns_topic.alerts[0].arn]
   }
 }
 
@@ -108,9 +111,14 @@ data "aws_iam_policy_document" "alerts_publish" {
 resource "aws_sns_topic" "alerts" {
   count = var.monitoring ? 1 : 0
 
-  policy = data.aws_iam_policy_document.alerts_publish.json
-
   name = module.luthername_prometheus.name
+}
+
+resource "aws_sns_topic_policy" "alerts" {
+  count = var.monitoring ? 1 : 0
+
+  arn    = aws_sns_topic.alerts[0].arn
+  policy = data.aws_iam_policy_document.alerts_publish.json
 }
 
 resource "aws_prometheus_alert_manager_definition" "alerts" {
