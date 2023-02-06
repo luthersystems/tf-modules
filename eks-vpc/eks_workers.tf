@@ -82,7 +82,7 @@ output "docker_log_opts" {
   value = jsonencode(local.docker_log_opts)
 }
 
-module "luthername_eks_worker_launch_configuration" {
+module "luthername_eks_worker_launch_template" {
   source         = "../luthername"
   luther_project = var.luther_project
   aws_region     = var.aws_region
@@ -93,26 +93,6 @@ module "luthername_eks_worker_launch_configuration" {
 
   # This id is a hack because ASG uses it as a prefix
   id = "worker-"
-}
-
-resource "aws_launch_configuration" "eks_worker" {
-  associate_public_ip_address = true
-  iam_instance_profile        = aws_iam_instance_profile.eks_worker.name
-  image_id                    = data.aws_ami.eks_worker.id
-  instance_type               = var.worker_instance_type
-  name_prefix                 = module.luthername_eks_worker_launch_configuration.name
-  security_groups             = [aws_security_group.eks_worker.id]
-  user_data_base64            = base64gzip(local.user_data)
-  key_name                    = var.aws_ssh_key_name
-  spot_price                  = var.spot_price
-
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes = [
-      key_name,
-      image_id,
-    ]
-  }
 }
 
 module "luthername_eks_worker_autoscaling_group" {
@@ -135,12 +115,19 @@ locals {
 }
 
 resource "aws_autoscaling_group" "eks_worker" {
-  desired_capacity     = var.autoscaling_desired
-  launch_configuration = aws_launch_configuration.eks_worker.id
-  max_size             = var.autoscaling_desired
-  min_size             = var.autoscaling_desired
-  name                 = module.luthername_eks_worker_autoscaling_group.name
-  vpc_zone_identifier  = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
+  count = local.managed_nodes ? 0 : 1
+
+  desired_capacity = var.autoscaling_desired
+
+  launch_template {
+    id      = aws_launch_template.eks_worker.id
+    version = aws_launch_template.eks_worker.default_version
+  }
+
+  max_size            = var.autoscaling_desired
+  min_size            = var.autoscaling_desired
+  name                = module.luthername_eks_worker_autoscaling_group.name
+  vpc_zone_identifier = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
 
   target_group_arns = var.worker_asg_target_group_arns
 
@@ -158,10 +145,117 @@ resource "aws_autoscaling_group" "eks_worker" {
     value               = "owned"
     propagate_at_launch = true
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_worker_AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.eks_worker_AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.eks_node_sa_AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.eks_worker_AmazonEKS_CNI_Policy
+  ]
+}
+
+locals {
+  eks_worker_asg_name = local.managed_nodes ? aws_eks_node_group.eks_worker[0].resources[0].autoscaling_groups[0].name : aws_autoscaling_group.eks_worker[0].name
 }
 
 output "eks_worker_asg_name" {
-  value = aws_autoscaling_group.eks_worker.name
+  value = local.eks_worker_asg_name
+}
+
+resource "aws_launch_template" "eks_worker" {
+
+  update_default_version = true
+
+  dynamic "network_interfaces" {
+    for_each = local.managed_nodes ? [] : [local.managed_nodes]
+
+    content {
+      associate_public_ip_address = true
+      security_groups             = [aws_security_group.eks_worker.id]
+    }
+  }
+
+
+  dynamic "iam_instance_profile" {
+    for_each = local.managed_nodes ? [] : [local.managed_nodes]
+
+    content {
+      name = aws_iam_instance_profile.eks_worker[0].name
+    }
+  }
+
+  image_id               = data.aws_ami.eks_worker.id
+  instance_type          = var.worker_instance_type
+  name_prefix            = module.luthername_eks_worker_launch_template.name
+  vpc_security_group_ids = local.managed_nodes ? [aws_security_group.eks_worker.id] : []
+  user_data              = base64gzip(local.user_data)
+  key_name               = var.aws_ssh_key_name
+
+  dynamic "instance_market_options" {
+    for_each = !local.managed_nodes && length(var.spot_price) > 0 ? [var.spot_price] : []
+
+    content {
+      market_type = "spot"
+
+      spot_options {
+        max_price = var.spot_price
+      }
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = [
+      key_name,
+      image_id,
+    ]
+  }
+
+  monitoring {
+    enabled = true
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = module.luthername_eks_worker_autoscaling_group.tags
+  }
+}
+
+resource "aws_eks_node_group" "eks_worker" {
+  count = local.managed_nodes ? 1 : 0
+
+  node_group_name_prefix = module.luthername_eks_worker_autoscaling_group.name
+
+  cluster_name  = aws_eks_cluster.app.name
+  node_role_arn = aws_iam_role.eks_worker.arn
+  subnet_ids    = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
+
+  capacity_type = length(var.spot_price) > 0 ? "SPOT" : "ON_DEMAND"
+
+  scaling_config {
+    desired_size = var.autoscaling_desired
+    max_size     = var.autoscaling_desired
+    min_size     = var.autoscaling_desired
+  }
+
+  update_config {
+    max_unavailable = 1
+  }
+
+  launch_template {
+    id      = aws_launch_template.eks_worker.id
+    version = aws_launch_template.eks_worker.default_version
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_worker_AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.eks_worker_AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.eks_node_sa_AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.eks_worker_AmazonEKS_CNI_Policy
+  ]
+
+  tags = module.luthername_eks_worker_autoscaling_group.tags
 }
 
 module "luthername_eks_worker_role" {
@@ -206,8 +300,15 @@ resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKSWorkerNodePolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKS_CNI_Policy" {
+  count = local.disable_cni_node_role ? 0 : 1
+
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = aws_iam_role.eks_worker.name
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node_sa_AmazonEKS_CNI_Policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = module.eks_node_service_account_iam_role.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEC2ContainerRegistryReadOnly" {
@@ -216,6 +317,8 @@ resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEC2ContainerRegistry
 }
 
 resource "aws_iam_role_policy" "eks_worker_s3_readonly" {
+  count = var.disable_s3_node_role || length(local.s3_prefixes) == 0 ? 0 : 1
+
   name   = "s3-readonly"
   role   = aws_iam_role.eks_worker.name
   policy = data.aws_iam_policy_document.s3_readonly.json
@@ -258,16 +361,16 @@ data "aws_iam_policy_document" "s3_readonly" {
       "s3:ListBucket",
     ]
 
-    resources = [
+    resources = compact([
       var.storage_s3_bucket_arn,
       var.common_static_s3_bucket_arn,
       var.common_external_s3_bucket_arn,
-    ]
+    ])
   }
 }
 
 locals {
-  s3_prefixes = [for prefix in var.storage_s3_key_prefixes : format("%s/%s", var.storage_s3_bucket_arn, prefix)]
+  s3_prefixes = length(var.storage_s3_bucket_arn) > 0 ? [for prefix in var.storage_s3_key_prefixes : format("%s/%s", var.storage_s3_bucket_arn, prefix)] : []
 }
 
 resource "aws_iam_role_policy" "eks_worker_cloudwatch_logs" {
@@ -292,11 +395,12 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
 }
 
 resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
+  count = local.disable_alb_node_role ? 0 : 1
+
   name = "alb-ingress-controller"
   # Policy taken from the guide here: https://aws.amazon.com/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/
   # Original policy: https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.9/docs/examples/iam-policy.json
-  role = aws_iam_role.eks_worker.name
-
+  role   = aws_iam_role.eks_worker.name
   policy = <<POLICY
 {
   "Version": "2012-10-17",
@@ -439,7 +543,6 @@ resource "aws_iam_role_policy" "eks_worker_alb_ingress_controller" {
   ]
 }
 POLICY
-
 }
 
 module "luthername_eks_worker_profile" {
@@ -454,6 +557,8 @@ module "luthername_eks_worker_profile" {
 }
 
 resource "aws_iam_instance_profile" "eks_worker" {
+  count = local.managed_nodes ? 0 : 1
+
   name = module.luthername_eks_worker_profile.name
   role = aws_iam_role.eks_worker.name
 }

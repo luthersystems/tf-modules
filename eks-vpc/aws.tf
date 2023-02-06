@@ -3,7 +3,7 @@ variable "aws_account_id" {
 }
 
 variable "aws_region" {
-  type = string
+  default = "eu-west-2"
 }
 
 variable "aws_ssh_key_name" {
@@ -45,3 +45,5 @@ variable "aws_availability_zones" {
 locals {
   region_availability_zones = var.aws_availability_zones[var.aws_region]
 }
+
+data "aws_partition" "current" {}

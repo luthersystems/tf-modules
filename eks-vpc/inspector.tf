@@ -1,7 +1,7 @@
 resource "aws_inspector_resource_group" "environment" {
   # The tags are OR'd, so search for the bastion name or the ASG group name
   tags = merge({
-    "aws:autoscaling:groupName" = aws_autoscaling_group.eks_worker.name
+    "aws:autoscaling:groupName" = local.eks_worker_asg_name
   }, var.use_bastion ? { "Name" = local.bastion_name } : {})
 }
 

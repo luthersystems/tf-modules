@@ -17,20 +17,20 @@ variable "component" {
 }
 
 variable "kubernetes_version" {
-  type = string
+  default = "1.23"
 }
 
 variable "worker_instance_type" {
   type    = string
-  default = "m5.large"
+  default = "m6i.large"
 }
 
 variable "domain" {
-  type = string
+  default = "luthersystemsapp.com"
 }
 
 variable "use_bastion" {
-  default = true
+  default = false
 }
 
 variable "bastion_ssh_port" {
@@ -98,12 +98,13 @@ variable "common_external_s3_bucket_arn" {
 }
 
 variable "storage_s3_bucket_arn" {
-  type = string
+  default = ""
 }
 
 # To access all keys in the bucket pass the list ["*"]
 variable "storage_s3_key_prefixes" {
-  type = list(string)
+  type    = list(string)
+  default = []
 }
 
 variable "autoscaling_desired" {
@@ -127,4 +128,108 @@ variable "public_api" {
 
 variable "spot_price" {
   default = ""
+}
+
+variable "disable_s3_node_role" {
+  default = false
+}
+
+variable "disable_alb_node_role" {
+  default = true
+}
+
+variable "disable_cni_node_role" {
+  default = true
+}
+
+variable "disable_csi_node_role" {
+  default = true
+}
+
+variable "kubeproxy_addon" {
+  default = true
+}
+
+variable "cni_addon" {
+  default = true
+}
+
+variable "csi_addon" {
+  default = true
+}
+
+variable "coredns_addon" {
+  default = true
+}
+
+variable "managed_nodes" {
+  default = true
+}
+
+variable "cni_addon_version" {
+  default = {
+    "1.21" = "v1.9.3-eksbuild.1"
+    "1.22" = "v1.10.2-eksbuild.1"
+    "1.23" = "v1.11.2-eksbuild.1"
+    "1.24" = "v1.11.4-eksbuild.1"
+  }
+}
+
+variable "csi_addon_version" {
+  default = {
+    "1.21" = ""
+    "1.22" = "v1.5.2-eksbuild.1"
+    "1.23" = "v1.10.0-eksbuild.1"
+    "1.24" = "v1.13.0-eksbuild.1"
+  }
+}
+
+variable "kubeproxy_addon_version" {
+  default = {
+    "1.21" = "v1.21.2-eksbuild.2"
+    "1.22" = "v1.22.6-eksbuild.1"
+    "1.23" = "v1.23.7-eksbuild.1"
+    "1.24" = "v1.24.7-eksbuild.2"
+  }
+}
+
+variable "coredns_addon_version" {
+  default = {
+    "1.21" = "v1.8.4-eksbuild.1"
+    "1.22" = "v1.8.7-eksbuild.1"
+    "1.23" = "v1.8.7-eksbuild.2"
+    "1.24" = "v1.8.7-eksbuild.3"
+  }
+}
+
+variable "public_worker_ip" {
+  default = true
+}
+
+#
+# Helper to upgrade from 1.21 to 1.23
+#
+variable "k8s1_21to1_23_upgrade_step" {
+  default = 0
+}
+
+variable "monitoring" {
+  default = false
+}
+
+variable "grafana_saml_admin_role_values" {
+  type    = list(string)
+  default = []
+}
+
+variable "grafana_saml_role_assertion" {
+  default = ""
+}
+
+variable "grafana_saml_metadata_xml" {
+  default = ""
+}
+
+variable "use_human_grafana_domain" {
+  default = false
 }

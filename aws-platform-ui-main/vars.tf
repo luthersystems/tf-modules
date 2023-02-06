@@ -77,3 +77,7 @@ variable "grafana_saml_role_assertion" {
 variable "grafana_saml_metadata_xml" {
   default = ""
 }
+
+variable "k8s1_21to1_23_upgrade_step" {
+  default = 0
+}
