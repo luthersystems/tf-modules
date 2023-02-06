@@ -106,6 +106,15 @@ data "aws_iam_policy_document" "kms_ebs" {
       "kms:DescribeKey",
     ]
 
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values = [
+        "ec2.${var.aws_region}.amazonaws.com",
+        "s3.${var.aws_region}.amazonaws.com",
+      ]
+    }
+
     resources = [data.aws_kms_key.volumes.arn]
   }
 }
