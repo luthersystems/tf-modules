@@ -320,3 +320,33 @@ data "aws_iam_policy_document" "mon_prometheus" {
     resources = try([aws_prometheus_workspace.k8s[0].arn], [])
   }
 }
+
+provider "aws" {
+  alias = "us-east-1"
+}
+
+module "grafana_frontend_url" {
+  source         = "../luthername"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = "luther"
+  component      = "mon"
+  resource       = ""
+}
+
+module "grafana_frontend" {
+  count = var.monitoring ? 1 : 0
+
+  source            = "../aws-cf-reverse-proxy"
+  luther_env        = var.luther_env
+  luther_project    = var.luther_project
+  app_naked_domain  = var.domain
+  app_target_domain = "${module.grafana_frontend_url.name}.${var.domain}"
+  origin_url        = aws_grafana_workspace.grafana[0].endpoint
+
+  providers = {
+    aws           = aws
+    aws.us-east-1 = aws.us-east-1
+  }
+}
