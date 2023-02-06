@@ -326,9 +326,10 @@ module "grafana_frontend_url" {
   luther_project = var.luther_project
   aws_region     = var.aws_region
   luther_env     = var.luther_env
-  org_name       = "luther"
+  org_name       = ""
   component      = "mon"
   resource       = ""
+  id             = ""
 }
 
 locals {
