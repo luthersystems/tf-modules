@@ -3,7 +3,7 @@ variable "aws_account_id" {
 }
 
 variable "aws_region" {
-  type = string
+  default = "eu-west-2"
 }
 
 variable "aws_ssh_key_name" {

@@ -17,16 +17,16 @@ variable "component" {
 }
 
 variable "kubernetes_version" {
-  type = string
+  default = "1.23"
 }
 
 variable "worker_instance_type" {
   type    = string
-  default = "m5.large"
+  default = "m6i.large"
 }
 
 variable "domain" {
-  type = string
+  default = "luthersystemsapp.com"
 }
 
 variable "use_bastion" {
@@ -98,7 +98,7 @@ variable "common_external_s3_bucket_arn" {
 }
 
 variable "storage_s3_bucket_arn" {
-  type = string
+  default = ""
 }
 
 # To access all keys in the bucket pass the list ["*"]

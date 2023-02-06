@@ -361,16 +361,16 @@ data "aws_iam_policy_document" "s3_readonly" {
       "s3:ListBucket",
     ]
 
-    resources = [
+    resources = compact([
       var.storage_s3_bucket_arn,
       var.common_static_s3_bucket_arn,
       var.common_external_s3_bucket_arn,
-    ]
+    ])
   }
 }
 
 locals {
-  s3_prefixes = [for prefix in var.storage_s3_key_prefixes : format("%s/%s", var.storage_s3_bucket_arn, prefix)]
+  s3_prefixes = length(var.storage_s3_bucket_arn) > 0 ? [for prefix in var.storage_s3_key_prefixes : format("%s/%s", var.storage_s3_bucket_arn, prefix)] : []
 }
 
 resource "aws_iam_role_policy" "eks_worker_cloudwatch_logs" {
