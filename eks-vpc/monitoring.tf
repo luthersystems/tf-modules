@@ -329,7 +329,7 @@ module "grafana_frontend_url" {
   org_name       = ""
   component      = "mon"
   resource       = ""
-  id             = ""
+  id             = " "
 }
 
 locals {
