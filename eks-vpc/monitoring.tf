@@ -321,10 +321,6 @@ data "aws_iam_policy_document" "mon_prometheus" {
   }
 }
 
-provider "aws" {
-  alias = "us-east-1"
-}
-
 module "grafana_frontend_url" {
   source         = "../luthername"
   luther_project = var.luther_project
