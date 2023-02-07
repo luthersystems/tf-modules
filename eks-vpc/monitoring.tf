@@ -287,6 +287,8 @@ output "grafana_endpoint" {
 }
 
 module "prometheus_service_account_iam_role" {
+  count = local.monitoring ? 1 : 0
+
   source = "../eks-service-account-iam-role"
 
   luther_project = var.luther_project
@@ -299,7 +301,7 @@ module "prometheus_service_account_iam_role" {
   service_account    = "prometheus"
   k8s_namespace      = "prometheus"
   add_policy         = true
-  policy             = data.aws_iam_policy_document.mon_prometheus.json
+  policy             = data.aws_iam_policy_document.mon_prometheus[0].json
   id                 = random_string.prometheus.result
 
   providers = {
@@ -307,11 +309,17 @@ module "prometheus_service_account_iam_role" {
   }
 }
 
+locals {
+  prometheus_service_account_role_arn = try(module.prometheus_service_account_iam_role[0].arn, "")
+}
+
 output "prometheus_service_account_role_arn" {
-  value = module.prometheus_service_account_iam_role.arn
+  value = local.prometheus_service_account_role_arn
 }
 
 data "aws_iam_policy_document" "mon_prometheus" {
+  count = local.monitoring ? 1 : 0
+
   statement {
     sid = "ApsIngest"
 
