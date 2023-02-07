@@ -15,6 +15,7 @@ locals {
       disable_alb_node_role = false
       disable_cni_node_role = false
       disable_csi_node_role = false
+      monitoring            = false
     }
 
     "prep_1.22" = {
@@ -27,6 +28,7 @@ locals {
       disable_alb_node_role = false
       disable_cni_node_role = false
       disable_csi_node_role = false
+      monitoring            = false
     }
 
     "do_1.22" = {
@@ -39,6 +41,7 @@ locals {
       disable_alb_node_role = false
       disable_cni_node_role = false
       disable_csi_node_role = false
+      monitoring            = false
     }
 
     "prep_1.23" = {
@@ -51,6 +54,7 @@ locals {
       disable_alb_node_role = false
       disable_cni_node_role = false
       disable_csi_node_role = false
+      monitoring            = false
     }
 
     "do_1.23" = {
@@ -63,6 +67,7 @@ locals {
       disable_alb_node_role = false
       disable_cni_node_role = false
       disable_csi_node_role = false
+      monitoring            = false
     }
 
     "finish_1.23" = {
@@ -75,6 +80,7 @@ locals {
       disable_alb_node_role = true
       disable_cni_node_role = true
       disable_csi_node_role = true
+      monitoring            = true
     }
   }
 
@@ -94,6 +100,8 @@ locals {
   disable_alb_node_role = try(local.upgrade_overrides.disable_alb_node_role, var.disable_alb_node_role)
   disable_cni_node_role = try(local.upgrade_overrides.disable_cni_node_role, var.disable_cni_node_role)
   disable_csi_node_role = try(local.upgrade_overrides.disable_csi_node_role, var.disable_csi_node_role)
+
+  monitoring = try(local.upgrade_overrides.monitoring, var.monitoring)
 }
 
 output "upgrade_stage" {
