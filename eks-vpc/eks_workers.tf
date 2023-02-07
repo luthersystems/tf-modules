@@ -189,7 +189,7 @@ resource "aws_launch_template" "eks_worker" {
   name_prefix            = module.luthername_eks_worker_launch_template.name
   vpc_security_group_ids = local.managed_nodes ? [aws_security_group.eks_worker.id] : []
   user_data              = base64gzip(local.user_data)
-  key_name               = var.aws_ssh_key_name
+  key_name               = local.managed_nodes ? "" : var.aws_ssh_key_name # disable ssh keys on managed nodes
 
   dynamic "instance_market_options" {
     for_each = !local.managed_nodes && length(var.spot_price) > 0 ? [var.spot_price] : []
