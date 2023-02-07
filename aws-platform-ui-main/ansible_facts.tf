@@ -36,8 +36,8 @@ locals {
     externaldns_public_service_account_iam_role_arn  = module.eks_vpc.externaldns_facts.public_service_account_iam_role_arn
     externaldns_private_service_account_iam_role_arn = module.eks_vpc.externaldns_facts.private_service_account_iam_role_arn
 
-    prometheus_service_account_iam_role_arn = module.prometheus_service_account_iam_role.arn
-    prometheus_workspace_id                 = aws_prometheus_workspace.k8s.id
+    prometheus_service_account_iam_role_arn = module.eks_vpc.k8s_facts.prometheus_service_account_iam_role_arn
+    prometheus_workspace_id                 = module.eks_vpc.k8s_facts.prometheus_workspace_id
   }
 }
 

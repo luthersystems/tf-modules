@@ -31,7 +31,11 @@ module "eks_vpc" {
 
   public_api = true
 
-  k8s1_21to1_23_upgrade_step = var.k8s1_21to1_23_upgrade_step
+  monitoring                     = var.monitoring
+  use_human_grafana_domain       = var.use_human_grafana_domain
+  grafana_saml_admin_role_values = var.grafana_saml_admin_role_values
+  grafana_saml_role_assertion    = var.grafana_saml_role_assertion
+  grafana_saml_metadata_xml      = var.grafana_saml_metadata_xml
 
   providers = {
     aws           = aws
@@ -73,4 +77,8 @@ output "eks_node_sa_role_arn" {
 
 data "aws_iam_role" "admin" {
   name = "admin"
+}
+
+output "grafana_endpoint" {
+  value = module.eks_vpc.grafana_endpoint
 }
