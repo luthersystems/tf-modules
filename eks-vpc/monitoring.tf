@@ -16,14 +16,14 @@ resource "random_string" "prometheus" {
 }
 
 resource "aws_prometheus_workspace" "k8s" {
-  count = var.monitoring ? 1 : 0
+  count = local.monitoring ? 1 : 0
 
   alias = module.luthername_prometheus.name
   tags  = module.luthername_prometheus.tags
 }
 
 resource "aws_prometheus_rule_group_namespace" "alert_rules" {
-  count = var.monitoring ? 1 : 0
+  count = local.monitoring ? 1 : 0
 
   name         = "alert-rules"
   workspace_id = aws_prometheus_workspace.k8s[0].id
@@ -74,6 +74,7 @@ EOT
 }
 
 data "aws_iam_policy_document" "alerts_publish" {
+  count = local.monitoring ? 1 : 0
 
   statement {
     sid = "Allow_Publish_Alarms"
@@ -109,20 +110,20 @@ data "aws_iam_policy_document" "alerts_publish" {
 # TODO: slack alert lambda
 
 resource "aws_sns_topic" "alerts" {
-  count = var.monitoring ? 1 : 0
+  count = local.monitoring ? 1 : 0
 
   name = module.luthername_prometheus.name
 }
 
 resource "aws_sns_topic_policy" "alerts" {
-  count = var.monitoring ? 1 : 0
+  count = local.monitoring ? 1 : 0
 
   arn    = aws_sns_topic.alerts[0].arn
-  policy = data.aws_iam_policy_document.alerts_publish.json
+  policy = data.aws_iam_policy_document.alerts_publish[0].json
 }
 
 resource "aws_prometheus_alert_manager_definition" "alerts" {
-  count = var.monitoring ? 1 : 0
+  count = local.monitoring ? 1 : 0
 
   workspace_id = aws_prometheus_workspace.k8s[0].id
   definition   = <<EOT
@@ -206,7 +207,7 @@ module "luthername_grafana" {
 }
 
 resource "aws_grafana_workspace" "grafana" {
-  count = var.monitoring ? 1 : 0
+  count = local.monitoring ? 1 : 0
 
   name                     = module.luthername_grafana.name
   account_access_type      = "CURRENT_ACCOUNT"
@@ -236,12 +237,16 @@ data "aws_iam_policy_document" "grafana-assume" {
 }
 
 resource "aws_iam_role_policy" "grafana" {
+  count = local.monitoring ? 1 : 0
+
   name   = "${module.luthername_grafana.name}-ingest"
   role   = aws_iam_role.grafana.id
-  policy = data.aws_iam_policy_document.grafana.json
+  policy = data.aws_iam_policy_document.grafana[0].json
 }
 
 data "aws_iam_policy_document" "grafana" {
+  count = local.monitoring ? 1 : 0
+
   statement {
     sid = "GrafanaList"
 
@@ -268,7 +273,7 @@ data "aws_iam_policy_document" "grafana" {
 }
 
 resource "aws_grafana_workspace_saml_configuration" "grafana" {
-  count = var.monitoring && var.grafana_saml_metadata_xml != "" ? 1 : 0
+  count = local.monitoring && var.grafana_saml_metadata_xml != "" ? 1 : 0
 
   editor_role_values = ["editor"]
   idp_metadata_xml   = var.grafana_saml_metadata_xml
@@ -282,6 +287,8 @@ output "grafana_endpoint" {
 }
 
 module "prometheus_service_account_iam_role" {
+  count = local.monitoring ? 1 : 0
+
   source = "../eks-service-account-iam-role"
 
   luther_project = var.luther_project
@@ -294,7 +301,7 @@ module "prometheus_service_account_iam_role" {
   service_account    = "prometheus"
   k8s_namespace      = "prometheus"
   add_policy         = true
-  policy             = data.aws_iam_policy_document.mon_prometheus.json
+  policy             = data.aws_iam_policy_document.mon_prometheus[0].json
   id                 = random_string.prometheus.result
 
   providers = {
@@ -302,11 +309,17 @@ module "prometheus_service_account_iam_role" {
   }
 }
 
+locals {
+  prometheus_service_account_role_arn = try(module.prometheus_service_account_iam_role[0].arn, "")
+}
+
 output "prometheus_service_account_role_arn" {
-  value = module.prometheus_service_account_iam_role.arn
+  value = local.prometheus_service_account_role_arn
 }
 
 data "aws_iam_policy_document" "mon_prometheus" {
+  count = local.monitoring ? 1 : 0
+
   statement {
     sid = "ApsIngest"
 
@@ -336,7 +349,7 @@ locals {
 }
 
 module "grafana_frontend" {
-  count = var.monitoring && var.use_human_grafana_domain ? 1 : 0
+  count = local.monitoring && var.use_human_grafana_domain ? 1 : 0
 
   source            = "../aws-cf-reverse-proxy"
   luther_env        = var.luther_env
