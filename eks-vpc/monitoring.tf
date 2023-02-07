@@ -283,7 +283,7 @@ resource "aws_grafana_workspace_saml_configuration" "grafana" {
 }
 
 output "grafana_endpoint" {
-  value = try(aws_grafana_workspace.grafana[0].endpoint, null)
+  value = local.human_grafana_domain != "" ? local.human_grafana_domain : try(aws_grafana_workspace.grafana[0].endpoint, null)
 }
 
 module "prometheus_service_account_iam_role" {
@@ -345,11 +345,11 @@ module "grafana_frontend_url" {
 }
 
 locals {
-  human_grafana_domain = var.use_human_grafana_domain ? "${module.grafana_frontend_url.prefix}.${var.domain}" : ""
+  human_grafana_domain = local.monitoring && var.use_human_grafana_domain ? "${module.grafana_frontend_url.prefix}.${var.domain}" : ""
 }
 
 module "grafana_frontend" {
-  count = local.monitoring && var.use_human_grafana_domain ? 1 : 0
+  count = local.human_grafana_domain != "" ? 1 : 0
 
   source            = "../aws-cf-reverse-proxy"
   luther_env        = var.luther_env

@@ -78,6 +78,10 @@ variable "grafana_saml_metadata_xml" {
   default = ""
 }
 
-variable "k8s1_21to1_23_upgrade_step" {
-  default = 0
+variable "use_human_grafana_domain" {
+  default = false
+}
+
+variable "monitoring" {
+  default = true
 }
