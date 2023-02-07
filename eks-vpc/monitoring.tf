@@ -237,12 +237,16 @@ data "aws_iam_policy_document" "grafana-assume" {
 }
 
 resource "aws_iam_role_policy" "grafana" {
+  count = local.monitoring ? 1 : 0
+
   name   = "${module.luthername_grafana.name}-ingest"
   role   = aws_iam_role.grafana.id
-  policy = data.aws_iam_policy_document.grafana.json
+  policy = data.aws_iam_policy_document.grafana[0].json
 }
 
 data "aws_iam_policy_document" "grafana" {
+  count = local.monitoring ? 1 : 0
+
   statement {
     sid = "GrafanaList"
 
