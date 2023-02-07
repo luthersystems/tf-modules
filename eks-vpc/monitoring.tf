@@ -74,6 +74,7 @@ EOT
 }
 
 data "aws_iam_policy_document" "alerts_publish" {
+  count = local.monitoring ? 1 : 0
 
   statement {
     sid = "Allow_Publish_Alarms"
@@ -118,7 +119,7 @@ resource "aws_sns_topic_policy" "alerts" {
   count = local.monitoring ? 1 : 0
 
   arn    = aws_sns_topic.alerts[0].arn
-  policy = data.aws_iam_policy_document.alerts_publish.json
+  policy = data.aws_iam_policy_document.alerts_publish[0].json
 }
 
 resource "aws_prometheus_alert_manager_definition" "alerts" {
