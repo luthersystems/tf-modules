@@ -90,7 +90,7 @@ module "luthername_eks_worker_launch_template" {
   org_name       = var.org_name
   component      = var.component
   # avoid destroying all nodes:
-  #resource       = aws_eks_cluster.app.version
+  resource       = "k8s"
 
   # This id is a hack because ASG uses it as a prefix
   id = "worker-"
