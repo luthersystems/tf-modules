@@ -25,7 +25,7 @@ locals {
       kubeproxy_addon       = true
       cni_addon             = true
       coredns_addon         = true
-      preserve_coredns      = true
+      preserve_coredns      = false
       csi_addon             = false
       disable_alb_node_role = false
       disable_cni_node_role = false
