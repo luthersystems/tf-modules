@@ -85,3 +85,7 @@ variable "use_human_grafana_domain" {
 variable "monitoring" {
   default = true
 }
+
+variable "preserve_coredns" {
+  default = false
+}
