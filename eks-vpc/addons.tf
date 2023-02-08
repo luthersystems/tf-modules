@@ -160,7 +160,7 @@ resource "aws_eks_addon" "coredns" {
   cluster_name      = aws_eks_cluster.app.name
   addon_name        = "coredns"
   addon_version     = var.coredns_addon_version[local.kubernetes_version]
-  resolve_conflicts = "OVERWRITE"
+  resolve_conflicts = local.preserve_coredns ? "PRESERVE" : "OVERWRITE"
 
   depends_on = [time_sleep.k8s_ready_wait]
 }

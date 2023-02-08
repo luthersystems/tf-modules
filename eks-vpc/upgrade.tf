@@ -12,6 +12,7 @@ locals {
       cni_addon             = false
       coredns_addon         = false
       csi_addon             = false
+      preserve_coredns      = false
       disable_alb_node_role = false
       disable_cni_node_role = false
       disable_csi_node_role = false
@@ -24,6 +25,7 @@ locals {
       kubeproxy_addon       = true
       cni_addon             = true
       coredns_addon         = true
+      preserve_coredns      = true
       csi_addon             = false
       disable_alb_node_role = false
       disable_cni_node_role = false
@@ -37,6 +39,7 @@ locals {
       kubeproxy_addon       = true
       cni_addon             = true
       coredns_addon         = true
+      preserve_coredns      = true
       csi_addon             = false
       disable_alb_node_role = false
       disable_cni_node_role = false
@@ -50,6 +53,7 @@ locals {
       kubeproxy_addon       = true
       cni_addon             = true
       coredns_addon         = true
+      preserve_coredns      = true
       csi_addon             = true
       disable_alb_node_role = false
       disable_cni_node_role = false
@@ -63,6 +67,7 @@ locals {
       kubeproxy_addon       = true
       cni_addon             = true
       coredns_addon         = true
+      preserve_coredns      = true
       csi_addon             = true
       disable_alb_node_role = false
       disable_cni_node_role = false
@@ -76,6 +81,7 @@ locals {
       kubeproxy_addon       = true
       cni_addon             = true
       coredns_addon         = true
+      preserve_coredns      = true
       csi_addon             = true
       disable_alb_node_role = true
       disable_cni_node_role = true
@@ -100,6 +106,8 @@ locals {
   disable_alb_node_role = try(local.upgrade_overrides.disable_alb_node_role, var.disable_alb_node_role)
   disable_cni_node_role = try(local.upgrade_overrides.disable_cni_node_role, var.disable_cni_node_role)
   disable_csi_node_role = try(local.upgrade_overrides.disable_csi_node_role, var.disable_csi_node_role)
+
+  preserve_coredns = try(local.upgrade_overrides.preserve_coredns, var.preserve_coredns)
 
   monitoring = try(local.upgrade_overrides.monitoring, var.monitoring)
 }
