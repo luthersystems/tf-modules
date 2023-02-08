@@ -39,7 +39,7 @@ module "eks_vpc" {
 
   providers = {
     aws           = aws
-    aws.us-east-1 = aws
+    aws.us-east-1 = aws.us-east-1
     null          = null
     local         = local
     external      = external
