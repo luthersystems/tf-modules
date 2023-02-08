@@ -89,7 +89,8 @@ module "luthername_eks_worker_launch_template" {
   luther_env     = var.luther_env
   org_name       = var.org_name
   component      = var.component
-  resource       = aws_eks_cluster.app.version
+  # avoid destroying all nodes:
+  #resource       = aws_eks_cluster.app.version
 
   # This id is a hack because ASG uses it as a prefix
   id = "worker-"
