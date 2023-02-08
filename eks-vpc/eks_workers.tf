@@ -208,7 +208,7 @@ resource "aws_launch_template" "eks_worker" {
     create_before_destroy = true
     ignore_changes = [
       key_name,
-      image_id,
+      #image_id,
     ]
   }
 
