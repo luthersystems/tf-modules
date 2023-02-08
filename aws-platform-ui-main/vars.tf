@@ -11,7 +11,7 @@ variable "kubernetes_version" {
 }
 
 variable "env_static_s3_bucket" {
-  type = string
+  default = ""
 }
 
 variable "storage_kms_key_arn" {
