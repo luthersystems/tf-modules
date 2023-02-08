@@ -25,7 +25,7 @@ module "eks_vpc" {
 
   autoscaling_desired = var.eks_worker_count
 
-  storage_s3_bucket_arn = data.aws_s3_bucket.env_static.arn
+  storage_s3_bucket_arn = local.storage_s3_bucket_arn
 
   spot_price = var.eks_worker_spot_price
 
