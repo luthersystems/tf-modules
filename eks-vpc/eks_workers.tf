@@ -90,7 +90,7 @@ module "luthername_eks_worker_launch_template" {
   org_name       = var.org_name
   component      = var.component
   # avoid destroying all nodes:
-  resource       = "k8s"
+  resource = "k8s"
 
   # This id is a hack because ASG uses it as a prefix
   id = "worker-"

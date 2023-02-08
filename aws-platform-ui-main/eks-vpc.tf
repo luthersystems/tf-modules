@@ -37,6 +37,8 @@ module "eks_vpc" {
   grafana_saml_role_assertion    = var.grafana_saml_role_assertion
   grafana_saml_metadata_xml      = var.grafana_saml_metadata_xml
 
+  preserve_coredns = var.preserve_coredns
+
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1
