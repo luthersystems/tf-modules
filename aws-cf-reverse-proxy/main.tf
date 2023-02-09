@@ -65,6 +65,10 @@ resource "aws_cloudfront_function" "this" {
   })
 }
 
+locals {
+  origin_domain = replace(var.origin_url,"/(https?://)|(/)/","")
+}
+
 resource "aws_cloudfront_distribution" "site" {
   enabled      = true
   price_class  = "PriceClass_200"
@@ -72,7 +76,7 @@ resource "aws_cloudfront_distribution" "site" {
 
   origin {
     origin_id   = "origin-site"
-    domain_name = var.origin_url
+    domain_name = local.origin_domain
 
     custom_origin_config {
       origin_protocol_policy = "https-only"

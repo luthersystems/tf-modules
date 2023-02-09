@@ -346,7 +346,7 @@ module "grafana_frontend_url" {
 
 locals {
   human_grafana_domain = local.monitoring && var.use_human_grafana_domain ? "${module.grafana_frontend_url.prefix}.${var.domain}" : ""
-  grafana_url = try(aws_grafana_workspace.grafana[0].endpoint, "")
+  grafana_url = try("https://${aws_grafana_workspace.grafana[0].endpoint}", "")
 }
 
 module "grafana_frontend" {
