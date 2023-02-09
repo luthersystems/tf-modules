@@ -84,3 +84,15 @@ data "aws_iam_role" "admin" {
 output "grafana_endpoint" {
   value = module.eks_vpc.grafana_endpoint
 }
+
+output "grafana_saml_acs_url" {
+  value = module.eks_vpc.grafana_saml_acs_url
+}
+
+output "grafana_saml_entity_id" {
+  value = module.eks_vpc.grafana_saml_entity_id
+}
+
+output "grafana_saml_start_url" {
+  value = module.eks_vpc.grafana_saml_start_url
+}

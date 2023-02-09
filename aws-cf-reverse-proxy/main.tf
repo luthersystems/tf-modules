@@ -52,6 +52,23 @@ resource "aws_route53_record" "site" {
   records = [aws_cloudfront_distribution.site.domain_name]
 }
 
+resource "aws_cloudfront_function" "this" {
+  count = var.use_302 ? 1 : 0
+
+  name    = module.luthername_site.name
+  runtime = "cloudfront-js-1.0"
+  comment = "Static 302 redirect from ${var.app_target_domain} to ${var.origin_url}"
+  publish = true
+  code = templatefile("${path.module}/src/index.js.tpl", {
+    REDIRECT_URL       = var.origin_url,
+    REDIRECT_HTTP_CODE = 302,
+  })
+}
+
+locals {
+  origin_domain = replace(var.origin_url,"/(https?://)|(/)/","")
+}
+
 resource "aws_cloudfront_distribution" "site" {
   enabled      = true
   price_class  = "PriceClass_200"
@@ -59,7 +76,7 @@ resource "aws_cloudfront_distribution" "site" {
 
   origin {
     origin_id   = "origin-site"
-    domain_name = var.origin_url
+    domain_name = local.origin_domain
 
     custom_origin_config {
       origin_protocol_policy = "https-only"
@@ -102,6 +119,15 @@ resource "aws_cloudfront_distribution" "site" {
 
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
+
+    dynamic "function_association" {
+      for_each = var.use_302 ? [var.use_302] : []
+
+      content {
+        event_type   = "viewer-request"
+        function_arn = aws_cloudfront_function.this[0].arn
+      }
+    }
   }
 
   restrictions {

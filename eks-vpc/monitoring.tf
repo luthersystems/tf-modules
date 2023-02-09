@@ -346,6 +346,7 @@ module "grafana_frontend_url" {
 
 locals {
   human_grafana_domain = local.monitoring && var.use_human_grafana_domain ? "${module.grafana_frontend_url.prefix}.${var.domain}" : ""
+  grafana_url = try("https://${aws_grafana_workspace.grafana[0].endpoint}", "")
 }
 
 module "grafana_frontend" {
@@ -356,7 +357,8 @@ module "grafana_frontend" {
   luther_project    = var.luther_project
   app_naked_domain  = var.domain
   app_target_domain = local.human_grafana_domain
-  origin_url        = aws_grafana_workspace.grafana[0].endpoint
+  origin_url        = local.grafana_url
+  use_302           = true
 
   providers = {
     aws           = aws
@@ -366,4 +368,16 @@ module "grafana_frontend" {
 
 output "human_grafana_domain" {
   value = local.human_grafana_domain
+}
+
+output "grafana_saml_acs_url" {
+  value = "${local.grafana_url}/saml/acs"
+}
+
+output "grafana_saml_entity_id" {
+  value = "${local.grafana_url}/saml/metadata"
+}
+
+output "grafana_saml_start_url" {
+  value = "${local.grafana_url}/login/saml"
 }

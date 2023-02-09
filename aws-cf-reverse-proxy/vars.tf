@@ -26,3 +26,7 @@ variable "duplicate_content_penalty_secret" {
 variable "origin_url" {
   type = string
 }
+
+variable "use_302" {
+  default = false
+}
