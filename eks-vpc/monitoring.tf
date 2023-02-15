@@ -107,7 +107,53 @@ data "aws_iam_policy_document" "alerts_publish" {
   }
 }
 
-# TODO: slack alert lambda
+module "luthername_slack_alerts_web_hook_url_secret" {
+  source         = "../luthername"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = "luther"
+  component      = "mon"
+  resource       = "slack-url-secret"
+}
+
+locals {
+  slack_secret_kms_arn = var.volumes_aws_kms_key_id # TODO: unique kms key?
+}
+
+resource "aws_secretsmanager_secret" "slack_alerts_web_hook_url" {
+  count = local.monitoring ? 1 : 0
+
+  name       = module.luthername_slack_alerts_web_hook_url_secret.name
+  kms_key_id = local.slack_secret_kms_arn
+
+  tags = module.luthername_slack_alerts_web_hook_url_secret.tags
+}
+
+resource "aws_secretsmanager_secret_version" "slack_alerts_web_hook_url_secret" {
+  count = local.monitoring && var.slack_alerts_web_hook_url_secret != "" ? 1 : 0
+
+  secret_id     = aws_secretsmanager_secret.slack_alerts_web_hook_url[0].id
+  secret_string = var.slack_alerts_web_hook_url_secret
+
+  lifecycle {
+    ignore_changes = [secret_string]
+  }
+}
+
+module "slack_sns_alert_lambda" {
+  count = local.monitoring ? 1 : 0
+
+  source = "../aws-lambda-sns-slack-alerts"
+
+  aws_region              = var.aws_region
+  luther_project          = var.luther_project
+  luther_env              = var.luther_env
+  org_name                = "luther"
+  web_hook_url_secret_arn = aws_secretsmanager_secret.slack_alerts_web_hook_url[0].arn
+  secret_kms_key_id       = local.slack_secret_kms_arn
+  sns_topic_arn           = aws_sns_topic.alerts[0].arn
+}
 
 resource "aws_sns_topic" "alerts" {
   count = local.monitoring ? 1 : 0

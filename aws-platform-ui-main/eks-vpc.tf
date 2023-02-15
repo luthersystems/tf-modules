@@ -39,6 +39,8 @@ module "eks_vpc" {
 
   preserve_coredns = var.preserve_coredns
 
+  slack_alerts_web_hook_url_secret = var.slack_alerts_web_hook_url_secret
+
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1
