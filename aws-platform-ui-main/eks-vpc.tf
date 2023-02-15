@@ -81,8 +81,21 @@ data "aws_iam_role" "admin" {
   name = "admin"
 }
 
-output "grafana_endpoint" {
-  value = module.eks_vpc.grafana_endpoint
+output "grafana_api_key" {
+  value     = module.eks_vpc.grafana_api_key
+  sensitive = true
+}
+
+output "prometheus_endpoint" {
+  value = module.eks_vpc.prometheus_endpoint
+}
+
+output "grafana_endpoint_url" {
+  value = module.eks_vpc.grafana_endpoint_url
+}
+
+output "grafana_human_url" {
+  value = module.eks_vpc.grafana_human_url
 }
 
 output "grafana_saml_acs_url" {
