@@ -189,6 +189,10 @@ output "prometheus_workspace_id" {
   value = try(aws_prometheus_workspace.k8s[0].id, null)
 }
 
+output "prometheus_endpoint" {
+  value = try(aws_prometheus_workspace.k8s[0].prometheus_endpoint, null)
+}
+
 resource "random_string" "grafana" {
   length  = 4
   upper   = false
@@ -283,7 +287,24 @@ resource "aws_grafana_workspace_saml_configuration" "grafana" {
 }
 
 output "grafana_endpoint" {
-  value = local.human_grafana_domain != "" ? local.human_grafana_domain : try(aws_grafana_workspace.grafana[0].endpoint, null)
+  value = try(aws_grafana_workspace.grafana[0].endpoint, "")
+}
+
+resource "time_static" "api_key_create_date" {}
+
+resource "aws_grafana_workspace_api_key" "grafana" {
+  count = local.monitoring ? 1 : 0
+
+  # this works most of the time, but could fail in a month with 31 days
+  key_name        = format("tf-%s", formatdate("YYYY-MM", time_static.api_key_create_date.rfc3339))
+  key_role        = "ADMIN"
+  seconds_to_live = 60 * 60 * 24 * 30 # max is 30 days
+  workspace_id    = aws_grafana_workspace.grafana[0].id
+}
+
+output "grafana_api_key" {
+  value     = try(aws_grafana_workspace_api_key.grafana[0].key, null)
+  sensitive = true
 }
 
 module "prometheus_service_account_iam_role" {
@@ -345,19 +366,20 @@ module "grafana_frontend_url" {
 }
 
 locals {
-  human_grafana_domain = local.monitoring && var.use_human_grafana_domain ? "${module.grafana_frontend_url.prefix}.${var.domain}" : ""
-  grafana_url = try("https://${aws_grafana_workspace.grafana[0].endpoint}", "")
+  grafana_endpoint     = try(aws_grafana_workspace.grafana[0].endpoint, null)
+  grafana_human_domain = local.monitoring && var.use_human_grafana_domain ? "${module.grafana_frontend_url.prefix}.${var.domain}" : null
+  grafana_endpoint_url = try(format("https://%s", local.grafana_endpoint), "")
 }
 
 module "grafana_frontend" {
-  count = local.human_grafana_domain != "" ? 1 : 0
+  count = local.grafana_human_domain != "" ? 1 : 0
 
   source            = "../aws-cf-reverse-proxy"
   luther_env        = var.luther_env
   luther_project    = var.luther_project
   app_naked_domain  = var.domain
-  app_target_domain = local.human_grafana_domain
-  origin_url        = local.grafana_url
+  app_target_domain = local.grafana_human_domain
+  origin_url        = local.grafana_endpoint_url
   use_302           = true
 
   providers = {
@@ -366,18 +388,22 @@ module "grafana_frontend" {
   }
 }
 
-output "human_grafana_domain" {
-  value = local.human_grafana_domain
+output "grafana_endpoint_url" {
+  value = local.grafana_endpoint_url
+}
+
+output "grafana_human_url" {
+  value = try(format("https://%s", local.grafana_human_domain), "")
 }
 
 output "grafana_saml_acs_url" {
-  value = "${local.grafana_url}/saml/acs"
+  value = try(format("%s/saml/acs", local.grafana_endpoint_url), "")
 }
 
 output "grafana_saml_entity_id" {
-  value = "${local.grafana_url}/saml/metadata"
+  value = try(format("%s/saml/metadata", local.grafana_endpoint_url), "")
 }
 
 output "grafana_saml_start_url" {
-  value = "${local.grafana_url}/login/saml"
+  value = try(format("%s/login/saml", local.grafana_endpoint_url), "")
 }
