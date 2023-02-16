@@ -453,3 +453,7 @@ output "grafana_saml_entity_id" {
 output "grafana_saml_start_url" {
   value = try(format("%s/login/saml", local.grafana_endpoint_url), "")
 }
+
+output "grafana_workspace_id" {
+  value = try(aws_grafana_workspace.grafana[0].id, "")
+}
