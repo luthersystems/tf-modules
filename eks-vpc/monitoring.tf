@@ -227,8 +227,8 @@ alertmanager_config: |
       - topic_arn: ${aws_sns_topic.alerts[0].arn}
         sigv4:
           region: ${var.aws_region}
-        message: '{% raw %}{{ template "slack.luther.text" . }}{% endraw %}'
-        subject: '{% raw %}{{ template "slack.luther.title" . }}{% endraw %}'
+        message: '{{ template "slack.luther.text" . }}'
+        subject: '{{ template "slack.luther.title" . }}'
         attributes:
           key: severity
           value: SEV2
