@@ -118,7 +118,7 @@ module "luthername_slack_alerts_web_hook_url_secret" {
 }
 
 locals {
-  slack_secret_kms_arn = var.volumes_aws_kms_key_id # TODO: unique kms key?
+  slack_secret_kms_arn = var.volumes_aws_kms_key_id
 }
 
 resource "aws_secretsmanager_secret" "slack_alerts_web_hook_url" {
