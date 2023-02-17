@@ -241,3 +241,7 @@ variable "preserve_coredns" {
 variable "slack_alerts_web_hook_url_secret" {
   default = ""
 }
+
+variable "alert_rules" {
+  default = ""
+}

@@ -22,12 +22,8 @@ resource "aws_prometheus_workspace" "k8s" {
   tags  = module.luthername_prometheus.tags
 }
 
-resource "aws_prometheus_rule_group_namespace" "alert_rules" {
-  count = local.monitoring ? 1 : 0
-
-  name         = "alert-rules"
-  workspace_id = aws_prometheus_workspace.k8s[0].id
-  data         = <<EOT
+locals {
+  default_alert_rules = <<EOT
 groups:
   - name: service
     rules:
@@ -71,6 +67,14 @@ groups:
       annotations:
         summary: "Service(s) could not be scraped"
 EOT
+}
+
+resource "aws_prometheus_rule_group_namespace" "alert_rules" {
+  count = local.monitoring ? 1 : 0
+
+  name         = "alert-rules"
+  workspace_id = aws_prometheus_workspace.k8s[0].id
+  data         = var.alert_rules != "" ? var.alert_rules : local.default_alert_rules
 }
 
 data "aws_iam_policy_document" "alerts_publish" {
