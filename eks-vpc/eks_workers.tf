@@ -1,13 +1,3 @@
-data "aws_ami" "eks_worker" {
-  filter {
-    name   = "name"
-    values = ["amazon-eks-node-${aws_eks_cluster.app.version}-v*"]
-  }
-
-  most_recent = true
-  owners      = ["602401143452"] # Amazon EKS AMI Account ID
-}
-
 # This data source is included for ease of sample architecture deployment
 # and can be swapped out as necessary.
 data "aws_region" "current" {
@@ -185,7 +175,7 @@ resource "aws_launch_template" "eks_worker" {
     }
   }
 
-  image_id               = data.aws_ami.eks_worker.id
+  image_id               = local.image_id
   instance_type          = var.worker_instance_type
   name_prefix            = module.luthername_eks_worker_launch_template.name
   vpc_security_group_ids = local.managed_nodes ? [aws_security_group.eks_worker.id] : []
