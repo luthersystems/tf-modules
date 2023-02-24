@@ -22,12 +22,8 @@ resource "aws_prometheus_workspace" "k8s" {
   tags  = module.luthername_prometheus.tags
 }
 
-resource "aws_prometheus_rule_group_namespace" "alert_rules" {
-  count = local.monitoring ? 1 : 0
-
-  name         = "alert-rules"
-  workspace_id = aws_prometheus_workspace.k8s[0].id
-  data         = <<EOT
+locals {
+  default_alert_rules = <<EOT
 groups:
   - name: service
     rules:
@@ -73,6 +69,14 @@ groups:
 EOT
 }
 
+resource "aws_prometheus_rule_group_namespace" "alert_rules" {
+  count = local.monitoring ? 1 : 0
+
+  name         = "alert-rules"
+  workspace_id = aws_prometheus_workspace.k8s[0].id
+  data         = var.alert_rules != "" ? var.alert_rules : local.default_alert_rules
+}
+
 data "aws_iam_policy_document" "alerts_publish" {
   count = local.monitoring ? 1 : 0
 
@@ -107,7 +111,53 @@ data "aws_iam_policy_document" "alerts_publish" {
   }
 }
 
-# TODO: slack alert lambda
+module "luthername_slack_alerts_web_hook_url_secret" {
+  source         = "../luthername"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = "luther"
+  component      = "mon"
+  resource       = "slack-url-secret"
+}
+
+locals {
+  slack_secret_kms_arn = var.volumes_aws_kms_key_id
+}
+
+resource "aws_secretsmanager_secret" "slack_alerts_web_hook_url" {
+  count = local.monitoring ? 1 : 0
+
+  name       = module.luthername_slack_alerts_web_hook_url_secret.name
+  kms_key_id = local.slack_secret_kms_arn
+
+  tags = module.luthername_slack_alerts_web_hook_url_secret.tags
+}
+
+resource "aws_secretsmanager_secret_version" "slack_alerts_web_hook_url_secret" {
+  count = local.monitoring && var.slack_alerts_web_hook_url_secret != "" ? 1 : 0
+
+  secret_id     = aws_secretsmanager_secret.slack_alerts_web_hook_url[0].id
+  secret_string = var.slack_alerts_web_hook_url_secret
+
+  lifecycle {
+    ignore_changes = [secret_string]
+  }
+}
+
+module "slack_sns_alert_lambda" {
+  count = local.monitoring ? 1 : 0
+
+  source = "../aws-lambda-sns-slack-alerts"
+
+  aws_region              = var.aws_region
+  luther_project          = var.luther_project
+  luther_env              = var.luther_env
+  org_name                = "luther"
+  web_hook_url_secret_arn = aws_secretsmanager_secret.slack_alerts_web_hook_url[0].arn
+  secret_kms_key_id       = local.slack_secret_kms_arn
+  sns_topic_arn           = aws_sns_topic.alerts[0].arn
+}
 
 resource "aws_sns_topic" "alerts" {
   count = local.monitoring ? 1 : 0
@@ -177,8 +227,8 @@ alertmanager_config: |
       - topic_arn: ${aws_sns_topic.alerts[0].arn}
         sigv4:
           region: ${var.aws_region}
-        message: '{% raw %}{{ template "slack.luther.text" . }}{% endraw %}'
-        subject: '{% raw %}{{ template "slack.luther.title" . }}{% endraw %}'
+        message: '{{ template "slack.luther.text" . }}'
+        subject: '{{ template "slack.luther.title" . }}'
         attributes:
           key: severity
           value: SEV2
@@ -406,4 +456,8 @@ output "grafana_saml_entity_id" {
 
 output "grafana_saml_start_url" {
   value = try(format("%s/login/saml", local.grafana_endpoint_url), "")
+}
+
+output "grafana_workspace_id" {
+  value = try(aws_grafana_workspace.grafana[0].id, "")
 }

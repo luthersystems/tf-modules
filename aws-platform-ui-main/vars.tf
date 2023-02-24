@@ -89,3 +89,7 @@ variable "monitoring" {
 variable "preserve_coredns" {
   default = false
 }
+
+variable "slack_alerts_web_hook_url_secret" {
+  default = ""
+}

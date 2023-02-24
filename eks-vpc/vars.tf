@@ -237,3 +237,11 @@ variable "use_human_grafana_domain" {
 variable "preserve_coredns" {
   default = false
 }
+
+variable "slack_alerts_web_hook_url_secret" {
+  default = ""
+}
+
+variable "alert_rules" {
+  default = ""
+}
