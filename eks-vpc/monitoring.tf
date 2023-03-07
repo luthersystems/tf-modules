@@ -422,7 +422,7 @@ locals {
 }
 
 module "grafana_frontend" {
-  count = local.grafana_human_domain != "" ? 1 : 0
+  count = local.grafana_human_domain != null ? 1 : 0
 
   source            = "../aws-cf-reverse-proxy"
   luther_env        = var.luther_env

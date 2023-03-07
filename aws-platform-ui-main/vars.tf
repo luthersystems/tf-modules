@@ -10,7 +10,7 @@ variable "kubernetes_version" {
   type = string
 }
 
-variable "env_static_s3_bucket" {
+variable "env_static_s3_bucket_arn" {
   default = ""
 }
 

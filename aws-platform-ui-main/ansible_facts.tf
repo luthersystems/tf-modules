@@ -3,7 +3,7 @@ locals {
     docker_log_driver   = "awslogs"
     docker_log_options  = module.eks_vpc.docker_log_opts
     region              = local.region
-    env_static_bucket   = local.storage_s3_bucket_arn
+    env_static_bucket   = trimprefix(var.env_static_s3_bucket_arn, "arn:aws:s3:::")
     acm_certificate_arn = aws_acm_certificate.cert.arn
   }
 
