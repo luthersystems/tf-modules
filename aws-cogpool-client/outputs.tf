@@ -7,17 +7,17 @@ output "oauth_client_secret" {
 }
 
 output "oauth_jwt_issuer" {
-  value = data.template_file.user_pool_issuer_url.rendered
+  value = local.user_pool_issuer_url
 }
 
 output "user_pool_webkey_url" {
-  value = data.template_file.user_pool_webkey_url.rendered
+  value = local.user_pool_webkey_url
 }
 
 output "user_pool_login_url" {
-  value = data.template_file.user_pool_login_url.rendered
+  value = local.user_pool_login_url
 }
 
 output "user_pool_token_url" {
-  value = data.template_file.user_pool_token_url.rendered
+  value = local.user_pool_token_url
 }

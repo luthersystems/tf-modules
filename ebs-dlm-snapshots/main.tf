@@ -28,6 +28,20 @@ resource "aws_dlm_lifecycle_policy" "policy" {
         SnapshotCreator = "DLM"
       }
 
+      dynamic "cross_region_copy_rule" {
+        for_each = var.cross_region_settings
+        content {
+          target    = cross_region_copy_rule.value.region
+          cmk_arn   = cross_region_copy_rule.value.cmk_arn
+          copy_tags = true
+          encrypted = true
+          retain_rule {
+            interval      = cross_region_copy_rule.value.interval
+            interval_unit = cross_region_copy_rule.value.interval_unit
+          }
+        }
+      }
+
       copy_tags = true
     }
 

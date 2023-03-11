@@ -21,3 +21,12 @@ variable "role_arn" {
 variable "description" {
   type = string
 }
+
+variable "cross_region_settings" {
+  type = map(object({
+    region        = string
+    cmk_arn       = string
+    interval      = number
+    interval_unit = string
+  }))
+}
