@@ -23,10 +23,11 @@ variable "description" {
 }
 
 variable "cross_region_settings" {
-  type = map(object({
+  type = list(object({
     region        = string
     cmk_arn       = string
     interval      = number
     interval_unit = string
   }))
+  default = []
 }
