@@ -4,7 +4,7 @@ locals {
 }
 
 resource "aws_iam_policy" "kms_ebs_dr_snapshots" {
-  for_each = var.cross_region_settings
+  for_each = { for s in var.cross_region_settings : s.target => s.cmk_arn if s.cmk_arn != null }
 
   name        = "DestinationKmsEBSSnapshotsPolicy"
   description = "KMS permissions for the destination key in cross-region EBS snapshot replication"
@@ -20,7 +20,7 @@ resource "aws_iam_policy" "kms_ebs_dr_snapshots" {
           "kms:ReEncryptFrom"
         ]
         Effect   = "Allow"
-        Resource = each.value.cmk_arn
+        Resource = each.value
       }
     ]
   })
