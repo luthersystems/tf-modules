@@ -1,6 +1,7 @@
 locals {
   default_role_arn   = "arn:aws:iam::967058059066:role/dlm-lifecycle"
   execution_role_arn = var.role_arn == "" ? local.default_role_arn : var.role_arn
+  execution_role     = split("/", local.execution_role_arn)[1]
 }
 
 resource "aws_iam_policy" "kms_ebs_dr_snapshots" {
@@ -30,7 +31,7 @@ resource "aws_iam_role_policy_attachment" "kms_ebs_dr_snapshots_attach" {
   for_each = aws_iam_policy.kms_ebs_dr_snapshots
 
   policy_arn = each.value.arn
-  role       = local.execution_role_arn
+  role       = local.execution_role
 }
 
 resource "aws_dlm_lifecycle_policy" "policy" {
