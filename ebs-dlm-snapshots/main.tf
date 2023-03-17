@@ -4,7 +4,7 @@ locals {
 }
 
 resource "aws_iam_policy" "kms_ebs_dr_snapshots" {
-  for_each = { for s in var.cross_region_settings : s.target => s.cmk_arn if s.cmk_arn != null }
+  for_each = { for s in var.cross_region_settings : s.region => s.cmk_arn if s.cmk_arn != null }
 
   name        = "DestinationKmsEBSSnapshotsPolicy"
   description = "KMS permissions for the destination key in cross-region EBS snapshot replication"
