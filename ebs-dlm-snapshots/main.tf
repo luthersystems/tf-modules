@@ -62,13 +62,13 @@ data "aws_ebs_volumes" "target_volumes" {
 }
 
 data "aws_ebs_volume" "target_volume" {
-  for_each = data.aws_ebs_volumes.target_volumes.ids
+  for_each = toset(data.aws_ebs_volumes.target_volumes.ids)
 
   most_recent = true
 
   filter {
     name   = "volume-id"
-    values = each.value
+    values = [each.value]
   }
 }
 
