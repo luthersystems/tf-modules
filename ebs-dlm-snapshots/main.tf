@@ -3,7 +3,7 @@ locals {
   execution_role_arn = var.role_arn == "" ? local.default_role_arn : var.role_arn
   execution_role     = split("/", local.execution_role_arn)[1]
 
-  source_ebs_kms_arns = data.aws_ebs_volume.target_volume.*.kms_key_id
+  source_ebs_kms_arns = [for v in data.aws_ebs_volume.target_volume : v.kms_key_id]
 }
 
 
@@ -25,7 +25,7 @@ data "aws_iam_policy_document" "kms_ebs_dr_snapshots" {
       values = [true]
     }
 
-    resources = compact(concat(each.value, local.source_ebs_kms_arns))
+    resources = compact(concat([each.value], local.source_ebs_kms_arns))
   }
 
   statement {
@@ -37,7 +37,7 @@ data "aws_iam_policy_document" "kms_ebs_dr_snapshots" {
       "kms:DescribeKey",
     ]
 
-    resources = compact(concat(each.value, local.source_ebs_kms_arns))
+    resources = compact(concat([each.value], local.source_ebs_kms_arns))
   }
 }
 
