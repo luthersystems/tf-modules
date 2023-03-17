@@ -3,6 +3,36 @@ locals {
   execution_role_arn = var.role_arn == "" ? local.default_role_arn : var.role_arn
 }
 
+resource "aws_iam_policy" "kms_ebs_dr_snapshots" {
+  for_each = var.cross_region_settings
+
+  name        = "DestinationKmsEBSSnapshotsPolicy"
+  description = "KMS permissions for the destination key in cross-region EBS snapshot replication"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "kms:CreateGrant",
+          "kms:Encrypt",
+          "kms:DescribeKey",
+          "kms:ReEncryptFrom"
+        ]
+        Effect   = "Allow"
+        Resource = each.value.cmk_arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "kms_ebs_dr_snapshots_attach" {
+  for_each = aws_iam_policy.kms_ebs_dr_snapshots
+
+  policy_arn = each.value.arn
+  role       = local.execution_role_arn
+}
+
 resource "aws_dlm_lifecycle_policy" "policy" {
   description        = var.description
   execution_role_arn = local.execution_role_arn
