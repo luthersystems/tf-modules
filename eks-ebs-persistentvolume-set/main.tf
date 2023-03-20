@@ -1,5 +1,30 @@
 locals {
-  persistentvolume_document = join("", data.template_file.persistentvolume_document.*.rendered)
+  persistentvolume_document = templatefile("${path.module}/pv.tftpl", { configs = [for i in range(var.replication) : {
+    name              = module.luthername_pv.names[i]
+    region            = var.aws_region
+    zone              = var.aws_availability_zones[i % length(var.aws_availability_zones)]
+    index             = i
+    size_gb           = var.volume_size_gb
+    volume_id         = module.aws_ebs_volume_set.aws_ebs_volume_ids[i]
+    storage_class     = var.k8s_storage_class
+    access_modes_json = jsonencode(var.k8s_access_modes)
+    fs_type           = var.fs_type
+    labels_json = jsonencode(
+      merge(
+        var.k8s_labels,
+        {
+          "app.kubernetes.io/name"      = module.luthername_pv.names[i]
+          "app.kubernetes.io/component" = var.component
+          # TF 0.12 tweak - confirm whether a string is necessary here
+          "replica-index"                            = tostring(i)
+          "failure-domain.beta.kubernetes.io/region" = var.aws_region
+          "failure-domain.beta.kubernetes.io/zone"   = var.aws_availability_zones[i % length(var.aws_availability_zones)]
+          "topology.kubernetes.io/region"            = var.aws_region
+          "topology.kubernetes.io/zone"              = var.aws_availability_zones[i % length(var.aws_availability_zones)]
+        },
+      ),
+    )
+  }] })
 }
 
 output "k8s_persistentvolume_document" {
@@ -16,55 +41,6 @@ module "luthername_pv" {
   subcomponent   = var.subcomponent
   resource       = "k8spv"
   replication    = var.replication
-}
-
-data "template_file" "persistentvolume_document" {
-  count = var.replication
-
-  template = <<TEMPLATE
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: $${name}
-  labels: $${labels_json}
-spec:
-  capacity:
-    storage: $${size_gb}Gi
-  accessModes: $${access_modes_json}
-  storageClassName: $${storage_class}
-  awsElasticBlockStore:
-    volumeID: $${volume_id}
-    fsType: $${fs_type}
-TEMPLATE
-
-
-  vars = {
-    name              = module.luthername_pv.names[count.index]
-    region            = var.aws_region
-    zone              = var.aws_availability_zones[count.index % length(var.aws_availability_zones)]
-    index             = count.index
-    size_gb           = var.volume_size_gb
-    volume_id         = module.aws_ebs_volume_set.aws_ebs_volume_ids[count.index]
-    storage_class     = var.k8s_storage_class
-    access_modes_json = jsonencode(var.k8s_access_modes)
-    fs_type           = var.fs_type
-    labels_json = jsonencode(
-      merge(
-        var.k8s_labels,
-        {
-          "app.kubernetes.io/name"      = module.luthername_pv.names[count.index]
-          "app.kubernetes.io/component" = var.component
-          # TF 0.12 tweak - confirm whether a string is necessary here
-          "replica-index"                            = tostring(count.index)
-          "failure-domain.beta.kubernetes.io/region" = var.aws_region
-          "failure-domain.beta.kubernetes.io/zone"   = var.aws_availability_zones[count.index % length(var.aws_availability_zones)]
-          "topology.kubernetes.io/region"            = var.aws_region
-          "topology.kubernetes.io/zone"              = var.aws_availability_zones[count.index % length(var.aws_availability_zones)]
-        },
-      ),
-    )
-  }
 }
 
 module "aws_ebs_volume_set" {
@@ -85,8 +61,7 @@ module "aws_ebs_volume_set" {
   snapshot_ids           = var.snapshot_ids
 
   providers = {
-    aws      = aws
-    template = template
+    aws = aws
   }
 }
 

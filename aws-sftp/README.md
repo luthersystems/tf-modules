@@ -31,7 +31,6 @@ module "sftp" {
 
   providers = {
     aws      = "aws"
-    template = "template"
     random   = "random"
     archive  = "archive"
   }

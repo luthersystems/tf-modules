@@ -126,7 +126,7 @@ data "aws_iam_policy_document" "event_ecr_replicate" {
     ]
 
     resources = [
-      "${aws_codebuild_project.ecr_replicate.arn}",
+      aws_codebuild_project.ecr_replicate.arn,
     ]
   }
 }

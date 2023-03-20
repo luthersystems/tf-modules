@@ -1,0 +1,17 @@
+%{~ for config in configs  ~}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ${config.name}
+  labels: ${config.labels_json}
+spec:
+  capacity:
+    storage: ${config.size_gb}Gi
+  accessModes: ${config.access_modes_json}
+  storageClassName: ${config.storage_class}
+  awsElasticBlockStore:
+    volumeID: ${config.volume_id}
+    fsType: ${config.fs_type}
+
+%{~ endfor ~}

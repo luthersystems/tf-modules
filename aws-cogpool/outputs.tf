@@ -7,11 +7,11 @@ output "user_pool_arn" {
 }
 
 output "user_pool_base_url" {
-  value = data.template_file.user_pool_base_url.rendered
+  value = local.user_pool_base_url
 }
 
 output "user_pool_webkey_url" {
-  value = data.template_file.user_pool_webkey_url.rendered
+  value = local.user_pool_webkey_url
 }
 
 output "user_pool_domain" {
