@@ -44,7 +44,7 @@ data "aws_iam_policy_document" "kms_ebs_dr_snapshots" {
 resource "aws_iam_policy" "kms_ebs_dr_snapshots" {
   for_each = data.aws_iam_policy_document.kms_ebs_dr_snapshots
 
-  name        = "DestinationKmsEBSSnapshotsPolicy-${each.key}"
+  name_prefix = "DestinationKmsEBSSnapshotsPolicy"
   description = "KMS permissions for the destination key in cross-region EBS snapshot replication"
 
   policy = each.value.json
