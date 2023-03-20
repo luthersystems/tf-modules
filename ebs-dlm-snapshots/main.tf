@@ -61,6 +61,8 @@ resource "aws_iam_policy" "kms_ebs_dr_snapshots" {
   description = "KMS permissions for the destination key in cross-region EBS snapshot replication"
 
   policy = each.value.json
+
+  tags = module.kms_ebs_dr_snapshots_name[each.key].tags
 }
 
 resource "aws_iam_role_policy_attachment" "kms_ebs_dr_snapshots_attach" {
