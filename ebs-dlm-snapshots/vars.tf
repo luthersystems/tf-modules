@@ -31,3 +31,11 @@ variable "cross_region_settings" {
   }))
   default = []
 }
+
+variable "luther_env" {
+  type = string
+}
+
+variable "luther_project" {
+  type = string
+}

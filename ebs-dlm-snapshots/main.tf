@@ -41,13 +41,28 @@ data "aws_iam_policy_document" "kms_ebs_dr_snapshots" {
   }
 }
 
+module "kms_ebs_dr_snapshots_name" {
+  for_each = data.aws_iam_policy_document.kms_ebs_dr_snapshots
+
+  source = "../luthername"
+
+  luther_project = var.luther_project
+  aws_region     = each.key
+  luther_env     = var.luther_env
+  component      = "dr"
+  resource       = "ebs"
+  subcomponent   = "snapshots"
+}
+
 resource "aws_iam_policy" "kms_ebs_dr_snapshots" {
   for_each = data.aws_iam_policy_document.kms_ebs_dr_snapshots
 
-  name        = "DestinationKmsEBSSnapshotsPolicy"
+  name        = module.kms_ebs_dr_snapshots_name[each.key].name
   description = "KMS permissions for the destination key in cross-region EBS snapshot replication"
 
   policy = each.value.json
+
+  tags = module.kms_ebs_dr_snapshots_name[each.key].tags
 }
 
 resource "aws_iam_role_policy_attachment" "kms_ebs_dr_snapshots_attach" {
