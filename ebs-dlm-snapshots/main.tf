@@ -57,7 +57,7 @@ module "kms_ebs_dr_snapshots_name" {
 resource "aws_iam_policy" "kms_ebs_dr_snapshots" {
   for_each = data.aws_iam_policy_document.kms_ebs_dr_snapshots
 
-  name_prefix = module.kms_ebs_dr_snapshots_name[each.key].name
+  name        = module.kms_ebs_dr_snapshots_name[each.key].name
   description = "KMS permissions for the destination key in cross-region EBS snapshot replication"
 
   policy = each.value.json
