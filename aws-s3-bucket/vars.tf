@@ -60,3 +60,7 @@ variable "lifecycle_rules" {
 variable "force_destroy" {
   default = false
 }
+
+variable "replicate_deletes" {
+  default = false
+}
