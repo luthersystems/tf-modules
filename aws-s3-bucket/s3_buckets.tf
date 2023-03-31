@@ -62,7 +62,10 @@ resource "aws_s3_bucket_replication_configuration" "bucket" {
 
   rule {
     filter {
-      prefix = ""
+      tag {
+        key   = "Resource"
+        value = "s3"
+      }
     }
 
     id     = "disaster-recovery"
