@@ -61,7 +61,9 @@ resource "aws_s3_bucket_replication_configuration" "bucket" {
   role       = var.replication_role_arn
 
   rule {
-    filter {}
+    filter {
+      prefix = ""
+    }
 
     id     = "disaster-recovery"
     status = "Enabled"
