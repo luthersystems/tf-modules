@@ -64,6 +64,10 @@ resource "aws_s3_bucket_replication_configuration" "bucket" {
     id     = "disaster-recovery"
     status = "Enabled"
 
+    delete_marker_replication {
+      status = var.replicate_deletes ? "Enabled" : "Disabled"
+    }
+
     destination {
       bucket        = var.replication_destination_arn
       storage_class = "STANDARD"
