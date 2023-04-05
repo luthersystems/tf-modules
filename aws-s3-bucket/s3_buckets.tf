@@ -95,11 +95,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket" {
     for_each = var.lifecycle_rules
 
     content {
-      id     = lifecycle_rule.value.id
-      status = lifecycle_rule.value.enabled ? "Enabled" : "Disabled"
+      id     = rule.value.id
+      status = rule.value.enabled ? "Enabled" : "Disabled"
 
       expiration {
-        days = lifecycle_rule.value.expiration_days
+        days = rule.value.expiration_days
       }
     }
   }
