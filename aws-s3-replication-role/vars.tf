@@ -18,6 +18,11 @@ variable "component" {
   type = string
 }
 
+variable "random_identifier" {
+  description = "A randomly generated string to mitigate namespace sniffing globally defined IAM role names"
+  default     = ""
+}
+
 variable "bucket_source_arns" {
   type = list(string)
 }
