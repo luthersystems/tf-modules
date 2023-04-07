@@ -1,3 +1,11 @@
+variable "aws_region" {
+  default = "eu-west-2"
+}
+
+variable "aws_region_replica" {
+  default = "eu-west-1"
+}
+
 variable "luther_project" {
   type        = string
   description = "A short (three character) identifier for the project"
