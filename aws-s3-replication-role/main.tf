@@ -1,3 +1,14 @@
+resource "random_string" "id" {
+  count   = var.random_identifier == "" ? 1 : 0
+  length  = 4
+  upper   = false
+  special = false
+}
+
+locals {
+  random_id = var.random_identifier == "" ? random_string.id.0.result : var.random_identifier
+}
+
 module "luthername_s3_replication" {
   source         = "../luthername"
   luther_project = var.luther_project
@@ -7,6 +18,7 @@ module "luthername_s3_replication" {
   component      = var.component
   resource       = "s3"
   subcomponent   = "replication"
+  id             = local.random_id
 }
 
 resource "aws_iam_role" "replication" {
@@ -27,7 +39,7 @@ data "aws_iam_policy_document" "s3_replication_assume_role" {
 }
 
 resource "aws_iam_role_policy" "replication" {
-  name   = "iam-role-policy-replication"
+  name   = format("iam-role-policy-replication-%s", local.random_id)
   role   = aws_iam_role.replication.name
   policy = data.aws_iam_policy_document.replication.json
 }
