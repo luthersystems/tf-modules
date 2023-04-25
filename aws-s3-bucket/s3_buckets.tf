@@ -31,9 +31,12 @@ resource "aws_s3_bucket" "bucket" {
   force_destroy = var.force_destroy
 }
 
-resource "aws_s3_bucket_acl" "bucket" {
+resource "aws_s3_bucket_ownership_controls" "bucket" {
   bucket = aws_s3_bucket.bucket.id
-  acl    = "private"
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "bucket" {
