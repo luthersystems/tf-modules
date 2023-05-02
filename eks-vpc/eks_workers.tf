@@ -47,16 +47,25 @@ locals {
     "tag"                  = "docker/{{.Name}}/{{.ID}}",
   }
 
+  awslogs_config = {
+    "log-driver" = "awslogs",
+    "log-opts"   = local.docker_log_opts,
+  }
+
   docker_config = {
     "bridge"                   = "none",
-    "log-driver"               = "awslogs",
-    "log-opts"                 = local.docker_log_opts,
     "live-restore"             = true,
     "max-concurrent-downloads" = 10,
   }
 
+  docker_config_awslogs = merge(
+    local.docker_config,
+    local.awslogs_config)
+
+  docker_config_json = var.awslogs_driver ? jsonencode(local.docker_config_awslogs) : jsonencode(local.docker_config)
+
   user_data_vars = {
-    docker_config_json = jsonencode(local.docker_config),
+    docker_config_json = local.docker_config_json
     endpoint           = aws_eks_cluster.app.endpoint,
     cluster_ca         = aws_eks_cluster.app.certificate_authority[0].data,
     cluster_name       = aws_eks_cluster.app.name,

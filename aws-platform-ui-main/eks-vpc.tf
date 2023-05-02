@@ -41,6 +41,8 @@ module "eks_vpc" {
 
   slack_alerts_web_hook_url_secret = var.slack_alerts_web_hook_url_secret
 
+  awslogs_driver = false
+
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1

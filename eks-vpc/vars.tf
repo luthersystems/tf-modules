@@ -245,3 +245,7 @@ variable "slack_alerts_web_hook_url_secret" {
 variable "alert_rules" {
   default = ""
 }
+
+variable "awslogs_driver" {
+  default = true
+}
