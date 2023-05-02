@@ -40,6 +40,7 @@ locals {
     prometheus_workspace_id                 = module.eks_vpc.k8s_facts.prometheus_workspace_id
 
     fluentbit_service_account_iam_role_arn = module.eks_vpc.k8s_facts.fluentbit_service_account_iam_role_arn
+    fluentbit_log_group_name               = module.eks_vpc.k8s_facts.fluentbit_log_group_name
   }
 }
 
