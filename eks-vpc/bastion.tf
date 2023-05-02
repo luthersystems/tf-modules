@@ -141,6 +141,8 @@ locals {
 
     prometheus_service_account_iam_role_arn = local.prometheus_service_account_role_arn
     prometheus_workspace_id                 = try(aws_prometheus_workspace.k8s[0].id, "")
+
+    fluentbit_service_account_iam_role_arn = local.fluentbit_service_account_role_arn
   }
   k8s_facts_json = jsonencode(local.k8s_facts)
 
