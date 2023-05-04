@@ -461,3 +461,4 @@ output "grafana_saml_start_url" {
 output "grafana_workspace_id" {
   value = try(aws_grafana_workspace.grafana[0].id, "")
 }
+
