@@ -127,6 +127,7 @@ resource "aws_iam_role_policy" "eks_master_attach_volumes" {
 }
 
 data "aws_iam_policy_document" "attach_volumes" {
+
   statement {
     effect = "Allow"
 
