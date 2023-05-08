@@ -60,7 +60,7 @@ locals {
 
   docker_config_awslogs = merge(
     local.docker_config,
-    local.awslogs_config)
+  local.awslogs_config)
 
   docker_config_json = var.awslogs_driver ? jsonencode(local.docker_config_awslogs) : jsonencode(local.docker_config)
 
@@ -162,6 +162,7 @@ output "eks_worker_asg_name" {
   value = local.eks_worker_asg_name
 }
 
+
 resource "aws_launch_template" "eks_worker" {
 
   update_default_version = true
@@ -215,6 +216,18 @@ resource "aws_launch_template" "eks_worker" {
     enabled = true
   }
 
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size           = var.root_volume_size_gb
+      volume_type           = "gp2"
+      delete_on_termination = true
+      encrypted             = true
+      kms_key_id            = data.aws_kms_key.volumes.arn
+    }
+  }
+
   tag_specifications {
     resource_type = "instance"
 
@@ -252,7 +265,7 @@ resource "aws_eks_node_group" "eks_worker" {
     aws_iam_role_policy_attachment.eks_worker_AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.eks_worker_AmazonEC2ContainerRegistryReadOnly,
     aws_iam_role_policy_attachment.eks_node_sa_AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.eks_worker_AmazonEKS_CNI_Policy
+    aws_iam_role_policy_attachment.eks_worker_AmazonEKS_CNI_Policy,
   ]
 
   tags = module.luthername_eks_worker_autoscaling_group.tags

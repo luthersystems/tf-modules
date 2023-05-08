@@ -21,6 +21,10 @@ resource "aws_kms_key" "main" {
   tags        = module.luthername_kms_key_main.tags
 }
 
+data "aws_iam_role" "autoscaling_service_role" {
+  name = "AWSServiceRoleForAutoScaling"
+}
+
 data "aws_iam_policy_document" "kms_key_main" {
   # Default statement attached to any kms key
   statement {
@@ -77,6 +81,40 @@ data "aws_iam_policy_document" "kms_key_main" {
         "kms:DescribeKey",
       ]
       resources = ["*"]
+    }
+  }
+
+  statement {
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+    principals {
+      type        = "AWS"
+      identifiers = [data.aws_iam_role.autoscaling_service_role.arn]
+    }
+  }
+
+  statement {
+    sid = "Allow attachment of persistent resources"
+    actions = [
+      "kms:CreateGrant",
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+    principals {
+      type        = "AWS"
+      identifiers = [data.aws_iam_role.autoscaling_service_role.arn]
+    }
+    condition {
+      test     = "Bool"
+      variable = "kms:GrantIsForAWSResource"
+      values   = ["true"]
     }
   }
 }

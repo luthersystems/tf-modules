@@ -57,6 +57,10 @@ variable "aws_kms_key_arns" {
   ]
 }
 
+variable "root_volume_size_gb" {
+  default = 30
+}
+
 variable "volumes_aws_kms_key_id" {
   type    = string
   default = "arn:aws:kms:eu-central-1:967058059066:alias/common-de-common-luther-storage-kms-eoxl"
