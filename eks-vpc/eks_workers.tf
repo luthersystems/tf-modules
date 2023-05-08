@@ -162,22 +162,6 @@ output "eks_worker_asg_name" {
   value = local.eks_worker_asg_name
 }
 
-module "luthername_root_kms" {
-  source         = "../luthername"
-  luther_project = var.luther_project
-  aws_region     = var.aws_region
-  luther_env     = var.luther_env
-  org_name       = var.org_name
-  component      = var.component
-  resource       = "kms"
-}
-
-
-resource "aws_kms_key" "root" {
-  description         = "KMS key for EBS volume encryption of root volumes"
-  enable_key_rotation = true
-  tags                = module.luthername_root_kms.tags
-}
 
 resource "aws_launch_template" "eks_worker" {
 
@@ -240,7 +224,7 @@ resource "aws_launch_template" "eks_worker" {
       volume_type           = "gp2"
       delete_on_termination = true
       encrypted             = true
-      kms_key_id            = aws_kms_key.root.arn
+      kms_key_id            = var.volumes_aws_kms_key_id
     }
   }
 
@@ -282,7 +266,7 @@ resource "aws_eks_node_group" "eks_worker" {
     aws_iam_role_policy_attachment.eks_worker_AmazonEC2ContainerRegistryReadOnly,
     aws_iam_role_policy_attachment.eks_node_sa_AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.eks_worker_AmazonEKS_CNI_Policy,
-    aws_kms_key_policy.autoscaling_root_kms,
+    aws_iam_role_policy.custom_autoscaling_kms_policy,
   ]
 
   tags = module.luthername_eks_worker_autoscaling_group.tags
@@ -324,64 +308,52 @@ data "aws_iam_policy_document" "ec2_assume_role" {
   }
 }
 
-data "aws_iam_role" "autoscaling_service_role" {
-  name = "AWSServiceRoleForAutoScaling"
+resource "aws_iam_role" "custom_autoscaling_service_role" {
+  name = "CustomAWSServiceRoleForAutoScaling"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "autoscaling.amazonaws.com"
+        }
+      }
+    ]
+  })
 }
 
-resource "aws_kms_key_policy" "autoscaling_root_kms" {
-  key_id = aws_kms_key.root.arn
-  policy = data.aws_iam_policy_document.eks_worker_root_kms.json
+data "aws_iam_policy" "autoscaling_service_role_policies" {
+  arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2AutoScalingServiceLinkedRolePolicy"
 }
 
-data "aws_iam_policy_document" "eks_worker_root_kms" {
+resource "aws_iam_role_policy_attachment" "custom_autoscaling_service_role_policies" {
+  policy_arn = data.aws_iam_policy.autoscaling_service_role_policies.arn
+  role       = aws_iam_role.custom_autoscaling_service_role.name
+}
 
-  statement {
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.aws_account_id}:root"]
-    }
-
-    actions   = ["kms:*"]
-    resources = ["*"]
-  }
-
+data "aws_iam_policy_document" "custom_autoscaling_kms_policy" {
   statement {
     actions = [
       "kms:Encrypt",
       "kms:Decrypt",
       "kms:ReEncrypt*",
       "kms:GenerateDataKey*",
-      "kms:DescribeKey"
-    ]
-    effect    = "Allow"
-    resources = ["*"]
-    principals {
-      type        = "AWS"
-      identifiers = [data.aws_iam_role.autoscaling_service_role.arn]
-    }
-  }
-
-  statement {
-    sid = "Allow attachment of persistent resources"
-    actions = [
+      "kms:DescribeKey",
       "kms:CreateGrant",
       "kms:ListGrants",
       "kms:RevokeGrant"
     ]
     effect    = "Allow"
-    resources = ["*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = [data.aws_iam_role.autoscaling_service_role.arn]
-    }
-
-    condition {
-      test     = "Bool"
-      variable = "kms:GrantIsForAWSResource"
-      values   = ["true"]
-    }
+    resources = [var.volumes_aws_kms_key_id]
   }
+}
+
+resource "aws_iam_role_policy" "custom_autoscaling_kms_policy" {
+  name   = "CustomAutoscalingKmsPolicy"
+  role   = aws_iam_role.custom_autoscaling_service_role.id
+  policy = data.aws_iam_policy_document.custom_autoscaling_kms_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKSWorkerNodePolicy" {
