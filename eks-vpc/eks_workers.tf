@@ -224,7 +224,7 @@ resource "aws_launch_template" "eks_worker" {
       volume_type           = "gp2"
       delete_on_termination = true
       encrypted             = true
-      kms_key_id            = var.volumes_aws_kms_key_id
+      kms_key_id            = data.aws_kms_key.volumes.arn
     }
   }
 
@@ -266,7 +266,6 @@ resource "aws_eks_node_group" "eks_worker" {
     aws_iam_role_policy_attachment.eks_worker_AmazonEC2ContainerRegistryReadOnly,
     aws_iam_role_policy_attachment.eks_node_sa_AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.eks_worker_AmazonEKS_CNI_Policy,
-    aws_iam_role_policy.custom_autoscaling_kms_policy,
   ]
 
   tags = module.luthername_eks_worker_autoscaling_group.tags
@@ -306,54 +305,6 @@ data "aws_iam_policy_document" "ec2_assume_role" {
       identifiers = ["ec2.amazonaws.com"]
     }
   }
-}
-
-resource "aws_iam_role" "custom_autoscaling_service_role" {
-  name = "CustomAWSServiceRoleForAutoScaling"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "autoscaling.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-data "aws_iam_policy" "autoscaling_service_role_policies" {
-  arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2AutoScalingServiceLinkedRolePolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "custom_autoscaling_service_role_policies" {
-  policy_arn = data.aws_iam_policy.autoscaling_service_role_policies.arn
-  role       = aws_iam_role.custom_autoscaling_service_role.name
-}
-
-data "aws_iam_policy_document" "custom_autoscaling_kms_policy" {
-  statement {
-    actions = [
-      "kms:Encrypt",
-      "kms:Decrypt",
-      "kms:ReEncrypt*",
-      "kms:GenerateDataKey*",
-      "kms:DescribeKey",
-      "kms:CreateGrant",
-      "kms:ListGrants",
-      "kms:RevokeGrant"
-    ]
-    effect    = "Allow"
-    resources = [var.volumes_aws_kms_key_id]
-  }
-}
-
-resource "aws_iam_role_policy" "custom_autoscaling_kms_policy" {
-  name   = "CustomAutoscalingKmsPolicy"
-  role   = aws_iam_role.custom_autoscaling_service_role.id
-  policy = data.aws_iam_policy_document.custom_autoscaling_kms_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEKSWorkerNodePolicy" {
