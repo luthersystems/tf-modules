@@ -58,6 +58,7 @@ data "aws_iam_policy_document" "replication" {
     actions = [
       "s3:GetObjectVersionForReplication",
       "s3:GetObjectVersionAcl",
+      "s3:GetObjectVersionTagging",
     ]
 
     resources = formatlist("%s/*", var.bucket_source_arns)
@@ -67,6 +68,7 @@ data "aws_iam_policy_document" "replication" {
     actions = [
       "s3:ReplicateObject",
       "s3:ReplicateDelete",
+      "s3:ReplicateTags",
     ]
 
     resources = formatlist("%s/*", var.bucket_destination_arns)
