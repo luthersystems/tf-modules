@@ -58,6 +58,7 @@ data "aws_iam_policy_document" "replication" {
     actions = [
       "s3:GetObjectVersionForReplication",
       "s3:GetObjectVersionAcl",
+      "s3:GetObjectVersionTagging",
     ]
 
     resources = formatlist("%s/*", var.bucket_source_arns)
@@ -67,6 +68,7 @@ data "aws_iam_policy_document" "replication" {
     actions = [
       "s3:ReplicateObject",
       "s3:ReplicateDelete",
+      "s3:ReplicateTags",
     ]
 
     resources = formatlist("%s/*", var.bucket_destination_arns)
@@ -75,6 +77,8 @@ data "aws_iam_policy_document" "replication" {
   statement {
     actions = [
       "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
     ]
     resources = var.source_kms_key_ids
 
@@ -88,6 +92,8 @@ data "aws_iam_policy_document" "replication" {
   statement {
     actions = [
       "kms:Encrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
     ]
     resources = var.destination_kms_key_ids
 
