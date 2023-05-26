@@ -21,7 +21,7 @@ data "aws_ami" "eks_worker" {
 resource "null_resource" "get_worker_ami" {
   triggers = { k8s_version = aws_eks_cluster.app.version }
   provisioner "local-exec" {
-    command = "echo ${data.aws_ami.eks_worker.id} >> ${local.ami_cache_file}"
+    command = "echo ${data.aws_ami.eks_worker.id} > ${local.ami_cache_file}"
   }
 }
 
