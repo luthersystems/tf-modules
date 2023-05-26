@@ -170,12 +170,17 @@ variable "managed_nodes" {
   default = true
 }
 
+# See: https://marcincuber.medium.com/amazon-eks-upgrade-journey-from-1-24-to-1-25-e1bcccc2f384
+# for versions
+
 variable "cni_addon_version" {
   default = {
     "1.21" = "v1.9.3-eksbuild.1"
     "1.22" = "v1.10.2-eksbuild.1"
     "1.23" = "v1.11.2-eksbuild.1"
     "1.24" = "v1.11.4-eksbuild.1"
+    "1.25" = "v1.12.2-eksbuild.1"
+    "1.26" = "v1.12.2-eksbuild.1"
   }
 }
 
@@ -185,6 +190,8 @@ variable "csi_addon_version" {
     "1.22" = "v1.5.2-eksbuild.1"
     "1.23" = "v1.10.0-eksbuild.1"
     "1.24" = "v1.13.0-eksbuild.1"
+    "1.25" = "v1.16.0-eksbuild.1"
+    "1.26" = "v1.17.0-eksbuild.1"
   }
 }
 
@@ -194,6 +201,8 @@ variable "kubeproxy_addon_version" {
     "1.22" = "v1.22.6-eksbuild.1"
     "1.23" = "v1.23.7-eksbuild.1"
     "1.24" = "v1.24.7-eksbuild.2"
+    "1.25" = "v1.25.6-eksbuild.1"
+    "1.26" = "v1.26.2-eksbuild.1"
   }
 }
 
@@ -203,6 +212,8 @@ variable "coredns_addon_version" {
     "1.22" = "v1.8.7-eksbuild.1"
     "1.23" = "v1.8.7-eksbuild.2"
     "1.24" = "v1.8.7-eksbuild.3"
+    "1.25" = "v1.9.3-eksbuild.2"
+    "1.26" = "v1.9.3-eksbuild.2"
   }
 }
 
