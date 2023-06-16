@@ -285,6 +285,18 @@ resource "aws_iam_role_policy" "common_assets" {
   policy = data.aws_iam_policy_document.common_assets.json
 }
 
+locals {
+  # Split the ARN into parts. Assumes the ARN is in the format "arn:aws:s3:::bucket-name"
+  common_static_bucket_arn_parts = split("/", split(":", var.common_static_asset_s3_bucket_arn)[5])
+
+  # Get the bucket name from the ARN. Assumes the bucket name is the first part after the split.
+  common_static_bucket_name = local.common_static_bucket_arn_parts[0]
+}
+
+data "aws_s3_bucket" "common_static" {
+  bucket = local.common_static_bucket_name
+}
+
 data "aws_iam_policy_document" "common_assets" {
   statement {
     actions = [
@@ -302,9 +314,7 @@ data "aws_iam_policy_document" "common_assets" {
     condition {
       test     = "StringEquals"
       variable = "kms:ViaService"
-      # TODO look up this region to support a common bucket in an alternate
-      # region
-      values = ["s3.eu-west-2.amazonaws.com"]
+      values = ["s3.${data.aws_s3_bucket.common_static.region}.amazonaws.com"]
     }
 
     resources = var.aws_kms_key_arns
