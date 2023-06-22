@@ -1,0 +1,18 @@
+name: Terraform CI
+
+on:
+  pull_request:
+    branches: [ 'main' ]
+
+jobs:
+  check_format_and_validate:
+    runs-on: ubuntu-latest
+    container:
+      image: hashicorp/terraform:1.4.6
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Check format
+      run: terraform fmt -diff=true -check=true
+    - name: Validate
+      run: ./validate.sh
