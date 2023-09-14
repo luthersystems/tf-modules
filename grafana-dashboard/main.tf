@@ -14,12 +14,12 @@ resource "grafana_data_source" "amp" {
   is_default = true
   url        = var.prometheus_endpoint
 
-  json_data {
-    http_method     = "GET"
-    sigv4_auth      = true
-    sigv4_auth_type = "workspace-iam-role"
-    sigv4_region    = var.prometheus_region
-  }
+  json_data_encoded = jsonencode({
+    httpMethod    = "GET"
+    sigv4Auth     = true
+    sigv4AuthType = "workspace-iam-role"
+    sigv4Tegion   = var.prometheus_region
+  })
 }
 
 resource "grafana_dashboard" "common" {
