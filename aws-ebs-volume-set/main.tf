@@ -38,6 +38,7 @@ resource "aws_ebs_volume" "vol" {
       "ID"   = module.luthername_vol.ids[count.index]
     },
     var.additional_tags,
+    try(var.additional_per_vol_tags[count.index], {}),
   )
 }
 
