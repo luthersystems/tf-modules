@@ -54,11 +54,12 @@ module "aws_ebs_volume_set" {
   subcomponent   = var.subcomponent
   replication    = var.replication
 
-  aws_availability_zones = var.aws_availability_zones
-  volume_size_gb         = var.volume_size_gb
-  aws_kms_key_arn        = data.aws_kms_key.main.arn
-  additional_tags        = var.additional_tags
-  snapshot_ids           = var.snapshot_ids
+  aws_availability_zones  = var.aws_availability_zones
+  volume_size_gb          = var.volume_size_gb
+  aws_kms_key_arn         = data.aws_kms_key.main.arn
+  additional_tags         = var.additional_tags
+  additional_per_vol_tags = var.additional_per_vol_tags
+  snapshot_ids            = var.snapshot_ids
 
   providers = {
     aws = aws

@@ -51,6 +51,11 @@ variable "additional_tags" {
   default = {}
 }
 
+variable "additional_per_vol_tags" {
+  type    = list(map(string))
+  default = []
+}
+
 variable "snapshot_ids" {
   default = []
   type    = list(string)
