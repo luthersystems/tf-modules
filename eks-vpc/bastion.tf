@@ -134,6 +134,8 @@ locals {
     k8s_cluster_azs                        = local.eks_worker_azs
     k8s_cluster_auth_config_map            = local.config_map_aws_auth
     k8s_cluster_storageclass_gp2_encrypted = local.storageclass_gp2_encrypted
+    k8s_cluster_storageclass_gp3_encrypted = local.storageclass_gp3_encrypted
+    k8s_cluster_storageclass_sc1_encrypted = local.storageclass_sc1_encrypted
     aws_load_balancer_controller_iam_role  = module.aws_lb_controller_service_account_iam_role.arn
     eks_worker_iam_role_arn                = aws_iam_role.eks_worker.arn
     k8s_admin_role_arn                     = data.aws_iam_role.assumed_role_admin.arn

@@ -68,7 +68,7 @@ resource "aws_instance" "service" {
   )
 
   root_block_device {
-    volume_type           = "gp2"
+    volume_type           = "gp3"
     volume_size           = var.root_volume_size_gb
     delete_on_termination = true
   }

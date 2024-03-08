@@ -221,7 +221,7 @@ resource "aws_launch_template" "eks_worker" {
 
     ebs {
       volume_size           = var.root_volume_size_gb
-      volume_type           = "gp2"
+      volume_type           = "gp3"
       delete_on_termination = true
       encrypted             = true
       kms_key_id            = data.aws_kms_key.volumes.arn

@@ -23,16 +23,12 @@ data:
         - system:masters
 CONFIGMAPAWSAUTH
 
-
-  # storageclass_gp2_encrypted declares "gp2-encrypted" as the default
-  # storageclass but that will not actually work until the eks-created
-  # storageclass, "gp2", is patched to deny its claim as the default.
+  # storageclass_gp2_encrypted declares "gp2-encrypted" for backwards
+  # compatibility.
   storageclass_gp2_encrypted = <<STORAGECLASS
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
   name: gp2-encrypted
 provisioner: kubernetes.io/aws-ebs
 parameters:
@@ -44,6 +40,46 @@ reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
 STORAGECLASS
+
+  # storageclass_sc1_encrypted declares "sc1-encrypted" for ledger
+  # data.
+  storageclass_sc1_encrypted = <<STORAGECLASS
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: sc1-encrypted
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: sc1
+  fsType: ext4
+  encrypted: "true"
+  kmsKeyId: ${var.volumes_aws_kms_key_id}
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+STORAGECLASS
+
+  # storageclass_gp3_encrypted declares "gp3-encrypted" as the default
+  # storageclass but that will not actually work until the eks-created
+  # storageclass, "gp2-encrypted", is patched to deny its claim as the default.
+  storageclass_gp3_encrypted = <<STORAGECLASS
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+  name: gp3-encrypted
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp3
+  fsType: ext4
+  encrypted: "true"
+  kmsKeyId: ${var.volumes_aws_kms_key_id}
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+STORAGECLASS
+
 }
 
 output "config_map_aws_auth" {
