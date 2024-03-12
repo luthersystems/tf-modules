@@ -270,6 +270,8 @@ resource "aws_grafana_workspace" "grafana" {
   role_arn                 = aws_iam_role.grafana.arn
   data_sources             = ["PROMETHEUS"]
   tags                     = module.luthername_grafana.tags
+
+  grafana_version = "9.4"
 }
 
 resource "aws_iam_role" "grafana" {
