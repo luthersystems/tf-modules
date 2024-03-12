@@ -320,6 +320,13 @@ data "aws_iam_policy_document" "grafana" {
       "aps:GetLabels",
       "aps:GetSeries",
       "aps:GetMetricMetadata",
+      "aps:ListRules",
+      "aps:ListAlertManagerSilences",
+      "aps:ListAlertManagerAlerts",
+      "aps:GetAlertManagerStatus",
+      "aps:ListAlertManagerAlertGroups",
+      "aps:PutAlertManagerSilences",
+      "aps:DeleteAlertManagerSilence",
     ]
 
     resources = try([aws_prometheus_workspace.k8s[0].arn], [])
