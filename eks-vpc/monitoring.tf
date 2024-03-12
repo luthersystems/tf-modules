@@ -269,6 +269,7 @@ resource "aws_grafana_workspace" "grafana" {
   permission_type          = "SERVICE_MANAGED"
   role_arn                 = aws_iam_role.grafana.arn
   data_sources             = ["PROMETHEUS"]
+  grafana_version          = "9.4"
   tags                     = module.luthername_grafana.tags
 }
 
