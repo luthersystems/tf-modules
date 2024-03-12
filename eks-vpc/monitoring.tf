@@ -328,6 +328,7 @@ data "aws_iam_policy_document" "grafana" {
       "aps:ListAlertManagerAlertGroups",
       "aps:PutAlertManagerSilences",
       "aps:DeleteAlertManagerSilence",
+      "aps:ListWorkspaces",
     ]
 
     resources = try([aws_prometheus_workspace.k8s[0].arn], [])
