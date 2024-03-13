@@ -23,40 +23,43 @@ resource "aws_prometheus_workspace" "k8s" {
 }
 
 locals {
+  data_volume_space_used_percentage = format("%.0f", (1 - var.data_volume_space_threshold) * 100)
+  root_volume_space_used_percentage = format("%.0f", (1 - var.root_volume_space_threshold) * 100)
+  instance_memory_used_percentage   = format("%.0f", (1 - var.instance_memory_threshold) * 100)
+}
+
+locals {
   default_alert_rules = <<EOT
 groups:
   - name: service
     rules:
     - alert: LowDataVolumeSpace
-      # used > 80%
-      expr: (kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes) < 0.2
+      expr: (kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes) < ${var.data_volume_space_threshold}
       for: 5m
       labels:
         project: "${var.luther_project}"
         environment: "${var.luther_env}"
         severity: page
       annotations:
-        summary: "Service data volume usage above 80%"
+        summary: "Service data volume usage above ${local.data_volume_space_used_percentage}%"
     - alert: LowRootVolumeSpace
-      # used > 80%
-      expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.2
+      expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < ${var.root_volume_space_threshold}
       for: 1m
       labels:
         project: "${var.luther_project}"
         environment: "${var.luther_env}"
         severity: page
       annotations:
-        summary: "Instance(s) root volume usage above 80%"
+        summary: "Instance(s) root volume usage above ${local.root_volume_space_used_percentage}%"
     - alert: LowInstanceMemory
-      # used > 80%
-      expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.2
+      expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < ${var.instance_memory_threshold}
       for: 1m
       labels:
         project: "${var.luther_project}"
         environment: "${var.luther_env}"
         severity: page
       annotations:
-        summary: "Instance(s) memory usage above 80%"
+        summary: "Instance(s) memory usage above ${local.instance_memory_used_percentage}%"
     - alert: ServiceDown
       expr: up != 1
       for: 2m
