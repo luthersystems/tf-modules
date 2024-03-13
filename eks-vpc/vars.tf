@@ -272,3 +272,21 @@ variable "alert_rules" {
 variable "awslogs_driver" {
   default = true
 }
+
+variable "data_volume_space_threshold" {
+  description = "Threshold for triggering data volume space alerts, represented as a fraction of 1"
+  type        = number
+  default     = 0.2
+}
+
+variable "root_volume_space_threshold" {
+  description = "Threshold for triggering root volume space alerts, represented as a fraction of 1"
+  type        = number
+  default     = 0.2
+}
+
+variable "instance_memory_threshold" {
+  description = "Threshold for triggering instance memory alerts, represented as a fraction of 1"
+  type        = number
+  default     = 0.2
+}
