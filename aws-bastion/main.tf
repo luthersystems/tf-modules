@@ -314,7 +314,7 @@ data "aws_iam_policy_document" "common_assets" {
     condition {
       test     = "StringEquals"
       variable = "kms:ViaService"
-      values = ["s3.${data.aws_s3_bucket.common_static.region}.amazonaws.com"]
+      values   = ["s3.${data.aws_s3_bucket.common_static.region}.amazonaws.com"]
     }
 
     resources = var.aws_kms_key_arns
@@ -330,4 +330,9 @@ resource "aws_security_group_rule" "ingress_bastion" {
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.service.id
   security_group_id        = aws_security_group.service.id
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_managed_instance_core" {
+  role       = aws_iam_role.service.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }

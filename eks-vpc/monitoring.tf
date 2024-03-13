@@ -269,6 +269,7 @@ resource "aws_grafana_workspace" "grafana" {
   permission_type          = "SERVICE_MANAGED"
   role_arn                 = aws_iam_role.grafana.arn
   data_sources             = ["PROMETHEUS"]
+  grafana_version          = "9.4"
   tags                     = module.luthername_grafana.tags
 }
 
@@ -320,6 +321,14 @@ data "aws_iam_policy_document" "grafana" {
       "aps:GetLabels",
       "aps:GetSeries",
       "aps:GetMetricMetadata",
+      "aps:ListRules",
+      "aps:ListAlertManagerSilences",
+      "aps:ListAlertManagerAlerts",
+      "aps:GetAlertManagerStatus",
+      "aps:ListAlertManagerAlertGroups",
+      "aps:PutAlertManagerSilences",
+      "aps:DeleteAlertManagerSilence",
+      "aps:ListWorkspaces",
     ]
 
     resources = try([aws_prometheus_workspace.k8s[0].arn], [])

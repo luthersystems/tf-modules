@@ -329,6 +329,11 @@ resource "aws_iam_role_policy_attachment" "eks_worker_AmazonEC2ContainerRegistry
   role       = aws_iam_role.eks_worker.name
 }
 
+resource "aws_iam_role_policy_attachment" "eks_worker_AmazonSSMManagedInstanceCore" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = aws_iam_role.eks_worker.name
+}
+
 resource "aws_iam_role_policy" "eks_worker_s3_readonly" {
   count = var.disable_s3_node_role || length(local.s3_prefixes) == 0 ? 0 : 1
 
