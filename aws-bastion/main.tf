@@ -50,6 +50,14 @@ locals {
     common_userdata = module.common_userdata.user_data
   }
   user_data = templatefile("${path.module}/files/userdata.sh.tmpl", local.user_data_vars)
+
+  tags = {
+    Project      = module.luthername_ec2.luther_project
+    Environment  = module.luthername_ec2.luther_env
+    Organization = module.luthername_ec2.org_name
+    Component    = module.luthername_ec2.component
+    Resource     = module.luthername_ec2.resource
+  }
 }
 
 resource "aws_instance" "service" {
@@ -76,15 +84,15 @@ resource "aws_instance" "service" {
   iam_instance_profile   = aws_iam_instance_profile.service.name
   vpc_security_group_ids = [aws_security_group.service.id]
 
-  tags = {
-    Name         = module.luthername_ec2.names[count.index]
-    Project      = module.luthername_ec2.luther_project
-    Environment  = module.luthername_ec2.luther_env
-    Organization = module.luthername_ec2.org_name
-    Component    = module.luthername_ec2.component
-    Resource     = module.luthername_ec2.resource
-    ID           = module.luthername_ec2.ids[count.index]
-  }
+  tags = merge(local.tags, {
+    Name = module.luthername_ec2.names[count.index]
+    ID   = module.luthername_ec2.ids[count.index]
+  })
+
+  volume_tags = merge(local.tags, {
+    Name = module.luthername_ec2.names[count.index]
+    ID   = module.luthername_ec2.ids[count.index]
+  })
 
   lifecycle {
     ignore_changes = [
