@@ -290,3 +290,7 @@ variable "instance_memory_threshold" {
   type        = number
   default     = 0.2
 }
+
+variable "worker_storage_class" {
+  default = "gp2"
+}
