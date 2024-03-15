@@ -54,6 +54,8 @@ module "aws_ebs_volume_set" {
   subcomponent   = var.subcomponent
   replication    = var.replication
 
+  storage_class = var.k8s_storage_class
+
   aws_availability_zones  = var.aws_availability_zones
   volume_size_gb          = var.volume_size_gb
   aws_kms_key_arn         = data.aws_kms_key.main.arn

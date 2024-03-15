@@ -60,3 +60,7 @@ variable "snapshot_ids" {
   default = []
   type    = list(string)
 }
+
+variable "storage_class" {
+  default = "gp3"
+}

@@ -103,3 +103,16 @@ variable "cloudwatch_log_group" {
 variable "cloudwatch_log_group_arn" {
   type = string
 }
+
+variable "replication" {
+  type    = number
+  default = 1
+}
+
+variable "aws_availability_zones" {
+  type = list(string)
+}
+
+variable "storage_class" {
+  default = "gp3"
+}

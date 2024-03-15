@@ -6,6 +6,18 @@ module "luthername_ec2" {
   org_name       = var.org_name
   component      = var.component
   resource       = "ec2"
+  replication    = var.replication
+}
+
+module "luthername_vol" {
+  source         = "../luthername"
+  luther_project = var.luther_project
+  aws_region     = var.aws_region
+  luther_env     = var.luther_env
+  org_name       = var.org_name
+  component      = var.component
+  resource       = "vol"
+  replication    = var.replication
 }
 
 locals {
@@ -50,18 +62,10 @@ locals {
     common_userdata = module.common_userdata.user_data
   }
   user_data = templatefile("${path.module}/files/userdata.sh.tmpl", local.user_data_vars)
-
-  tags = {
-    Project      = module.luthername_ec2.luther_project
-    Environment  = module.luthername_ec2.luther_env
-    Organization = module.luthername_ec2.org_name
-    Component    = module.luthername_ec2.component
-    Resource     = module.luthername_ec2.resource
-  }
 }
 
 resource "aws_instance" "service" {
-  count = "1" # TODO
+  count = var.replication
 
   ami              = var.aws_ami
   subnet_id        = element(var.aws_subnet_ids, count.index)
@@ -76,7 +80,7 @@ resource "aws_instance" "service" {
   )
 
   root_block_device {
-    volume_type           = "gp3"
+    volume_type           = var.storage_class
     volume_size           = var.root_volume_size_gb
     delete_on_termination = true
   }
@@ -84,14 +88,16 @@ resource "aws_instance" "service" {
   iam_instance_profile   = aws_iam_instance_profile.service.name
   vpc_security_group_ids = [aws_security_group.service.id]
 
-  tags = merge(local.tags, {
-    Name = module.luthername_ec2.names[count.index]
-    ID   = module.luthername_ec2.ids[count.index]
+  availability_zone = try(var.aws_availability_zones[count.index], null)
+
+  tags = merge(module.luthername_ec2.tags, {
+    "Name" = module.luthername_ec2.names[count.index]
+    "ID"   = module.luthername_ec2.ids[count.index]
   })
 
-  volume_tags = merge(local.tags, {
-    Name = module.luthername_ec2.names[count.index]
-    ID   = module.luthername_ec2.ids[count.index]
+  volume_tags = merge(module.luthername_vol.tags, {
+    "Name" = module.luthername_vol.names[count.index]
+    "ID"   = module.luthername_vol.ids[count.index]
   })
 
   lifecycle {

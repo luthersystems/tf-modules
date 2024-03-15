@@ -27,6 +27,8 @@ resource "aws_ebs_volume" "vol" {
 
   size = var.volume_size_gb
 
+  type = var.storage_class
+
   # Encrypt the volume using the environment-wide key.
   encrypted  = true
   kms_key_id = var.aws_kms_key_arn
