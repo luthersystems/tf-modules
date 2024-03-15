@@ -233,6 +233,34 @@ resource "aws_launch_template" "eks_worker" {
 
     tags = module.luthername_eks_worker_autoscaling_group.tags
   }
+
+  tag_specifications {
+    resource_type = "volume"
+
+    tags = merge(module.luthername_eks_worker_autoscaling_group.tags,
+      {
+        resource = "vol",
+    })
+  }
+
+  tag_specifications {
+    resource_type = "network-interface"
+
+    tags = merge(module.luthername_eks_worker_autoscaling_group.tags,
+      {
+        resource = "iface",
+    })
+  }
+
+  tag_specifications {
+    resource_type = "spot-instances-request"
+
+    tags = merge(module.luthername_eks_worker_autoscaling_group.tags,
+      {
+        resource = "spotreq",
+    })
+  }
+
 }
 
 resource "aws_eks_node_group" "eks_worker" {
