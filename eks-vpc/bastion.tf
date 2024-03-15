@@ -76,6 +76,8 @@ module "aws_bastion" {
   ssh_port                             = var.bastion_ssh_port
   cloudwatch_log_group                 = aws_cloudwatch_log_group.main.name
   cloudwatch_log_group_arn             = aws_cloudwatch_log_group.main.arn
+  aws_availability_zones               = var.aws_availability_zones
+  replication                          = var.bastion_replication
 
   providers = {
     aws = aws

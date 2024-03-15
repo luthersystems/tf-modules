@@ -294,3 +294,7 @@ variable "instance_memory_threshold" {
 variable "worker_storage_class" {
   default = "gp2"
 }
+
+variable "bastion_replication" {
+  default = 1
+}
