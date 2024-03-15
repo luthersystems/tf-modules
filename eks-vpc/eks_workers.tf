@@ -231,8 +231,12 @@ resource "aws_launch_template" "eks_worker" {
   tag_specifications {
     resource_type = "instance"
 
-    tags = module.luthername_eks_worker_autoscaling_group.tags
+    tags = merge(module.luthername_eks_worker_autoscaling_group.tags,
+      {
+        resource = "vm",
+    })
   }
+
 
   tag_specifications {
     resource_type = "volume"
