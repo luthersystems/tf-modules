@@ -298,3 +298,7 @@ variable "worker_storage_class" {
 variable "bastion_replication" {
   default = 1
 }
+
+variable "bastion_storage_class" {
+  default = "gp3"
+}

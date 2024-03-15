@@ -78,6 +78,7 @@ module "aws_bastion" {
   cloudwatch_log_group_arn             = aws_cloudwatch_log_group.main.arn
   aws_availability_zones               = local.region_availability_zones
   replication                          = var.bastion_replication
+  storage_class                        = var.bastion_storage_class
 
   providers = {
     aws = aws
