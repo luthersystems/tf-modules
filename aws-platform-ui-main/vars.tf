@@ -93,3 +93,7 @@ variable "preserve_coredns" {
 variable "slack_alerts_web_hook_url_secret" {
   default = ""
 }
+
+variable "worker_storage_class" {
+  default = "gp3-encrypted"
+}

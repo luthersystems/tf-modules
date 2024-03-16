@@ -41,6 +41,8 @@ module "eks_vpc" {
 
   slack_alerts_web_hook_url_secret = var.slack_alerts_web_hook_url_secret
 
+  worker_storage_class = var.worker_storage_class
+
   awslogs_driver = false
 
   providers = {
