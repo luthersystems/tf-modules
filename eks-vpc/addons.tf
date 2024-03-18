@@ -174,5 +174,13 @@ resource "aws_eks_addon" "ebs-csi" {
   resolve_conflicts_on_update = "OVERWRITE"
   service_account_role_arn    = module.ebs_csi_controller_service_account_iam_role.arn
 
+  configuration_values = jsonencode({
+    controller = {
+      volumeModificationFeature = {
+        enabled = true
+      }
+    }
+  })
+
   depends_on = [time_sleep.k8s_ready_wait]
 }
