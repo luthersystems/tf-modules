@@ -45,6 +45,8 @@ module "eks_vpc" {
 
   awslogs_driver = false
 
+  enable_csi_vol_mod = var.enable_csi_vol_mod
+
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1

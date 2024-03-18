@@ -302,3 +302,7 @@ variable "bastion_replication" {
 variable "bastion_storage_class" {
   default = "gp3"
 }
+
+variable "enable_csi_vol_mod" {
+  default = false
+}
