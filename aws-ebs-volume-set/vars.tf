@@ -61,6 +61,6 @@ variable "snapshot_ids" {
   type    = list(string)
 }
 
-variable "storage_class" {
+variable "volume_type" {
   default = "gp3"
 }

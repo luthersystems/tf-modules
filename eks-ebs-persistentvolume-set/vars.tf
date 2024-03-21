@@ -30,6 +30,11 @@ variable "volume_size_gb" {
   default = "8"
 }
 
+variable "volume_type" {
+  type    = string
+  default = "gp2"
+}
+
 variable "aws_kms_key_id" {
   type = string
 }

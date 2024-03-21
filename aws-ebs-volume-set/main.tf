@@ -27,7 +27,7 @@ resource "aws_ebs_volume" "vol" {
 
   size = var.volume_size_gb
 
-  type = var.storage_class
+  type = var.volume_type
 
   # Encrypt the volume using the environment-wide key.
   encrypted  = true
@@ -42,6 +42,10 @@ resource "aws_ebs_volume" "vol" {
     var.additional_tags,
     try(var.additional_per_vol_tags[count.index], {}),
   )
+
+  lifecycle {
+    ignore_changes = [type, size]
+  }
 }
 
 output "aws_ebs_volume_ids" {
