@@ -6,9 +6,9 @@ metadata:
   name: ${config.name}
   labels: ${config.labels_json}
 spec:
-  %{ if config.storage_class != "" ~}
+   %{~ if config.storage_class != "" ~}
   storageClassName: ${config.storage_class}
-  %{ endif ~}
+  %{~ endif ~}
   persistentVolumeReclaimPolicy: Retain
   capacity:
     storage: ${config.size_gb}Gi
