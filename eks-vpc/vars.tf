@@ -192,7 +192,7 @@ variable "csi_addon_version" {
     "1.22" = "v1.5.2-eksbuild.1"
     "1.23" = "v1.10.0-eksbuild.1"
     "1.24" = "v1.13.0-eksbuild.1"
-    "1.25" = "v1.16.0-eksbuild.1"
+    "1.25" = "v1.28.0-eksbuild.1"
     "1.26" = "v1.28.0-eksbuild.1"
     "1.27" = "v1.28.0-eksbuild.1"
     "1.28" = "v1.28.0-eksbuild.1"
