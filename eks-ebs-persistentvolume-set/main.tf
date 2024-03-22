@@ -6,6 +6,7 @@ locals {
     index             = i
     size_gb           = var.volume_size_gb
     volume_id         = module.aws_ebs_volume_set.aws_ebs_volume_ids[i]
+    storage_class     = var.k8s_storage_class
     access_modes_json = jsonencode(var.k8s_access_modes)
     fs_type           = var.fs_type
     labels_json = jsonencode(
