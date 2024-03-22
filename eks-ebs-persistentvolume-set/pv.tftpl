@@ -6,13 +6,13 @@ metadata:
   name: ${config.name}
   labels: ${config.labels_json}
 spec:
+  %{ if config.storage_class != "" ~}
+  storageClassName: ${config.storage_class}
+  %{ endif ~}
   persistentVolumeReclaimPolicy: Retain
   capacity:
     storage: ${config.size_gb}Gi
   accessModes: ${config.access_modes_json}
-  %{ if config.storage_class != "" ~}
-  storageClassName: ${config.storage_class}
-  %{ endif ~}
   awsElasticBlockStore:
     volumeID: ${config.volume_id}
     fsType: ${config.fs_type}
