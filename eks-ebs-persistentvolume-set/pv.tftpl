@@ -6,6 +6,7 @@ metadata:
   name: ${config.name}
   labels: ${config.labels_json}
 spec:
+  persistentVolumeReclaimPolicy: Retain
   capacity:
     storage: ${config.size_gb}Gi
   accessModes: ${config.access_modes_json}
