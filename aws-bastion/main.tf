@@ -80,7 +80,7 @@ resource "aws_instance" "service" {
   )
 
   root_block_device {
-    volume_type           = var.storage_class
+    volume_type           = var.volume_type
     volume_size           = var.root_volume_size_gb
     delete_on_termination = true
   }

@@ -113,6 +113,6 @@ variable "aws_availability_zones" {
   type = list(string)
 }
 
-variable "storage_class" {
+variable "volume_type" {
   default = "gp3"
 }
