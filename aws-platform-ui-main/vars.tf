@@ -94,7 +94,7 @@ variable "slack_alerts_web_hook_url_secret" {
   default = ""
 }
 
-variable "worker_storage_class" {
+variable "worker_volume_type" {
   default = "gp3"
 }
 
