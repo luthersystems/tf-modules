@@ -25,9 +25,9 @@ resource "aws_ebs_volume" "vol" {
   availability_zone = var.aws_availability_zones[count.index]
   snapshot_id       = length(var.snapshot_ids) > 0 ? var.snapshot_ids[count.index] : null
 
-  size = var.volume_size_gb
+  size = var.init_volume_size_gb
 
-  type = var.volume_type
+  type = var.init_volume_type
 
   # Encrypt the volume using the environment-wide key.
   encrypted  = true

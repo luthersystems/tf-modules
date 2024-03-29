@@ -25,7 +25,7 @@ variable "replication" {
   default = 1
 }
 
-variable "volume_size_gb" {
+variable "init_volume_size_gb" {
   type    = string
   default = "8"
 }
@@ -61,6 +61,6 @@ variable "snapshot_ids" {
   type    = list(string)
 }
 
-variable "volume_type" {
+variable "init_volume_type" {
   default = "gp3"
 }
