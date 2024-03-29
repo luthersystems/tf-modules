@@ -221,7 +221,7 @@ resource "aws_launch_template" "eks_worker" {
 
     ebs {
       volume_size           = var.root_volume_size_gb
-      volume_type           = "gp2"
+      volume_type           = var.worker_volume_type
       delete_on_termination = true
       encrypted             = true
       kms_key_id            = data.aws_kms_key.volumes.arn
@@ -231,8 +231,40 @@ resource "aws_launch_template" "eks_worker" {
   tag_specifications {
     resource_type = "instance"
 
-    tags = module.luthername_eks_worker_autoscaling_group.tags
+    tags = merge(module.luthername_eks_worker_autoscaling_group.tags,
+      {
+        resource = "vm",
+    })
   }
+
+
+  tag_specifications {
+    resource_type = "volume"
+
+    tags = merge(module.luthername_eks_worker_autoscaling_group.tags,
+      {
+        resource = "vol",
+    })
+  }
+
+  tag_specifications {
+    resource_type = "network-interface"
+
+    tags = merge(module.luthername_eks_worker_autoscaling_group.tags,
+      {
+        resource = "iface",
+    })
+  }
+
+  tag_specifications {
+    resource_type = "spot-instances-request"
+
+    tags = merge(module.luthername_eks_worker_autoscaling_group.tags,
+      {
+        resource = "spotreq",
+    })
+  }
+
 }
 
 resource "aws_eks_node_group" "eks_worker" {

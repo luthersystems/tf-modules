@@ -25,9 +25,14 @@ variable "replication" {
   default = 1
 }
 
-variable "volume_size_gb" {
+variable "init_volume_size_gb" {
   type    = string
   default = "8"
+}
+
+variable "init_volume_type" {
+  type    = string
+  default = "gp2"
 }
 
 variable "aws_kms_key_id" {

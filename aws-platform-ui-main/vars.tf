@@ -87,9 +87,18 @@ variable "monitoring" {
 }
 
 variable "preserve_coredns" {
-  default = false
+  default = true
 }
 
 variable "slack_alerts_web_hook_url_secret" {
   default = ""
 }
+
+variable "worker_volume_type" {
+  default = "gp3"
+}
+
+variable "enable_csi_vol_mod" {
+  default = false
+}
+

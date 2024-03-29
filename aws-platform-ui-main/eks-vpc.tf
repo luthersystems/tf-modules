@@ -41,7 +41,11 @@ module "eks_vpc" {
 
   slack_alerts_web_hook_url_secret = var.slack_alerts_web_hook_url_secret
 
+  worker_volume_type = var.worker_volume_type
+
   awslogs_driver = false
+
+  enable_csi_vol_mod = var.enable_csi_vol_mod
 
   providers = {
     aws           = aws

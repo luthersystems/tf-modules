@@ -4,7 +4,7 @@ locals {
     region            = var.aws_region
     zone              = var.aws_availability_zones[i % length(var.aws_availability_zones)]
     index             = i
-    size_gb           = var.volume_size_gb
+    size_gb           = var.init_volume_size_gb
     volume_id         = module.aws_ebs_volume_set.aws_ebs_volume_ids[i]
     storage_class     = var.k8s_storage_class
     access_modes_json = jsonencode(var.k8s_access_modes)
@@ -54,8 +54,10 @@ module "aws_ebs_volume_set" {
   subcomponent   = var.subcomponent
   replication    = var.replication
 
+  init_volume_type    = var.init_volume_type
+  init_volume_size_gb = var.init_volume_size_gb
+
   aws_availability_zones  = var.aws_availability_zones
-  volume_size_gb          = var.volume_size_gb
   aws_kms_key_arn         = data.aws_kms_key.main.arn
   additional_tags         = var.additional_tags
   additional_per_vol_tags = var.additional_per_vol_tags

@@ -25,7 +25,7 @@ variable "replication" {
   default = 1
 }
 
-variable "volume_size_gb" {
+variable "init_volume_size_gb" {
   type    = string
   default = "8"
 }
@@ -59,4 +59,8 @@ variable "additional_per_vol_tags" {
 variable "snapshot_ids" {
   default = []
   type    = list(string)
+}
+
+variable "init_volume_type" {
+  default = "gp3"
 }
