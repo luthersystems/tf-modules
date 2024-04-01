@@ -306,3 +306,7 @@ variable "bastion_volume_type" {
 variable "enable_csi_vol_mod" {
   default = false
 }
+
+variable "bastion_ssh_whitelist" {
+  default = ["0.0.0.0/0"]
+}
