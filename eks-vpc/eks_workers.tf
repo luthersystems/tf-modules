@@ -398,10 +398,7 @@ data "aws_iam_policy_document" "s3_readonly" {
       "s3:GetObject",
     ]
 
-    resources = [
-      "${var.common_static_s3_bucket_arn}/*",
-      "${var.common_external_s3_bucket_arn}/*",
-    ]
+    resources = local.s3_common_resource_arns
   }
 
   statement {

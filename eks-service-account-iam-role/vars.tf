@@ -28,7 +28,14 @@ variable "oidc_provider_name" {
 }
 
 variable "k8s_namespace" {
-  type = string
+  type    = string
+  default = ""
+}
+
+variable "namespace_service_accounts" {
+  type        = map(list(string))
+  description = "Map of namespaces to a list of service accounts"
+  default     = {}
 }
 
 variable "service_account" {

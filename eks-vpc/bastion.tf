@@ -142,6 +142,10 @@ locals {
 
     fluentbit_service_account_iam_role_arn = local.fluentbit_service_account_role_arn
     fluentbit_log_group_name               = aws_cloudwatch_log_group.main.name
+
+    k8s_fabric_peer_service_account_iam_role_arn    = local.fabric_peer_service_account_role_arn
+    k8s_fabric_cli_service_account_iam_role_arn     = local.fabric_cli_service_account_role_arn
+    k8s_fabric_orderer_service_account_iam_role_arn = local.fabric_orderer_service_account_role_arn
   }
   k8s_facts_json = jsonencode(local.k8s_facts)
 

@@ -8,9 +8,7 @@ locals {
   }
 
   ansible_facts_json = jsonencode(merge(local.ansible_facts, var.additional_ansible_facts))
-}
 
-locals {
   local_file_facts = {
     escaped_facts = {
       k8s_fabric_peer_docker_log_driver  = local.ansible_facts.docker_log_driver
@@ -41,6 +39,10 @@ locals {
 
     fluentbit_service_account_iam_role_arn = module.eks_vpc.k8s_facts.fluentbit_service_account_iam_role_arn
     fluentbit_log_group_name               = module.eks_vpc.k8s_facts.fluentbit_log_group_name
+
+    k8s_fabric_peer_service_account_iam_role_arn    = module.eks_vpc.fabric_peer_service_account_iam_role_arn
+    k8s_fabric_cli_service_account_iam_role_arn     = module.eks_vpc.fabric_cli_service_account_iam_role_arn
+    k8s_fabric_orderer_service_account_iam_role_arn = module.eks_vpc.fabric_orderer_service_account_iam_role_arn
   }
 }
 
