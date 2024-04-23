@@ -1,14 +1,10 @@
-data "aws_route53_zone" "external" {
-  name = "${var.domain}."
-}
-
 locals {
   fqdn_bastion_vars = {
     project     = var.luther_project
     region_code = var.aws_region_short_code[var.aws_region]
     org_part    = "${var.org_name == "" ? "" : "-"}${var.org_name}"
     env         = var.luther_env
-    domain      = var.domain
+    domain      = var.human_domain
   }
 
   fqdn_bastion_name = format("%s-%s-%s%s.%s",
@@ -20,24 +16,29 @@ locals {
   )
 }
 
-# The common name of the bastion host.  Outputs the name from the route53
-# resource to avoid race conditions with module importers trying to use
-# bastion_dns_name for ssh provisioning.  Though it's better to use
-# bastion_provisioning_dns_name for ssh provisioning on the bastion.
+locals {
+  bastion_public_dns = var.use_bastion ? module.aws_bastion[0].aws_instance_public_dns[0] : ""
+}
+
 output "bastion_dns_name" {
-  value = var.use_bastion ? aws_route53_record.bastion[0].name : ""
+  value = (var.use_bastion && var.human_domain != "") ? aws_route53_record.bastion[0].name : local.bastion_public_dns
 }
 
 # A better dns name to use for ssh provisioning on the bastion because it can
 # trigger reprovisioning if the bastion is replaced for any reason.
 output "bastion_provisioning_dns_name" {
-  value = var.use_bastion ? module.aws_bastion[0].aws_instance_public_dns[0] : ""
+  value = local.bastion_public_dns
+}
+
+data "aws_route53_zone" "external" {
+  count = (var.use_bastion && var.human_domain != "") ? 1 : 0
+  name = "${var.human_domain}."
 }
 
 resource "aws_route53_record" "bastion" {
-  count = var.use_bastion ? 1 : 0
+  count = (var.use_bastion && var.human_domain != "") ? 1 : 0
 
-  zone_id = data.aws_route53_zone.external.zone_id
+  zone_id = data.aws_route53_zone.external.0.zone_id
   name    = local.fqdn_bastion_name
   type    = "CNAME"
   ttl     = 300

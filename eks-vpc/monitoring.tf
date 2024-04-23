@@ -429,7 +429,7 @@ module "grafana_frontend_url" {
 
 locals {
   grafana_endpoint     = try(aws_grafana_workspace.grafana[0].endpoint, null)
-  grafana_human_domain = local.monitoring && var.use_human_grafana_domain ? "${module.grafana_frontend_url.prefix}.${var.domain}" : null
+  grafana_human_domain = local.monitoring && var.human_domain != "" ? "${module.grafana_frontend_url.prefix}.${var.human_domain}" : null
   grafana_endpoint_url = try(format("https://%s", local.grafana_endpoint), "")
 }
 
@@ -439,7 +439,7 @@ module "grafana_frontend" {
   source            = "../aws-cf-reverse-proxy"
   luther_env        = var.luther_env
   luther_project    = var.luther_project
-  app_naked_domain  = var.domain
+  app_naked_domain  = var.human_domain
   app_target_domain = local.grafana_human_domain
   origin_url        = local.grafana_endpoint_url
   use_302           = true

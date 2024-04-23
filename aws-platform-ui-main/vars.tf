@@ -78,10 +78,6 @@ variable "grafana_saml_metadata_xml" {
   default = ""
 }
 
-variable "use_human_grafana_domain" {
-  default = false
-}
-
 variable "monitoring" {
   default = true
 }
