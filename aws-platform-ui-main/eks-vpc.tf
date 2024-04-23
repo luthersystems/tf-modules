@@ -18,7 +18,7 @@ module "eks_vpc" {
 
   aws_account_id = local.account_id
 
-  domain = var.domain
+  human_domain = var.domain
 
   aws_kms_key_arns       = concat([data.aws_kms_key.storage.arn], var.shared_asset_kms_key_arns)
   volumes_aws_kms_key_id = data.aws_kms_key.storage.id
@@ -32,7 +32,6 @@ module "eks_vpc" {
   public_api = true
 
   monitoring                     = var.monitoring
-  use_human_grafana_domain       = var.use_human_grafana_domain
   grafana_saml_admin_role_values = var.grafana_saml_admin_role_values
   grafana_saml_role_assertion    = var.grafana_saml_role_assertion
   grafana_saml_metadata_xml      = var.grafana_saml_metadata_xml

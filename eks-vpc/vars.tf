@@ -25,8 +25,8 @@ variable "worker_instance_type" {
   default = "m6i.large"
 }
 
-variable "domain" {
-  default = "luthersystemsapp.com"
+variable "human_domain" {
+  default = ""
 }
 
 variable "use_bastion" {
@@ -251,10 +251,6 @@ variable "grafana_saml_role_assertion" {
 
 variable "grafana_saml_metadata_xml" {
   default = ""
-}
-
-variable "use_human_grafana_domain" {
-  default = false
 }
 
 variable "preserve_coredns" {
