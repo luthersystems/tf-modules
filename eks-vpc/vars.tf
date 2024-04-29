@@ -56,7 +56,7 @@ variable "root_volume_size_gb" {
 }
 
 variable "volumes_aws_kms_key_id" {
-  type = string
+  default = ""
 }
 
 variable "aws_cloudwatch_log_subscription_filter_lambda_arn" {
