@@ -39,11 +39,13 @@ variable "random_identifier_replica" {
 variable "aws_kms_key_arn" {
   type        = string
   description = "The KMS key to encrypt the bucket"
+  default     = ""
 }
 
 variable "aws_kms_key_arn_replica" {
   type        = string
   description = "Destination kms key arn for S3 bucket replication"
+  default     = ""
 }
 
 variable "lifecycle_rules" {
