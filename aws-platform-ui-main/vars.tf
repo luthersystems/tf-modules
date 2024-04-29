@@ -47,13 +47,8 @@ variable "org_name" {
 }
 
 variable "shared_asset_kms_key_arns" {
-  type = list(string)
-  default = [
-    # "arn:aws:kms:eu-west-2:967058059066:alias/common-ln-common-luther-storage-kms-umaq",
-    "arn:aws:kms:eu-west-2:967058059066:key/4cf1dd96-7fd0-4d76-8cc6-4d991d6b27cf",
-    # "arn:aws:kms:eu-west-2:967058059066:alias/common-ln-common-luther-external-kms-ehpz",
-    "arn:aws:kms:eu-west-2:967058059066:key/078b9b79-8ae6-4d50-9143-1cc3228dd232",
-  ]
+  type    = list(string)
+  default = []
 }
 
 variable "additional_ansible_facts" {

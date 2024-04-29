@@ -1,6 +1,5 @@
 locals {
-  default_role_arn   = "arn:aws:iam::967058059066:role/dlm-lifecycle"
-  execution_role_arn = var.role_arn == "" ? local.default_role_arn : var.role_arn
+  execution_role_arn = var.role_arn
   execution_role     = split("/", local.execution_role_arn)[1]
 
   source_ebs_kms_arns = [for v in data.aws_ebs_volume.target_volume : v.kms_key_id]
