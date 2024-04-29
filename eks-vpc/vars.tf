@@ -47,14 +47,8 @@ variable "bastion_aws_instance_type" {
 }
 
 variable "aws_kms_key_arns" {
-  type = list(string)
-
-  default = [
-    "arn:aws:kms:eu-west-2:967058059066:key/4cf1dd96-7fd0-4d76-8cc6-4d991d6b27cf",
-    "arn:aws:kms:eu-west-2:967058059066:key/078b9b79-8ae6-4d50-9143-1cc3228dd232",
-    "arn:aws:kms:eu-central-1:967058059066:key/0ba12ce2-28bd-4761-a578-e0900cace0ca",
-    "arn:aws:kms:eu-central-1:967058059066:key/ac3c5328-abcc-471c-8700-80929f067aa7",
-  ]
+  type    = list(string)
+  default = []
 }
 
 variable "root_volume_size_gb" {
@@ -62,8 +56,7 @@ variable "root_volume_size_gb" {
 }
 
 variable "volumes_aws_kms_key_id" {
-  type    = string
-  default = "arn:aws:kms:eu-central-1:967058059066:alias/common-de-common-luther-storage-kms-eoxl"
+  default = ""
 }
 
 variable "aws_cloudwatch_log_subscription_filter_lambda_arn" {

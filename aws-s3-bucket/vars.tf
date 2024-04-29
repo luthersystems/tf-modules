@@ -21,10 +21,7 @@ variable "random_identifier" {
 variable "aws_kms_key_arn" {
   type        = string
   description = "The KMS key to encrypt the bucket"
-
-  # This default is the Luther Systems default KMS key for S3 buckets defined
-  # in the common-infrastructure repository.
-  default = "arn:aws:kms:eu-west-2:967058059066:key/4cf1dd96-7fd0-4d76-8cc6-4d991d6b27cf"
+  default     = ""
 }
 
 variable "dr_bucket_replication" {
