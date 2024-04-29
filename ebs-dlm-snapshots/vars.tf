@@ -15,7 +15,7 @@ variable "retain_count" {
 }
 
 variable "role_arn" {
-  default = ""
+  type = string
 }
 
 variable "description" {
