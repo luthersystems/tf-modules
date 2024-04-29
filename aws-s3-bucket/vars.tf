@@ -21,6 +21,7 @@ variable "random_identifier" {
 variable "aws_kms_key_arn" {
   type        = string
   description = "The KMS key to encrypt the bucket"
+  default     = ""
 }
 
 variable "dr_bucket_replication" {
