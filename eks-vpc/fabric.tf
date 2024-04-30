@@ -181,8 +181,10 @@ locals {
   fabric_namespace_service_account_iam_role_arns = {
     for ns in distinct(concat(keys(local.fabric_ro_service_account_role_arns), keys(local.fabric_snapshot_service_account_role_arns))) :
     ns => {
-      "fabric-ro"       = lookup(local.fabric_ro_service_account_role_arns, ns, null)
-      "fabric-snapshot" = lookup(local.fabric_snapshot_service_account_role_arns, ns, null)
+      for sa, arn in {
+        "fabric-ro"       = lookup(local.fabric_ro_service_account_role_arns, ns, null),
+        "fabric-snapshot" = lookup(local.fabric_snapshot_service_account_role_arns, ns, null)
+      } : sa => arn if arn != null
     }
   }
 }
