@@ -24,8 +24,21 @@ output "arn" {
   value = aws_iam_role.role.arn
 }
 
+locals {
+  namespace_service_accounts = length(var.namespace_service_accounts) == 0 ? {
+    "${var.k8s_namespace}" = [var.service_account]
+  } : var.namespace_service_accounts
+
+  all_service_accounts = flatten([
+    for ns, accounts in local.namespace_service_accounts : [
+      for account in accounts : "system:serviceaccount:${ns}:${account}"
+    ]
+  ])
+}
+
 data "aws_iam_policy_document" "assume_role" {
   statement {
+    effect = "Allow"
     principals {
       type        = "Federated"
       identifiers = [var.oidc_provider_arn]
@@ -36,7 +49,7 @@ data "aws_iam_policy_document" "assume_role" {
     condition {
       test     = "StringEquals"
       variable = "${var.oidc_provider_name}:sub"
-      values   = ["system:serviceaccount:${var.k8s_namespace}:${var.service_account}"]
+      values   = local.all_service_accounts
     }
   }
 }

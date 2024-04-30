@@ -299,3 +299,19 @@ variable "enable_csi_vol_mod" {
 variable "bastion_ssh_whitelist" {
   default = ["0.0.0.0/0"]
 }
+
+variable "fabric_namespace_ro_service_accounts" {
+  type        = list(string)
+  description = "List of namespaces for read-only service accounts"
+  default     = ["fabric-org1", "fabric-org2", "fabric-orderer"]
+}
+
+variable "fabric_namespace_snapshot_service_accounts" {
+  type        = list(string)
+  description = "List of namespaces for snapshot service accounts"
+  default     = ["fabric-org1", "fabric-org2"]
+}
+
+variable "storage_s3_bucket_snapshot_prefix" {
+  default = "fabric-snapshots"
+}

@@ -32,7 +32,7 @@ output "bastion_provisioning_dns_name" {
 
 data "aws_route53_zone" "external" {
   count = (var.use_bastion && var.human_domain != "") ? 1 : 0
-  name = "${var.human_domain}."
+  name  = "${var.human_domain}."
 }
 
 resource "aws_route53_record" "bastion" {
@@ -142,6 +142,9 @@ locals {
 
     fluentbit_service_account_iam_role_arn = local.fluentbit_service_account_role_arn
     fluentbit_log_group_name               = aws_cloudwatch_log_group.main.name
+
+    k8s_fabric_ro_service_account_iam_role_arns       = local.fabric_ro_service_account_role_arns
+    k8s_fabric_snapshot_service_account_iam_role_arns = local.fabric_snapshot_service_account_role_arns
   }
   k8s_facts_json = jsonencode(local.k8s_facts)
 
