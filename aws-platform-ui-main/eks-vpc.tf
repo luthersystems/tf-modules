@@ -46,6 +46,8 @@ module "eks_vpc" {
 
   enable_csi_vol_mod = var.enable_csi_vol_mod
 
+  disable_s3_node_role = true
+
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1
