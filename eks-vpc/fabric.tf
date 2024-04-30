@@ -130,7 +130,7 @@ module "fabric_ro_service_account_iam_role" {
   luther_project = var.luther_project
   aws_region     = var.aws_region
   luther_env     = var.luther_env
-  component      = "fabric"
+  component      = each.key
 
   oidc_provider_name = local.oidc_provider_name
   oidc_provider_arn  = local.oidc_provider_arn
@@ -154,7 +154,7 @@ module "fabric_snapshot_service_account_iam_role" {
   luther_project = var.luther_project
   aws_region     = var.aws_region
   luther_env     = var.luther_env
-  component      = "fabric"
+  component      = each.key
 
   oidc_provider_name = local.oidc_provider_name
   oidc_provider_arn  = local.oidc_provider_arn
