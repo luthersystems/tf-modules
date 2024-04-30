@@ -40,8 +40,9 @@ locals {
     fluentbit_service_account_iam_role_arn = module.eks_vpc.k8s_facts.fluentbit_service_account_iam_role_arn
     fluentbit_log_group_name               = module.eks_vpc.k8s_facts.fluentbit_log_group_name
 
-    k8s_fabric_ro_service_account_iam_role_arns       = module.eks_vpc.fabric_ro_service_account_iam_role_arns
-    k8s_fabric_snapshot_service_account_iam_role_arns = module.eks_vpc.fabric_snapshot_service_account_iam_role_arns
+    k8s_fabric_ro_service_account_iam_role_arns        = module.eks_vpc.fabric_ro_service_account_iam_role_arns
+    k8s_fabric_snapshot_service_account_iam_role_arns  = module.eks_vpc.fabric_snapshot_service_account_iam_role_arns
+    k8s_fabric_namespace_service_account_iam_role_arns = module.eks_vpc.fabric_namespace_service_account_iam_role_arns
   }
 }
 

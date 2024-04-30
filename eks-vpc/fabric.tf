@@ -177,6 +177,14 @@ locals {
   fabric_snapshot_service_account_role_arns = {
     for key, role in module.fabric_snapshot_service_account_iam_role : key => role.arn
   }
+
+  fabric_namespace_service_account_iam_role_arns = {
+    for ns in distinct(concat(keys(local.fabric_ro_service_account_role_arns), keys(local.fabric_snapshot_service_account_role_arns))) :
+    ns => {
+      "fabric-ro"       = lookup(local.fabric_ro_service_account_role_arns, ns, null)
+      "fabric-snapshot" = lookup(local.fabric_snapshot_service_account_role_arns, ns, null)
+    }
+  }
 }
 
 output "fabric_ro_service_account_iam_role_arns" {
@@ -185,4 +193,8 @@ output "fabric_ro_service_account_iam_role_arns" {
 
 output "fabric_snapshot_service_account_iam_role_arns" {
   value = local.fabric_snapshot_service_account_role_arns
+}
+
+output "fabric_namespace_service_account_iam_role_arns" {
+  value = local.fabric_namespace_service_account_iam_role_arns
 }
