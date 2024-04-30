@@ -169,10 +169,14 @@ module "fabric_snapshot_service_account_iam_role" {
   }
 }
 
-
 locals {
-  fabric_ro_service_account_role_arns       = module.fabric_ro_service_account_iam_role.*.arn
-  fabric_snapshot_service_account_role_arns = module.fabric_snapshot_service_account_iam_role.*.arn
+  fabric_ro_service_account_role_arns = {
+    for key, role in module.fabric_ro_service_account_iam_role : key => role.arn
+  }
+
+  fabric_snapshot_service_account_role_arns = {
+    for key, role in module.fabric_snapshot_service_account_iam_role : key => role.arn
+  }
 }
 
 output "fabric_ro_service_account_iam_role_arns" {
