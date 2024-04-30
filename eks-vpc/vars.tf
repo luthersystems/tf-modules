@@ -300,47 +300,16 @@ variable "bastion_ssh_whitelist" {
   default = ["0.0.0.0/0"]
 }
 
-variable "fabric_namespace_service_accounts" {
-  type        = map(list(string))
-  description = "Map of namespaces to a list of service accounts"
-  default = {
-    "fabric-org1" = [
-      "fabric-peer0-org1",
-      "fabric-peer1-org1",
-      "fabric-peer2-org1",
-      "fabric-peer3-org1",
-      "fabric-peer4-org1",
-      "fabric-peer5-org1",
-      "fabric-cli0-org1",
-      "fabric-cli1-org1",
-      "fabric-cli2-org1",
-      "fabric-cli3-org1",
-      "fabric-cli4-org1",
-      "fabric-cli5-org1",
-    ],
-    "fabric-org2" = [
-      "fabric-peer0-org2",
-      "fabric-peer1-org2",
-      "fabric-peer2-org2",
-      "fabric-peer3-org2",
-      "fabric-peer4-org2",
-      "fabric-peer5-org2",
-      "fabric-cli0-org2",
-      "fabric-cli1-org2",
-      "fabric-cli2-org2",
-      "fabric-cli3-org2",
-      "fabric-cli4-org2",
-      "fabric-cli5-org2",
-    ],
-    "fabric-orderer" = [
-      "fabric-orderer0",
-      "fabric-orderer1",
-      "fabric-orderer2",
-      "fabric-cli0-orderer",
-      "fabric-cli1-orderer",
-      "fabric-cli2-orderer",
-    ],
-  }
+variable "fabric_namespace_ro_service_accounts" {
+  type        = list(string)
+  description = "List of namespaces for read-only service accounts"
+  default     = ["fabric-org1", "fabric-org2", "fabric-orderer"]
+}
+
+variable "fabric_namespace_snapshot_service_accounts" {
+  type        = list(string)
+  description = "List of namespaces for snapshot service accounts"
+  default     = ["fabric-org1", "fabric-org2"]
 }
 
 variable "storage_s3_bucket_snapshot_prefix" {
