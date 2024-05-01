@@ -9,15 +9,16 @@ locals {
   random_id = var.random_identifier == "" ? random_string.id.0.result : var.random_identifier
 }
 
+data "aws_region" "current" {}
+
 module "luthername_s3_bucket" {
-  source                = "../luthername"
-  luther_project        = var.luther_project
-  aws_region            = var.aws_region
-  aws_region_short_code = var.aws_region_short_code
-  luther_env            = var.luther_env
-  component             = var.component
-  resource              = "s3"
-  id                    = local.random_id
+  source         = "../luthername"
+  luther_project = var.luther_project
+  aws_region     = data.aws_region.current.name
+  luther_env     = var.luther_env
+  component      = var.component
+  resource       = "s3"
+  id             = local.random_id
 }
 
 resource "aws_s3_bucket" "bucket" {

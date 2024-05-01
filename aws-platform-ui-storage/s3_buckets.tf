@@ -2,7 +2,6 @@ module "static_bucket" {
   source          = "../aws-s3-bucket"
   luther_project  = var.luther_project
   luther_env      = var.luther_env
-  aws_region      = local.region
   component       = "static"
   aws_kms_key_arn = aws_kms_key.main.arn
 
