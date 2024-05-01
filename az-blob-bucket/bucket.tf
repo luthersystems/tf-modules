@@ -46,7 +46,7 @@ resource "azurerm_storage_account" "bucket" {
 
   network_rules {
     default_action             = var.subnet_id != "" ? "Deny" : "Allow"
-    ip_rules                   = [data.http.ip.body] # IMPORTANT: don't get locked out of storage APIs
+    ip_rules                   = [data.http.ip.response_body] # IMPORTANT: don't get locked out of storage APIs
     virtual_network_subnet_ids = var.subnet_id != "" ? [var.subnet_id] : null
     bypass                     = ["AzureServices"]
   }
