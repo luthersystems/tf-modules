@@ -2,11 +2,16 @@ locals {
   component = var.component_replica == "" ? format("%s-replica", var.component) : var.component_replica
 }
 
+
+data "aws_region" "primary" {}
+data "aws_region" "replica" {
+  provider = aws.replica
+}
+
 module "aws_s3_bucket_replica" {
   source = "../aws-s3-bucket"
 
   luther_project    = var.luther_project
-  aws_region        = var.aws_region_replica
   luther_env        = var.luther_env
   component         = local.component
   random_identifier = var.random_identifier_replica
@@ -23,7 +28,6 @@ module "aws_s3_bucket" {
   source = "../aws-s3-bucket"
 
   luther_project    = var.luther_project
-  aws_region        = var.aws_region
   luther_env        = var.luther_env
   component         = var.component
   random_identifier = var.random_identifier
@@ -36,14 +40,18 @@ module "aws_s3_bucket" {
   replication_destination_arn = module.aws_s3_bucket_replica.arn
   destination_kms_key_arn     = var.aws_kms_key_arn_replica
   replicate_deletes           = var.replicate_deletes
+
+  providers = {
+    aws = aws
+  }
 }
 
 module "replication_role" {
   source = "../aws-s3-replication-role"
 
   luther_project = var.luther_project
-  aws_region     = var.aws_region
-  aws_region_dr  = var.aws_region_replica
+  aws_region     = data.aws_region.primary.name
+  aws_region_dr  = data.aws_region.replica.name
   luther_env     = var.luther_env
   component      = local.component
   bucket_source_arns = [

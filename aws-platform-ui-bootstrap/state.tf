@@ -36,7 +36,6 @@ module "aws_s3_bucket_tfstate" {
 
   luther_project  = var.project
   luther_env      = var.env
-  aws_region      = local.region
   component       = "tfstate"
   aws_kms_key_arn = aws_kms_key.tfstate.0.arn
 
