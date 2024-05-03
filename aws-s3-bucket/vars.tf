@@ -59,5 +59,5 @@ variable "force_destroy" {
 }
 
 variable "replicate_deletes" {
-  default = false
+  default = true
 }
