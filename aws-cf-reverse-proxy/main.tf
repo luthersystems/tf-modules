@@ -16,6 +16,9 @@ data "aws_route53_zone" "site" {
 }
 
 resource "aws_acm_certificate" "site" {
+  # ACM certs for CloudFront must be in us-east-1:
+  # https://docs.aws.amazon.com/acm/latest/userguide/acm-regions.html
+  provider          = aws.us-east-1
   domain_name       = var.app_target_domain
   validation_method = "DNS"
 }
@@ -38,6 +41,7 @@ resource "aws_route53_record" "site_validation" {
 }
 
 resource "aws_acm_certificate_validation" "site" {
+  provider                = aws.us-east-1
   certificate_arn         = aws_acm_certificate.site.arn
   validation_record_fqdns = [for record in aws_route53_record.site_validation : record.fqdn]
 }
