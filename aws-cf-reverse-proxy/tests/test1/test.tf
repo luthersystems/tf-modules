@@ -6,7 +6,9 @@ terraform {
   }
 }
 
-provider "aws" {}
+provider "aws" {
+  alias = "us-east-1"
+}
 
 module "test" {
   source            = "../../"
@@ -17,6 +19,7 @@ module "test" {
   origin_url        = "origin.example.com"
 
   providers = {
-    aws = aws
+    aws           = aws
+    aws.us-east-1 = aws.us-east-1
   }
 }
