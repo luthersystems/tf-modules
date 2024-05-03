@@ -30,3 +30,7 @@ variable "origin_url" {
 variable "use_302" {
   default = false
 }
+
+variable "random_identifier" {
+  default = ""
+}
