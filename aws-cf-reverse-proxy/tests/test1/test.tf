@@ -3,6 +3,9 @@ terraform {
     aws = {
       source = "hashicorp/aws"
     }
+    random = {
+      source = "hashicorp/random"
+    }
   }
 }
 
@@ -21,5 +24,6 @@ module "test" {
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1
+    random        = random
   }
 }

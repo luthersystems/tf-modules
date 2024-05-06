@@ -1,3 +1,14 @@
+resource "random_string" "id" {
+  count   = var.random_identifier == "" ? 1 : 0
+  length  = 4
+  upper   = false
+  special = false
+}
+
+locals {
+  random_id = var.random_identifier == "" ? random_string.id.0.result : var.random_identifier
+}
+
 module "luthername_site" {
   source         = "../luthername"
   luther_project = var.luther_project
@@ -7,7 +18,7 @@ module "luthername_site" {
   component      = "api"
   subcomponent   = "site"
   resource       = "cf"
-  id             = "157d"
+  id             = local.random_id
 }
 
 data "aws_route53_zone" "site" {
