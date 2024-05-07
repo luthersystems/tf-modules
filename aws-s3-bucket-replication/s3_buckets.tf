@@ -20,7 +20,8 @@ module "aws_s3_bucket_replica" {
   force_destroy     = var.force_destroy
 
   providers = {
-    aws = aws.replica
+    aws    = aws.replica
+    random = random
   }
 }
 
@@ -41,10 +42,12 @@ module "aws_s3_bucket" {
   destination_kms_key_arn     = var.aws_kms_key_arn_replica
   replicate_deletes           = var.replicate_deletes
 
-  depends_on = [module.aws_s3_bucket_replica]
+  # the source bucket depends on versioning being enabled on the replica
+  depends_on = [module.aws_s3_bucket_replica.versioning_id]
 
   providers = {
-    aws = aws
+    aws    = aws
+    random = random
   }
 }
 
@@ -64,4 +67,9 @@ module "replication_role" {
   ]
   source_kms_key_ids      = [var.aws_kms_key_arn]
   destination_kms_key_ids = [var.aws_kms_key_arn_replica]
+
+  providers = {
+    aws    = aws
+    random = random
+  }
 }

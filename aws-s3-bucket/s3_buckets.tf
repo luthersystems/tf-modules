@@ -58,6 +58,10 @@ resource "aws_s3_bucket_versioning" "bucket" {
   }
 }
 
+output "versioning_id" {
+  value = aws_s3_bucket_versioning.bucket.id
+}
+
 resource "aws_s3_bucket_replication_configuration" "bucket" {
   count      = var.dr_bucket_replication ? 1 : 0
   bucket     = aws_s3_bucket.bucket.id
