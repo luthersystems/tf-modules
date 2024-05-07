@@ -42,7 +42,8 @@ module "aws_s3_bucket" {
   destination_kms_key_arn     = var.aws_kms_key_arn_replica
   replicate_deletes           = var.replicate_deletes
 
-  depends_on = [module.aws_s3_bucket_replica]
+  # the source bucket depends on versioning being enabled on the replica
+  depends_on = [module.aws_s3_bucket_replica.versioning_id]
 
   providers = {
     aws    = aws
