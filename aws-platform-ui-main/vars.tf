@@ -74,7 +74,7 @@ variable "grafana_saml_metadata_xml" {
 }
 
 variable "monitoring" {
-  default = true
+  default = false
 }
 
 variable "preserve_coredns" {
