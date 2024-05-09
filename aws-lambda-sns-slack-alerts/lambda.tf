@@ -112,7 +112,7 @@ resource "aws_lambda_function" "main" {
   source_code_hash = data.archive_file.lambda.output_base64sha256
   role             = aws_iam_role.lambda.arn
   handler          = "index.handler"
-  runtime          = "nodejs12.x"
+  runtime          = "nodejs18.x"
   description      = "subscribe to SNS events and post to slack"
 
   tags = {
