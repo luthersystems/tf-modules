@@ -37,7 +37,6 @@ module "test" {
   luther_env     = "env"
   luther_project = "project"
 
-  domain              = "luthersystemsapp.com"
   kubernetes_version  = "1.23"
   storage_kms_key_arn = ""
 

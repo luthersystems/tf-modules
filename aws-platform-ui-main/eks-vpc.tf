@@ -18,7 +18,7 @@ module "eks_vpc" {
 
   aws_account_id = local.account_id
 
-  human_domain = var.domain
+  human_domain = var.monitoring_human_domain
 
   aws_kms_key_arns       = concat([data.aws_kms_key.storage.arn], var.shared_asset_kms_key_arns)
   volumes_aws_kms_key_id = data.aws_kms_key.storage.id

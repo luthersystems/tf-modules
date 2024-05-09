@@ -2,8 +2,8 @@ variable "luther_env" {
   type = string
 }
 
-variable "domain" {
-  type = string
+variable "monitoring_human_domain" {
+  default = ""
 }
 
 variable "kubernetes_version" {
