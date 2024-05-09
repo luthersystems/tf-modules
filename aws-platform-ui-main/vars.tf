@@ -2,7 +2,7 @@ variable "luther_env" {
   type = string
 }
 
-variable "monitoring_human_domain" {
+variable "domain" {
   default = ""
 }
 
