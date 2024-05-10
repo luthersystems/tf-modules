@@ -22,7 +22,7 @@ resource "aws_kms_key" "main" {
 }
 
 data "aws_iam_role" "autoscaling_service_role" {
-  name = "AWSServiceRoleForAutoScaling"
+  name = var.autoscaling_service_role_name
 }
 
 data "aws_iam_policy_document" "kms_key_main" {
