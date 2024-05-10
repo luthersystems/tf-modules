@@ -25,19 +25,3 @@ data "aws_iam_policy_document" "assume_role" {
 output "admin_role" {
   value = aws_iam_role.admin.arn
 }
-
-resource "aws_route53_zone" "main" {
-  name = var.domain
-}
-
-output "domain" {
-  value = var.domain
-}
-
-output "aws_route53_zone_name_servers" {
-  value = aws_route53_zone.main.name_servers
-}
-
-output "zone_id" {
-  value = aws_route53_zone.main.zone_id
-}

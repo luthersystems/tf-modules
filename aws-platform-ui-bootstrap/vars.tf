@@ -7,9 +7,6 @@ variable "env" {
 variable "org_name" {
 }
 
-variable "domain" {
-}
-
 variable "admin_principals" {
   type = list(string)
 }
