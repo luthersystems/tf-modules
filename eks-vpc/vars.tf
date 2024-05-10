@@ -47,8 +47,7 @@ variable "bastion_aws_instance_type" {
 }
 
 variable "aws_kms_key_arns" {
-  type    = list(string)
-  default = []
+  type = list(string)
 }
 
 variable "root_volume_size_gb" {
@@ -56,7 +55,7 @@ variable "root_volume_size_gb" {
 }
 
 variable "volumes_aws_kms_key_id" {
-  default = ""
+  type = string
 }
 
 variable "aws_cloudwatch_log_subscription_filter_lambda_arn" {
