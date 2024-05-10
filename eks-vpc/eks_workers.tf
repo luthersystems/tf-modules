@@ -111,7 +111,8 @@ output "eks_worker_azs" {
 }
 
 locals {
-  eks_worker_azs = slice(local.region_availability_zones, 0, var.autoscaling_desired)
+  num_azs = min(var.autoscaling_desired, length(local.region_availability_zones))
+  eks_worker_azs = slice(local.region_availability_zones, 0, local.num_azs)
 }
 
 resource "aws_autoscaling_group" "eks_worker" {
@@ -127,7 +128,7 @@ resource "aws_autoscaling_group" "eks_worker" {
   max_size            = var.autoscaling_desired
   min_size            = var.autoscaling_desired
   name                = module.luthername_eks_worker_autoscaling_group.name
-  vpc_zone_identifier = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
+  vpc_zone_identifier = slice(aws_subnet.net.*.id, 0, local.num_azs)
 
   target_group_arns = var.worker_asg_target_group_arns
 
@@ -274,7 +275,7 @@ resource "aws_eks_node_group" "eks_worker" {
 
   cluster_name  = aws_eks_cluster.app.name
   node_role_arn = aws_iam_role.eks_worker.arn
-  subnet_ids    = slice(aws_subnet.net.*.id, 0, var.autoscaling_desired)
+  subnet_ids    = slice(aws_subnet.net.*.id, 0, local.num_azs)
 
   capacity_type = length(var.spot_price) > 0 ? "SPOT" : "ON_DEMAND"
 

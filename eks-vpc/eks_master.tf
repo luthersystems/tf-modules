@@ -27,6 +27,8 @@ resource "aws_eks_cluster" "app" {
     subnet_ids              = aws_subnet.net.*.id
   }
 
+  tags = module.luthername_eks_cluster.tags
+
   depends_on = [
     aws_iam_role_policy_attachment.eks_master_AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.eks_master_AmazonEKSServicePolicy,
