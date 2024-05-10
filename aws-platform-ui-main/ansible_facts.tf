@@ -1,9 +1,10 @@
 locals {
   ansible_facts = {
-    docker_log_driver  = "awslogs"
-    docker_log_options = module.eks_vpc.docker_log_opts
-    region             = local.region
-    env_static_bucket  = trimprefix(var.env_static_s3_bucket_arn, "arn:aws:s3:::")
+    docker_log_driver   = "awslogs"
+    docker_log_options  = module.eks_vpc.docker_log_opts
+    region              = local.region
+    env_static_bucket   = trimprefix(var.env_static_s3_bucket_arn, "arn:aws:s3:::")
+    acm_certificate_arn = local.cert_arn
   }
 
   ansible_facts_json = jsonencode(merge(local.ansible_facts, var.additional_ansible_facts))
@@ -16,8 +17,9 @@ locals {
     facts = merge(local.base_file_facts, var.additional_ansible_facts)
   }
   base_file_facts = {
-    env_region        = local.ansible_facts.region
-    env_static_bucket = local.ansible_facts.env_static_bucket
+    env_region               = local.ansible_facts.region
+    env_static_bucket        = local.ansible_facts.env_static_bucket
+    frontend_certificate_arn = local.ansible_facts.acm_certificate_arn
 
     kubectl_version                                = module.eks_vpc.k8s_facts.k8s_cluster_version
     kubectl_eks_cluster_name                       = module.eks_vpc.k8s_facts.k8s_cluster_name

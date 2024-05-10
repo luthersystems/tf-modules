@@ -25,6 +25,8 @@ locals {
       type   = dvo.resource_record_type
     }
   } : {}
+
+  cert_arn = length(var.domain) > 0 ? aws_acm_certificate.cert[0].arn : ""
 }
 
 resource "aws_route53_record" "cert_validation" {
