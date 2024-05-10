@@ -20,3 +20,7 @@ variable "external_access_principials" {
   type    = list(string)
   default = []
 }
+
+variable "autoscaling_service_role_name" {
+  default = "AWSServiceRoleForAutoScaling"
+}

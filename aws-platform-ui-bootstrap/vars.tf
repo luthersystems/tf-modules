@@ -22,6 +22,10 @@ variable "create_state_bucket" {
   default = true
 }
 
+variable "create_dns" {
+  default = true
+}
+
 variable "kms_alias_suffix" {
   default = "tfstate"
 }
