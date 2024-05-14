@@ -6,6 +6,14 @@ output "arn" {
   value = module.aws_s3_bucket.arn
 }
 
+output "bucket_regional_domain_name" {
+  value = module.aws_s3_bucket.bucket_regional_domain_name
+}
+
+output "bucket_regional_domain_name_replica" {
+  value = module.aws_s3_bucket_replica.bucket_regional_domain_name
+}
+
 output "bucket_replica" {
   value = module.aws_s3_bucket_replica.bucket
 }
