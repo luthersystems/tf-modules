@@ -111,7 +111,7 @@ output "eks_worker_azs" {
 }
 
 locals {
-  num_azs = min(var.autoscaling_desired, length(local.region_availability_zones))
+  num_azs        = min(var.autoscaling_desired, length(local.region_availability_zones))
   eks_worker_azs = slice(local.region_availability_zones, 0, local.num_azs)
 }
 
@@ -163,6 +163,16 @@ output "eks_worker_asg_name" {
   value = local.eks_worker_asg_name
 }
 
+resource "terraform_data" "worker_user_data" {
+  input            = base64gzip(local.user_data)
+
+  lifecycle {
+    ignore_changes = [input]
+  }
+
+  triggers_replace = [var.kubernetes_version]
+}
+
 
 resource "aws_launch_template" "eks_worker" {
 
@@ -190,7 +200,7 @@ resource "aws_launch_template" "eks_worker" {
   instance_type          = var.worker_instance_type
   name_prefix            = module.luthername_eks_worker_launch_template.name
   vpc_security_group_ids = local.managed_nodes ? [aws_security_group.eks_worker.id] : []
-  user_data              = base64gzip(local.user_data)
+  user_data              = terraform_data.worker_user_data.output
   key_name               = local.managed_nodes ? "" : var.aws_ssh_key_name # disable ssh keys on managed nodes
 
   dynamic "instance_market_options" {
