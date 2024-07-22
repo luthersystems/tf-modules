@@ -112,8 +112,10 @@ resource "aws_lambda_function" "main" {
   source_code_hash = data.archive_file.lambda.output_base64sha256
   role             = aws_iam_role.lambda.arn
   handler          = "index.handler"
-  runtime          = "nodejs18.x"
+  runtime          = "nodejs20.x"
   description      = "subscribe to SNS events and post to slack"
+
+  architectures = ["arm64"]
 
   tags = {
     Name         = module.luthername_lambda.names[0]

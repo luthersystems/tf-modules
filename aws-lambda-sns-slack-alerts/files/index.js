@@ -1,6 +1,6 @@
 'use strict';
 
-const AWS = require('aws-sdk');
+const { SecretsManager } = require('@aws-sdk/client-secrets-manager');
 const url = require('url');
 const https = require('https');
 const zlib = require('zlib');
@@ -8,7 +8,7 @@ const zlib = require('zlib');
 const slackChannel = process.env['slackChannel'];
 const webHookUrlSecretId = process.env['webHookUrlSecretId'];
 const secretsManagerRegion = process.env['webHookUrlSecretRegion'];
-const secretsManager = new AWS.SecretsManager({
+const secretsManager = new SecretsManager({
     region: secretsManagerRegion
 });
 
