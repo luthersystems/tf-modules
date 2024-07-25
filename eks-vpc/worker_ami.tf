@@ -3,29 +3,31 @@
 # refreshing the nodes due to a new AMI added to AWS.
 #
 locals {
-  image_id = chomp(data.local_file.worker_ami.content)
-  # TODO: is there a better way to cache this, directly in the state file?
-  ami_cache_file = "${path.root}/vars/${terraform.workspace}/worker_ami.txt"
+  image_id = terraform_data.worker_ami.output
+
+  # Determine if the instance type is Graviton (ARM architecture)
+  is_graviton = contains(["a1", "c6g", "m6g", "r6g", "t4g"], substr(var.worker_instance_type, 0, 3))
+
+  # Set the AMI filter based on the instance type's architecture
+  ami_name_filter = local.is_graviton ? "amazon-eks-arm64-node-${aws_eks_cluster.app.version}-v*" : "amazon-eks-node-${aws_eks_cluster.app.version}-v*"
 }
 
 data "aws_ami" "eks_worker" {
   filter {
     name   = "name"
-    values = ["amazon-eks-node-${aws_eks_cluster.app.version}-v*"]
+    values = [local.ami_name_filter]
   }
 
   most_recent = true
-  owners      = ["602401143452"] # Amazon EKS AMI Account ID
+  owners      = ["amazon"]
 }
 
-resource "null_resource" "get_worker_ami" {
-  triggers = { k8s_version = aws_eks_cluster.app.version }
-  provisioner "local-exec" {
-    command = "echo ${data.aws_ami.eks_worker.id} > ${local.ami_cache_file}"
+resource "terraform_data" "worker_ami" {
+  input = data.aws_ami.eks_worker.id
+
+  lifecycle {
+    ignore_changes = [input]
   }
-}
 
-data "local_file" "worker_ami" {
-  filename   = local.ami_cache_file
-  depends_on = [null_resource.get_worker_ami]
+  triggers_replace = [aws_eks_cluster.app.version, var.worker_instance_type]
 }

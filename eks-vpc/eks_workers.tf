@@ -164,7 +164,7 @@ output "eks_worker_asg_name" {
 }
 
 resource "terraform_data" "worker_user_data" {
-  input            = base64gzip(local.user_data)
+  input = base64gzip(local.user_data)
 
   lifecycle {
     ignore_changes = [input]
@@ -219,7 +219,7 @@ resource "aws_launch_template" "eks_worker" {
     create_before_destroy = true
     ignore_changes = [
       key_name,
-      #image_id,
+      image_id,
     ]
   }
 
