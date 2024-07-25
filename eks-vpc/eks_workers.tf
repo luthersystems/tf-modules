@@ -164,7 +164,7 @@ output "eks_worker_asg_name" {
 }
 
 resource "terraform_data" "worker_user_data" {
-  input            = base64gzip(local.user_data)
+  input = base64gzip(local.user_data)
 
   lifecycle {
     ignore_changes = [input]
