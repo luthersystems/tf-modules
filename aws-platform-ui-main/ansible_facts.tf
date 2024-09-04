@@ -7,15 +7,17 @@ locals {
     acm_certificate_arn = local.cert_arn
   }
 
-  ansible_facts_json = jsonencode(merge(local.ansible_facts, var.additional_ansible_facts))
-
   local_file_facts = {
     escaped_facts = {
       k8s_fabric_peer_docker_log_driver  = local.ansible_facts.docker_log_driver
       k8s_fabric_peer_docker_log_options = local.ansible_facts.docker_log_options
     }
-    facts = merge(local.base_file_facts, var.additional_ansible_facts)
+    facts = merge(local.base_file_facts, var.additional_ansible_facts, var.k8s_alt_admin_role_arn != "" ? {
+      kubectl_aws_role_arn = var.k8s_alt_admin_role_arn
+      } : {}
+    )
   }
+
   base_file_facts = {
     env_region               = local.ansible_facts.region
     env_static_bucket        = local.ansible_facts.env_static_bucket
@@ -28,6 +30,7 @@ locals {
     eks_cluster_azs                                = module.eks_vpc.k8s_facts.k8s_cluster_azs
     eks_cluster_init_eks_worker_iam_role_arn       = module.eks_vpc.k8s_facts.eks_worker_iam_role_arn
     eks_cluster_init_k8s_admin_role_arn            = module.eks_vpc.k8s_facts.k8s_admin_role_arn
+    eks_cluster_init_k8s_alt_admin_role_arn        = module.eks_vpc.k8s_facts.k8s_alt_admin_role_arn
     eks_cluster_init_storage_kms_key_id            = module.eks_vpc.k8s_facts.storage_kms_key_id
     aws_lb_controller_service_account_iam_role_arn = module.eks_vpc.k8s_facts.aws_load_balancer_controller_iam_role
 

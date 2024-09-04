@@ -3,6 +3,7 @@ locals {
     var.common_static_s3_bucket_arn != "" ? "${var.common_static_s3_bucket_arn}/*" : "",
     var.common_external_s3_bucket_arn != "" ? "${var.common_external_s3_bucket_arn}/*" : ""
   ])
+  s3_common_get_objs = compact(concat(local.s3_common_resource_arns, local.s3_prefixes))
 }
 
 data "aws_iam_policy_document" "fabric_ro" {
@@ -28,14 +29,17 @@ data "aws_iam_policy_document" "fabric_ro" {
     resources = var.aws_kms_key_arns
   }
 
-  statement {
-    effect = "Allow"
+  dynamic "statement" {
+    for_each = length(local.s3_common_get_objs) > 0 ? [1] : []
+    content {
+      effect = "Allow"
 
-    actions = [
-      "s3:GetObject",
-    ]
+      actions = [
+        "s3:GetObject",
+      ]
 
-    resources = concat(local.s3_common_resource_arns, local.s3_prefixes)
+      resources = local.s3_common_get_objs
+    }
   }
 
   statement {
@@ -76,14 +80,17 @@ data "aws_iam_policy_document" "fabric_snapshot" {
     resources = var.aws_kms_key_arns
   }
 
-  statement {
-    effect = "Allow"
+  dynamic "statement" {
+    for_each = length(local.s3_common_get_objs) > 0 ? [1] : []
+    content {
+      effect = "Allow"
 
-    actions = [
-      "s3:GetObject",
-    ]
+      actions = [
+        "s3:GetObject",
+      ]
 
-    resources = concat(local.s3_common_resource_arns, local.s3_prefixes)
+      resources = local.s3_common_get_objs
+    }
   }
 
   dynamic "statement" {

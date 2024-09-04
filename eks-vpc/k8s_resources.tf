@@ -4,6 +4,17 @@ data "aws_iam_role" "assumed_role_admin" {
 
 # deprecated - moved to ansible
 locals {
+
+  alt_admin_role_entry = (
+    var.has_alt_admin_role ? <<ALTADMIN
+    - rolearn: ${local.k8s_alt_admin_role_arn}
+      username: luther:admin
+      groups:
+        - system:masters
+ALTADMIN
+    : ""
+  )
+
   config_map_aws_auth = <<CONFIGMAPAWSAUTH
 apiVersion: v1
 kind: ConfigMap
@@ -21,6 +32,7 @@ data:
       username: luther:admin
       groups:
         - system:masters
+${local.alt_admin_role_entry}
 CONFIGMAPAWSAUTH
 
   # storageclass_gp2_encrypted declares "gp2-encrypted" for backwards

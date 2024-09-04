@@ -16,11 +16,32 @@ variable "luther_env" {
   type = string
 }
 
-variable "external_access_principials" {
+variable "external_access_principals" {
   type    = list(string)
   default = []
 }
 
 variable "autoscaling_service_role_name" {
+  type    = string
   default = "AWSServiceRoleForAutoScaling"
+}
+
+variable "has_github" {
+  type    = bool
+  default = false
+}
+
+variable "ci_github_org" {
+  type    = string
+  default = ""
+}
+
+variable "ci_github_repo" {
+  type    = string
+  default = ""
+}
+
+variable "ci_github_env" {
+  type    = string
+  default = ""
 }
