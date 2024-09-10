@@ -68,7 +68,7 @@ data "aws_iam_policy_document" "get_vault_password_secret" {
 }
 
 resource "aws_iam_policy" "env_admin_vault_password_secret_policy" {
-  count = var.has_vault ? 0 : 1
+  count = var.has_vault && var.has_env_admin ? 0 : 1
 
   name   = "${module.luthername_vault_password_secret.name}-admin"
   policy = data.aws_iam_policy_document.get_vault_password_secret.json
@@ -77,7 +77,7 @@ resource "aws_iam_policy" "env_admin_vault_password_secret_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "env_admin_vault_password_secret_policy_attachment" {
-  count = var.has_vault ? 0 : 1
+  count = var.has_vault && var.has_env_admin ? 0 : 1
 
   role       = aws_iam_role.env_admin_role[0].name
   policy_arn = aws_iam_policy.env_admin_vault_password_secret_policy[0].arn
