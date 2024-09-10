@@ -33,12 +33,12 @@ variable "has_github" {
 
 variable "has_env_admin" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "has_vault" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "ci_github_org" {
