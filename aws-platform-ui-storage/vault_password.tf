@@ -26,7 +26,7 @@ resource "random_password" "vault_password" {
 }
 
 resource "aws_secretsmanager_secret" "vault_password" {
-  count = var.has_vault ? 0 : 1
+  count = var.has_vault ? 1 : 0
 
   name        = module.luthername_vault_password_secret.name
   description = "This is a secret used for ansible vault password"
@@ -35,7 +35,7 @@ resource "aws_secretsmanager_secret" "vault_password" {
 }
 
 resource "aws_secretsmanager_secret_version" "vault_password" {
-  count = var.has_vault ? 0 : 1
+  count = var.has_vault ? 1 : 0
 
   secret_id      = aws_secretsmanager_secret.vault_password[0].id
   secret_string  = random_password.vault_password.result
