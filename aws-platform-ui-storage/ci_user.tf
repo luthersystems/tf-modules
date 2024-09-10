@@ -28,6 +28,8 @@ data "aws_iam_policy_document" "env_admin_assume_role" {
 }
 
 resource "aws_iam_role" "env_admin_role" {
+  count = var.has_env_admin ? 1 : 0
+
   name               = "${module.luthername_env_admin_role.name}-role"
   description        = "Provides environment Admin level access"
   assume_role_policy = data.aws_iam_policy_document.env_admin_assume_role.json
@@ -36,11 +38,11 @@ resource "aws_iam_role" "env_admin_role" {
 }
 
 output "env_admin_role_name" {
-  value = aws_iam_role.env_admin_role.name
+  value = try(aws_iam_role.env_admin_role[0].name, null)
 }
 
 output "env_admin_role_arn" {
-  value = aws_iam_role.env_admin_role.arn
+  value = try(aws_iam_role.env_admin_role[0].arn, null)
 }
 
 resource "aws_iam_openid_connect_provider" "github" {
@@ -124,4 +126,46 @@ output "ci_role_name" {
 
 output "ci_role_arn" {
   value = aws_iam_role.ci_role.arn
+}
+
+data "aws_iam_policy_document" "ecr_push_ci" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecr:GetAuthorizationToken",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:PutImage",
+      "ecr:InitiateLayerUpload",
+      "ecr:UploadLayerPart",
+      "ecr:CompleteLayerUpload",
+      "ecr:DescribeRepositories",
+      "ecr:DescribeImages",
+      "ecr:ListImages",
+      "ecr:BatchDeleteImage",
+    ]
+    resources = var.ci_ecr_push_arns
+  }
+}
+
+resource "aws_iam_policy" "ecr_push_ci" {
+  count = length(var.ci_ecr_push_arns) == 0 ? 0 : 1
+
+  name   = "${module.luthername_ci_role.name}-ecr-rw"
+  path   = "/"
+  policy = data.aws_iam_policy_document.ecr_push_ci.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecr_push_ci" {
+  count = length(var.ci_ecr_push_arns) == 0 ? 0 : 1
+
+  role       = aws_iam_role.ci_role.name
+  policy_arn = aws_iam_policy.ecr_push_ci[0].arn
 }

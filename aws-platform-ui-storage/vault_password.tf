@@ -26,6 +26,8 @@ resource "random_password" "vault_password" {
 }
 
 resource "aws_secretsmanager_secret" "vault_password" {
+  count = var.has_vault ? 0 : 1
+
   name        = module.luthername_vault_password_secret.name
   description = "This is a secret used for ansible vault password"
 
@@ -33,17 +35,19 @@ resource "aws_secretsmanager_secret" "vault_password" {
 }
 
 resource "aws_secretsmanager_secret_version" "vault_password" {
-  secret_id      = aws_secretsmanager_secret.vault_password.id
+  count = var.has_vault ? 0 : 1
+
+  secret_id      = aws_secretsmanager_secret.vault_password[0].id
   secret_string  = random_password.vault_password.result
   version_stages = ["AWSCURRENT"]
 }
 
 output "vault_password_secret_name" {
-  value = aws_secretsmanager_secret.vault_password.name
+  value = try(aws_secretsmanager_secret.vault_password[0].name, null)
 }
 
 output "vault_password_secret_arn" {
-  value = aws_secretsmanager_secret.vault_password.arn
+  value = try(aws_secretsmanager_secret.vault_password[0].arn, null)
 }
 
 data "aws_iam_policy_document" "get_vault_password_secret" {
@@ -56,13 +60,16 @@ data "aws_iam_policy_document" "get_vault_password_secret" {
       "secretsmanager:ListSecretVersionIds",
     ]
 
+
     resources = [
-      aws_secretsmanager_secret.vault_password.arn,
+      try(aws_secretsmanager_secret.vault_password[0].arn, null),
     ]
   }
 }
 
 resource "aws_iam_policy" "env_admin_vault_password_secret_policy" {
+  count = var.has_vault ? 0 : 1
+
   name   = "${module.luthername_vault_password_secret.name}-admin"
   policy = data.aws_iam_policy_document.get_vault_password_secret.json
 
@@ -70,6 +77,8 @@ resource "aws_iam_policy" "env_admin_vault_password_secret_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "env_admin_vault_password_secret_policy_attachment" {
-  role       = aws_iam_role.env_admin_role.name
-  policy_arn = aws_iam_policy.env_admin_vault_password_secret_policy.arn
+  count = var.has_vault ? 0 : 1
+
+  role       = aws_iam_role.env_admin_role[0].name
+  policy_arn = aws_iam_policy.env_admin_vault_password_secret_policy[0].arn
 }

@@ -31,6 +31,16 @@ variable "has_github" {
   default = false
 }
 
+variable "has_env_admin" {
+  type    = bool
+  default = true
+}
+
+variable "has_vault" {
+  type    = bool
+  default = true
+}
+
 variable "ci_github_org" {
   type    = string
   default = ""
@@ -44,4 +54,9 @@ variable "ci_github_repo" {
 variable "ci_github_env" {
   type    = string
   default = ""
+}
+
+variable "ci_ecr_push_arns" {
+  type    = list(string)
+  default = []
 }
