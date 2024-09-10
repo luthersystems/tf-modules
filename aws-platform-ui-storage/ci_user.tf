@@ -56,7 +56,9 @@ resource "aws_iam_openid_connect_provider" "github" {
 }
 
 locals {
-  ci_github_sub_str = "repo:${var.ci_github_org}/${var.ci_github_repo}:environment:${var.ci_github_env}"
+  # TODO generalize this by creating a new var that is an array of ojects with these values, and construct
+  # the sub strs from these objects
+  ci_github_sub_strs = [for sub in var.ci_github_repos : "repo:${sub.org}/${sub.repo}:environment:${sub.env}"]
 }
 
 data "aws_iam_policy_document" "ci_assume_role" {
@@ -97,7 +99,7 @@ data "aws_iam_policy_document" "ci_assume_role" {
       condition {
         test     = "StringLike"
         variable = "token.actions.githubusercontent.com:sub"
-        values   = [local.ci_github_sub_str]
+        values   = local.ci_github_sub_strs
       }
     }
   }

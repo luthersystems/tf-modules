@@ -41,19 +41,13 @@ variable "has_vault" {
   default = false
 }
 
-variable "ci_github_org" {
-  type    = string
-  default = ""
-}
-
-variable "ci_github_repo" {
-  type    = string
-  default = ""
-}
-
-variable "ci_github_env" {
-  type    = string
-  default = ""
+variable "ci_github_repos" {
+  description = "An array of GitHub org, repo, and environment combinations."
+  type = list(object({
+    org  = string
+    repo = string
+    env  = string
+  }))
 }
 
 variable "ci_ecr_push_arns" {
