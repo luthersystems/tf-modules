@@ -17,6 +17,7 @@ variable "component" {
 }
 
 variable "kubernetes_version" {
+  type    = string
   default = "1.23"
 }
 
@@ -26,18 +27,22 @@ variable "worker_instance_type" {
 }
 
 variable "human_domain" {
+  type    = string
   default = ""
 }
 
 variable "use_bastion" {
+  type    = bool
   default = false
 }
 
 variable "bastion_ssh_port" {
+  type    = number
   default = 2222
 }
 
 variable "bastion_ami" {
+  type    = string
   default = ""
 }
 
@@ -51,6 +56,7 @@ variable "aws_kms_key_arns" {
 }
 
 variable "root_volume_size_gb" {
+  type    = number
   default = 30
 }
 
@@ -80,6 +86,7 @@ variable "aws_autorecovery_sns_arn" {
 }
 
 variable "ssh_public_keys_s3_bucket_arn" {
+  type    = string
   default = ""
 }
 
@@ -94,6 +101,7 @@ variable "common_external_s3_bucket_arn" {
 }
 
 variable "storage_s3_bucket_arn" {
+  type    = string
   default = ""
 }
 
@@ -104,6 +112,7 @@ variable "storage_s3_key_prefixes" {
 }
 
 variable "autoscaling_desired" {
+  type    = number
   default = 3
 }
 
@@ -123,42 +132,52 @@ variable "public_api" {
 }
 
 variable "spot_price" {
+  type    = string
   default = ""
 }
 
 variable "disable_s3_node_role" {
+  type    = bool
   default = false
 }
 
 variable "disable_alb_node_role" {
+  type    = bool
   default = true
 }
 
 variable "disable_cni_node_role" {
+  type    = bool
   default = true
 }
 
 variable "disable_csi_node_role" {
+  type    = bool
   default = true
 }
 
 variable "kubeproxy_addon" {
+  type    = bool
   default = true
 }
 
 variable "cni_addon" {
+  type    = bool
   default = true
 }
 
 variable "csi_addon" {
+  type    = bool
   default = true
 }
 
 variable "coredns_addon" {
+  type    = bool
   default = true
 }
 
 variable "managed_nodes" {
+  type    = bool
   default = true
 }
 
@@ -167,6 +186,7 @@ variable "managed_nodes" {
 
 # https://github.com/aws/amazon-vpc-cni-k8s/releases
 variable "cni_addon_version" {
+  type = map(string)
   default = {
     "1.21" = "v1.9.3-eksbuild.1"
     "1.22" = "v1.10.2-eksbuild.1"
@@ -182,6 +202,7 @@ variable "cni_addon_version" {
 
 # https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/CHANGELOG.md
 variable "csi_addon_version" {
+  type = map(string)
   default = {
     "1.21" = ""
     "1.22" = "v1.5.2-eksbuild.1"
@@ -196,6 +217,7 @@ variable "csi_addon_version" {
 }
 
 variable "kubeproxy_addon_version" {
+  type = map(string)
   default = {
     "1.21" = "v1.21.2-eksbuild.2"
     "1.22" = "v1.22.6-eksbuild.1"
@@ -210,6 +232,7 @@ variable "kubeproxy_addon_version" {
 }
 
 variable "coredns_addon_version" {
+  type = map(string)
   default = {
     "1.21" = "v1.8.4-eksbuild.1"
     "1.22" = "v1.8.7-eksbuild.1"
@@ -224,6 +247,7 @@ variable "coredns_addon_version" {
 }
 
 variable "public_worker_ip" {
+  type    = bool
   default = true
 }
 
@@ -231,10 +255,12 @@ variable "public_worker_ip" {
 # Helper to upgrade from 1.21 to 1.23
 #
 variable "k8s1_21to1_23_upgrade_step" {
+  type    = number
   default = 0
 }
 
 variable "monitoring" {
+  type    = bool
   default = false
 }
 
@@ -244,26 +270,32 @@ variable "grafana_saml_admin_role_values" {
 }
 
 variable "grafana_saml_role_assertion" {
+  type    = string
   default = ""
 }
 
 variable "grafana_saml_metadata_xml" {
+  type    = string
   default = ""
 }
 
 variable "preserve_coredns" {
-  default = true
+  type    = bool
+  default = false
 }
 
 variable "slack_alerts_web_hook_url_secret" {
+  type    = string
   default = ""
 }
 
 variable "alert_rules" {
+  type    = string
   default = ""
 }
 
 variable "awslogs_driver" {
+  type    = bool
   default = true
 }
 
@@ -286,22 +318,27 @@ variable "instance_memory_threshold" {
 }
 
 variable "worker_volume_type" {
-  default = "gp2"
+  type    = string
+  default = "gp3"
 }
 
 variable "bastion_replication" {
+  type    = number
   default = 1
 }
 
 variable "bastion_volume_type" {
+  type    = string
   default = "gp3"
 }
 
 variable "enable_csi_vol_mod" {
-  default = false
+  type    = bool
+  default = true
 }
 
 variable "bastion_ssh_whitelist" {
+  type    = list(string)
   default = ["0.0.0.0/0"]
 }
 
@@ -318,5 +355,16 @@ variable "fabric_namespace_snapshot_service_accounts" {
 }
 
 variable "storage_s3_bucket_snapshot_prefix" {
+  type    = string
   default = "fabric-snapshots"
+}
+
+variable "has_alt_admin_role" {
+  type    = bool
+  default = false
+}
+
+variable "k8s_alt_admin_role_arn" {
+  type    = string
+  default = ""
 }

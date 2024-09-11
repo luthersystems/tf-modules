@@ -12,21 +12,21 @@ module "static_bucket" {
 }
 
 resource "aws_s3_bucket_policy" "static" {
-  count  = length(var.external_access_principials) == 0 ? 0 : 1
+  count  = length(var.external_access_principals) == 0 ? 0 : 1
   bucket = module.static_bucket.bucket
   policy = data.aws_iam_policy_document.external_access.json
 }
 
 data "aws_iam_policy_document" "external_access" {
   dynamic "statement" {
-    for_each = length(var.external_access_principials) == 0 ? [] : [1]
+    for_each = length(var.external_access_principals) == 0 ? [] : [1]
 
     content {
       sid = "externalGet"
 
       principals {
         type        = "AWS"
-        identifiers = var.external_access_principials
+        identifiers = var.external_access_principals
       }
 
       actions   = ["s3:GetObject"]
@@ -35,14 +35,14 @@ data "aws_iam_policy_document" "external_access" {
   }
 
   dynamic "statement" {
-    for_each = length(var.external_access_principials) == 0 ? [] : [1]
+    for_each = length(var.external_access_principals) == 0 ? [] : [1]
 
     content {
       sid = "externalList"
 
       principals {
         type        = "AWS"
-        identifiers = var.external_access_principials
+        identifiers = var.external_access_principals
       }
 
       actions   = ["s3:ListBucket"]

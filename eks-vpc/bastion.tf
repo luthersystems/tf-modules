@@ -120,6 +120,7 @@ resource "null_resource" "bastion_k8s_provisioning" {
 }
 
 locals {
+
   bastion_name = var.use_bastion ? module.aws_bastion[0].name : ""
 
   k8s_facts = {
@@ -135,6 +136,7 @@ locals {
     aws_load_balancer_controller_iam_role  = module.aws_lb_controller_service_account_iam_role.arn
     eks_worker_iam_role_arn                = aws_iam_role.eks_worker.arn
     k8s_admin_role_arn                     = data.aws_iam_role.assumed_role_admin.arn
+    k8s_alt_admin_role_arn                 = local.k8s_alt_admin_role_arn
     storage_kms_key_id                     = var.volumes_aws_kms_key_id
 
     prometheus_service_account_iam_role_arn = local.prometheus_service_account_role_arn

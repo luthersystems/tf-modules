@@ -1,10 +1,3 @@
-data "aws_ami" "ubuntu" {
-  // Canonical
-  owners      = ["099720109477"]
-  most_recent = true
-  name_regex  = "^ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-\\d{8}$"
-}
-
 module "eks_vpc" {
   source = "../eks-vpc"
 
@@ -35,6 +28,8 @@ module "eks_vpc" {
   grafana_saml_admin_role_values = var.grafana_saml_admin_role_values
   grafana_saml_role_assertion    = var.grafana_saml_role_assertion
   grafana_saml_metadata_xml      = var.grafana_saml_metadata_xml
+  common_static_s3_bucket_arn    = var.common_static_s3_bucket_arn
+  common_external_s3_bucket_arn  = var.common_external_s3_bucket_arn
 
   preserve_coredns = var.preserve_coredns
 
@@ -47,6 +42,9 @@ module "eks_vpc" {
   enable_csi_vol_mod = var.enable_csi_vol_mod
 
   disable_s3_node_role = true
+
+  has_alt_admin_role     = var.has_alt_admin_role
+  k8s_alt_admin_role_arn = var.k8s_alt_admin_role_arn
 
   providers = {
     aws           = aws
@@ -84,10 +82,6 @@ output "eks_worker_role_arn" {
 
 output "eks_node_sa_role_arn" {
   value = module.eks_vpc.aws_iam_role_eks_node_sa_arn
-}
-
-data "aws_iam_role" "admin" {
-  name = "admin"
 }
 
 output "grafana_api_key" {

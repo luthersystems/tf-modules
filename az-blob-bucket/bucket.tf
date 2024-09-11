@@ -6,7 +6,7 @@ resource "random_string" "id" {
 }
 
 locals {
-  random_id = var.random_identifier == "" ? random_string.id.0.result : var.random_identifier
+  random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
 }
 
 module "luthername_sa_bucket" {
@@ -29,7 +29,7 @@ resource "azurerm_storage_account" "bucket" {
   account_tier             = "Standard"
   account_replication_type = "GRS"
 
-  enable_https_traffic_only = true
+  https_traffic_only_enabled = true
 
   blob_properties {
     versioning_enabled  = true

@@ -40,14 +40,14 @@ data "aws_iam_policy_document" "kms_key_main" {
   }
 
   dynamic "statement" {
-    for_each = length(var.external_access_principials) == 0 ? [] : [1]
+    for_each = length(var.external_access_principals) == 0 ? [] : [1]
 
     content {
       sid = "External account S3 Decrypt access"
 
       principals {
         type        = "AWS"
-        identifiers = var.external_access_principials
+        identifiers = var.external_access_principals
       }
 
       actions = [
@@ -67,14 +67,14 @@ data "aws_iam_policy_document" "kms_key_main" {
   }
 
   dynamic "statement" {
-    for_each = length(var.external_access_principials) == 0 ? [] : [1]
+    for_each = length(var.external_access_principals) == 0 ? [] : [1]
 
     content {
       sid = "External account key info access"
 
       principals {
         type        = "AWS"
-        identifiers = var.external_access_principials
+        identifiers = var.external_access_principals
       }
 
       actions = [
