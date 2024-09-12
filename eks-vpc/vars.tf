@@ -264,6 +264,11 @@ variable "monitoring" {
   default = false
 }
 
+variable "logs" {
+  type    = bool
+  default = true
+}
+
 variable "grafana_saml_admin_role_values" {
   type    = list(string)
   default = []

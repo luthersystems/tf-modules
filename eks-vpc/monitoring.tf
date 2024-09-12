@@ -73,7 +73,7 @@ EOT
 }
 
 resource "aws_prometheus_rule_group_namespace" "alert_rules" {
-  count = local.monitoring ? 1 : 0
+  count = local.alerts ? 1 : 0
 
   name         = "alert-rules"
   workspace_id = aws_prometheus_workspace.k8s[0].id
@@ -81,7 +81,7 @@ resource "aws_prometheus_rule_group_namespace" "alert_rules" {
 }
 
 data "aws_iam_policy_document" "alerts_publish" {
-  count = local.monitoring ? 1 : 0
+  count = local.alerts ? 1 : 0
 
   statement {
     sid = "Allow_Publish_Alarms"
@@ -129,7 +129,7 @@ locals {
 }
 
 resource "aws_secretsmanager_secret" "slack_alerts_web_hook_url" {
-  count = local.monitoring ? 1 : 0
+  count = local.alerts ? 1 : 0
 
   name       = module.luthername_slack_alerts_web_hook_url_secret.name
   kms_key_id = local.slack_secret_kms_arn
@@ -138,7 +138,7 @@ resource "aws_secretsmanager_secret" "slack_alerts_web_hook_url" {
 }
 
 resource "aws_secretsmanager_secret_version" "slack_alerts_web_hook_url_secret" {
-  count = local.monitoring && var.slack_alerts_web_hook_url_secret != "" ? 1 : 0
+  count = local.alerts ? 1 : 0
 
   secret_id     = aws_secretsmanager_secret.slack_alerts_web_hook_url[0].id
   secret_string = var.slack_alerts_web_hook_url_secret
@@ -148,8 +148,12 @@ resource "aws_secretsmanager_secret_version" "slack_alerts_web_hook_url_secret" 
   }
 }
 
+locals {
+  alerts = var.monitoring && var.slack_alerts_web_hook_url_secret != ""
+}
+
 module "slack_sns_alert_lambda" {
-  count = local.monitoring ? 1 : 0
+  count = local.alerts ? 1 : 0
 
   source = "../aws-lambda-sns-slack-alerts"
 
@@ -163,20 +167,20 @@ module "slack_sns_alert_lambda" {
 }
 
 resource "aws_sns_topic" "alerts" {
-  count = local.monitoring ? 1 : 0
+  count = local.alerts ? 1 : 0
 
   name = module.luthername_prometheus.name
 }
 
 resource "aws_sns_topic_policy" "alerts" {
-  count = local.monitoring ? 1 : 0
+  count = local.alerts ? 1 : 0
 
   arn    = aws_sns_topic.alerts[0].arn
   policy = data.aws_iam_policy_document.alerts_publish[0].json
 }
 
 resource "aws_prometheus_alert_manager_definition" "alerts" {
-  count = local.monitoring ? 1 : 0
+  count = local.alerts ? 1 : 0
 
   workspace_id = aws_prometheus_workspace.k8s[0].id
   definition   = <<EOT

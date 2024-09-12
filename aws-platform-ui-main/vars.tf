@@ -114,3 +114,8 @@ variable "has_alt_admin_role" {
   type    = bool
   default = false
 }
+
+variable "logs" {
+  type    = bool
+  default = false
+}
