@@ -49,7 +49,7 @@ resource "random_string" "fluentbit" {
 }
 
 module "fluentbit_service_account_iam_role" {
-  count = local.monitoring ? 1 : 0
+  count = local.logs ? 1 : 0
 
   source = "../eks-service-account-iam-role"
 
@@ -68,6 +68,8 @@ module "fluentbit_service_account_iam_role" {
 }
 
 locals {
+  logs = var.logs || local.monitoring
+
   fluentbit_service_account_role_arn = try(module.fluentbit_service_account_iam_role[0].arn, "")
 }
 
@@ -76,7 +78,7 @@ output "fluentbit_service_account_role_arn" {
 }
 
 data "aws_iam_policy_document" "mon_fluentbit" {
-  count = local.monitoring ? 1 : 0
+  count = local.logs ? 1 : 0
 
   statement {
     actions = [

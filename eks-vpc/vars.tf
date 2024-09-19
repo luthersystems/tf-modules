@@ -197,6 +197,7 @@ variable "cni_addon_version" {
     "1.27" = "v1.17.1-eksbuild.1"
     "1.28" = "v1.17.1-eksbuild.1"
     "1.29" = "v1.18.2-eksbuild.1"
+    "1.30" = "v1.18.3-eksbuild.1"
   }
 }
 
@@ -213,6 +214,7 @@ variable "csi_addon_version" {
     "1.27" = "v1.28.0-eksbuild.1"
     "1.28" = "v1.28.0-eksbuild.1"
     "1.29" = "v1.31.0-eksbuild.1"
+    "1.30" = "v1.31.1-eksbuild.1"
   }
 }
 
@@ -228,6 +230,7 @@ variable "kubeproxy_addon_version" {
     "1.27" = "v1.27.1-eksbuild.1"
     "1.28" = "v1.28.1-eksbuild.1"
     "1.29" = "v1.29.0-eksbuild.2"
+    "1.30" = "v1.30.0-eksbuild.3"
   }
 }
 
@@ -243,6 +246,7 @@ variable "coredns_addon_version" {
     "1.27" = "v1.10.1-eksbuild.1"
     "1.28" = "v1.10.1-eksbuild.4"
     "1.29" = "v1.11.1-eksbuild.4"
+    "1.30" = "v1.11.1-eksbuild.9"
   }
 }
 
@@ -262,6 +266,11 @@ variable "k8s1_21to1_23_upgrade_step" {
 variable "monitoring" {
   type    = bool
   default = false
+}
+
+variable "logs" {
+  type    = bool
+  default = true
 }
 
 variable "grafana_saml_admin_role_values" {

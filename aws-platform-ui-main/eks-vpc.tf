@@ -25,6 +25,7 @@ module "eks_vpc" {
   public_api = true
 
   monitoring                     = var.monitoring
+  logs                           = var.logs
   grafana_saml_admin_role_values = var.grafana_saml_admin_role_values
   grafana_saml_role_assertion    = var.grafana_saml_role_assertion
   grafana_saml_metadata_xml      = var.grafana_saml_metadata_xml
