@@ -11,6 +11,8 @@ module "luthername_redirect_lambda_role" {
 }
 
 resource "aws_iam_role" "lambda_edge_role" {
+  provider = aws.us-east-1
+
   count = var.use_302 ? 1 : 0
 
   name = module.luthername_redirect_lambda_role[0].name
@@ -28,6 +30,8 @@ resource "aws_iam_role" "lambda_edge_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_edge_policy" {
+  provider = aws.us-east-1
+
   count = var.use_302 ? 1 : 0
 
   role       = aws_iam_role.lambda_edge_role[0].name
@@ -47,6 +51,8 @@ module "luthername_redirect_lambda" {
 }
 
 resource "aws_lambda_function" "edge_function" {
+  provider = aws.us-east-1
+
   count = var.use_302 ? 1 : 0
 
   function_name = module.luthername_redirect_lambda[0].name
