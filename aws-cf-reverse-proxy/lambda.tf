@@ -54,9 +54,8 @@ resource "aws_lambda_function" "edge_function" {
   handler       = "index.handler"
   runtime       = "nodejs20.x"
   publish       = true
-  filename      = "${path.module}/lambda.zip"
+  filename      = data.archive_file.lambda_edge_zip.output_path
 
-  # Environment variables or other config
   environment {
     variables = {
       REDIRECT_URL       = var.origin_url
