@@ -65,19 +65,6 @@ resource "aws_route53_record" "site" {
   records = [aws_cloudfront_distribution.site.domain_name]
 }
 
-resource "aws_cloudfront_function" "this" {
-  count = var.use_302 ? 1 : 0
-
-  name    = module.luthername_site.name
-  runtime = "cloudfront-js-1.0"
-  comment = "Static 302 redirect from ${var.app_target_domain} to ${var.origin_url}"
-  publish = true
-  code = templatefile("${path.module}/src/index.js.tpl", {
-    REDIRECT_URL       = var.origin_url,
-    REDIRECT_HTTP_CODE = 302,
-  })
-}
-
 locals {
   origin_domain = replace(var.origin_url, "/(https?://)|(/)/", "")
 }
@@ -85,7 +72,7 @@ locals {
 resource "aws_cloudfront_distribution" "site" {
   enabled      = true
   price_class  = "PriceClass_200"
-  http_version = "http1.1"
+  http_version = "http2"
 
   origin {
     origin_id   = "origin-site"
@@ -95,7 +82,7 @@ resource "aws_cloudfront_distribution" "site" {
       origin_protocol_policy = "https-only"
       http_port              = "80"
       https_port             = "443"
-      origin_ssl_protocols   = ["TLSv1"]
+      origin_ssl_protocols   = ["TLSv1.2"]
     }
 
     custom_header {
@@ -104,17 +91,8 @@ resource "aws_cloudfront_distribution" "site" {
     }
   }
 
-  default_root_object = "index.html"
-
-  custom_error_response {
-    error_code            = "404"
-    error_caching_min_ttl = "360"
-    response_code         = "200"
-    response_page_path    = "/index.html"
-  }
-
   default_cache_behavior {
-    allowed_methods = ["GET", "HEAD", "DELETE", "OPTIONS", "PATCH", "POST", "PUT"]
+    allowed_methods = ["GET", "HEAD"]
     cached_methods  = ["GET", "HEAD"]
 
     forwarded_values {
@@ -133,14 +111,16 @@ resource "aws_cloudfront_distribution" "site" {
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
 
-    dynamic "function_association" {
-      for_each = var.use_302 ? [var.use_302] : []
+    dynamic "lambda_function_association" {
+      for_each = var.use_302 ? [1] : []
 
       content {
         event_type   = "viewer-request"
-        function_arn = aws_cloudfront_function.this[0].arn
+        lambda_arn   = aws_lambda_function.edge_function[0].qualified_arn
+        include_body = false
       }
     }
+
   }
 
   restrictions {
@@ -152,7 +132,7 @@ resource "aws_cloudfront_distribution" "site" {
   viewer_certificate {
     acm_certificate_arn      = aws_acm_certificate_validation.site.certificate_arn
     ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1"
+    minimum_protocol_version = "TLSv1.2_2018"
   }
 
   aliases = [var.app_target_domain]
