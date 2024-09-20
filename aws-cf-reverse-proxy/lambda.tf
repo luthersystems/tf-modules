@@ -69,9 +69,15 @@ resource "aws_lambda_function" "edge_function" {
 
 data "archive_file" "lambda_edge_zip" {
   type = "zip"
-  source_file = templatefile("${path.module}/src/index.js.tpl", {
-    REDIRECT_URL       = var.origin_url,
-    REDIRECT_HTTP_CODE = 302,
-  })
+
+  source {
+    content = templatefile("${path.module}/src/index.js.tpl", {
+      REDIRECT_URL       = var.origin_url,
+      REDIRECT_HTTP_CODE = 302,
+    })
+
+    filename = "index.js"
+  }
+
   output_path = "${path.module}/lambda.zip"
 }
