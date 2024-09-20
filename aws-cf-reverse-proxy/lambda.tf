@@ -62,18 +62,16 @@ resource "aws_lambda_function" "edge_function" {
   publish       = true
   filename      = data.archive_file.lambda_edge_zip.output_path
 
-  environment {
-    variables = {
-      REDIRECT_URL       = var.origin_url
-      REDIRECT_HTTP_CODE = 302
-    }
-  }
+  source_code_hash = data.archive_file.lambda_edge_zip.output_base64sha256
 
   tags = module.luthername_redirect_lambda[0].tags
 }
 
 data "archive_file" "lambda_edge_zip" {
-  type        = "zip"
-  source_dir  = "${path.module}/src"
+  type = "zip"
+  source_file = templatefile("${path.module}/src/index.js.tpl", {
+    REDIRECT_URL       = var.origin_url,
+    REDIRECT_HTTP_CODE = 302,
+  })
   output_path = "${path.module}/lambda.zip"
 }
