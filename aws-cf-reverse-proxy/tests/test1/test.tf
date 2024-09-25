@@ -20,6 +20,7 @@ module "test" {
   app_naked_domain  = "example.com"
   app_target_domain = "target.example.com"
   origin_url        = "origin.example.com"
+  use_302           = true
 
   providers = {
     aws           = aws

@@ -1,4 +1,5 @@
 variable "aws_region" {
+  type    = string
   default = "eu-west-2"
 }
 
@@ -20,6 +21,7 @@ variable "app_target_domain" {
 }
 
 variable "duplicate_content_penalty_secret" {
+  type    = string
   default = "luthersystems"
 }
 
@@ -28,9 +30,11 @@ variable "origin_url" {
 }
 
 variable "use_302" {
+  type    = bool
   default = false
 }
 
 variable "random_identifier" {
+  type    = string
   default = ""
 }
