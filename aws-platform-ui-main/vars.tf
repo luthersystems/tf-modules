@@ -119,3 +119,8 @@ variable "logs" {
   type    = bool
   default = false
 }
+
+variable "custom_instance_userdata" {
+  type    = string
+  default = ""
+}

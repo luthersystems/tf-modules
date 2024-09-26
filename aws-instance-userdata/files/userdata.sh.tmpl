@@ -13,3 +13,6 @@ echo '${cloudwatch_config_base64}' | base64 -d > cloudwatch-agent.json
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:cloudwatch-agent.json
 systemctl start amazon-cloudwatch-agent.service
 systemctl enable amazon-cloudwatch-agent.service
+%{ if custom_script != "" }
+${custom_script}
+%{ endif }

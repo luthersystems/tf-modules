@@ -377,3 +377,8 @@ variable "k8s_alt_admin_role_arn" {
   type    = string
   default = ""
 }
+
+variable "custom_instance_userdata" {
+  type    = string
+  default = ""
+}

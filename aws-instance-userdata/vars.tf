@@ -32,3 +32,8 @@ variable "distro" {
 variable "log_namespace" {
   type = string
 }
+
+variable "custom_script" {
+  type    = string
+  default = ""
+}
