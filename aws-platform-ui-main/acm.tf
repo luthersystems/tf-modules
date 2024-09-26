@@ -1,8 +1,10 @@
 resource "aws_acm_certificate" "cert" {
   count = length(var.domain) > 0 ? 1 : 0
 
-  domain_name       = "*.${var.domain}"
-  validation_method = "DNS"
+  domain_name = var.domain
+
+  subject_alternative_names = ["*.${var.domain}"] # Include wildcard for subdomains
+  validation_method         = "DNS"
 
   tags = {
     Project     = var.luther_project
