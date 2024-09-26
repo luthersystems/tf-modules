@@ -37,6 +37,8 @@ module "common_userdata" {
   log_files = [
     "/var/log/cloud-init-output.log",
   ]
+
+  custom_script = var.custom_instance_userdata
 }
 
 locals {

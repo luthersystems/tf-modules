@@ -1,8 +1,10 @@
 resource "aws_acm_certificate" "cert" {
   count = length(var.domain) > 0 ? 1 : 0
 
-  domain_name       = "*.${var.domain}"
-  validation_method = "DNS"
+  domain_name = var.domain
+
+  subject_alternative_names = ["*.${var.domain}"] # Include wildcard for subdomains
+  validation_method         = "DNS"
 
   tags = {
     Project     = var.luther_project
@@ -37,6 +39,8 @@ resource "aws_route53_record" "cert_validation" {
   ttl     = 60
   type    = each.value.type
   zone_id = data.aws_route53_zone.zone[0].zone_id
+
+  allow_overwrite = true
 }
 
 resource "aws_acm_certificate_validation" "cert" {

@@ -64,6 +64,7 @@ locals {
     cloudwatch_config_base64  = base64encode(jsonencode(local.cloudwatch_config)),
     cloudwatch_package_source = local.cloudwatch_sources[var.distro]
     package_install           = local.package_install[var.distro]
+    custom_script             = var.custom_script
   }
 }
 
