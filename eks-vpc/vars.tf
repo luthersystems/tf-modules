@@ -382,3 +382,10 @@ variable "custom_instance_userdata" {
   type    = string
   default = ""
 }
+
+
+variable "remote_prom_query_role_arn" {
+  description = "ARN of the remote account that will assume the Prometheus query role. If empty, no role is created."
+  type        = string
+  default     = ""
+}

@@ -478,3 +478,63 @@ output "grafana_workspace_id" {
   value = try(aws_grafana_workspace.grafana[0].id, "")
 }
 
+locals {
+  remote_prom_query_role_arn = local.monitoring ? var.remote_prom_query_role_arn : ""
+}
+
+data "aws_iam_policy_document" "prometheus_query_assume_role" {
+  count = local.remote_prom_query_role_arn != "" ? 1 : 0
+
+  statement {
+    sid     = "PrometheusQueryAssume"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "AWS"
+      identifiers = [var.remote_prom_query_role_arn]
+    }
+  }
+}
+
+resource "aws_iam_role" "prometheus_query_role" {
+  count = local.remote_prom_query_role_arn != "" ? 1 : 0
+
+  name = "${module.luthername_prometheus.name}-query"
+
+  assume_role_policy = data.aws_iam_policy_document.prometheus_query_assume_role[0].json
+}
+
+data "aws_iam_policy_document" "prometheus_query_policy" {
+  count = var.remote_prom_query_role_arn != "" ? 1 : 0
+
+  statement {
+    sid = "PrometheusQueryMetrics"
+
+    actions = [
+      "aps:QueryMetrics"
+    ]
+
+    resources = try([aws_prometheus_workspace.k8s[0].arn], [])
+  }
+}
+
+resource "aws_iam_policy" "prometheus_query_policy" {
+  count = local.remote_prom_query_role_arn != "" ? 1 : 0
+
+  name   = "${module.luthername_prometheus.name}-query-pol"
+  policy = data.aws_iam_policy_document.prometheus_query_policy[0].json
+
+}
+
+resource "aws_iam_role_policy_attachment" "prometheus_query_role_attachment" {
+  count = local.remote_prom_query_role_arn != "" ? 1 : 0
+
+  role       = aws_iam_role.prometheus_query_role[0].name
+  policy_arn = aws_iam_policy.prometheus_query_policy[0].arn
+}
+
+output "prometheus_query_role_arn" {
+  value       = try(aws_iam_role.prometheus_query_role[0].arn, null)
+  description = "The ARN of the Prometheus query role for remote access"
+}
