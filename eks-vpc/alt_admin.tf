@@ -21,6 +21,8 @@ data "aws_iam_policy_document" "eks_kubeconfig_permissions" {
 }
 
 resource "aws_iam_policy" "eks_kubeconfig_policy" {
+  count = var.has_alt_admin_role ? 1 : 0
+
   name   = module.luthername_k8s_admin.name
   policy = data.aws_iam_policy_document.eks_kubeconfig_permissions.json
 
@@ -33,7 +35,8 @@ locals {
 }
 
 resource "aws_iam_role_policy_attachment" "alt_admin_eks_kubeconfig_policy_attachment" {
-  count      = var.has_alt_admin_role ? 1 : 0
+  count = var.has_alt_admin_role ? 1 : 0
+
   role       = local.k8s_alt_admin_role
-  policy_arn = aws_iam_policy.eks_kubeconfig_policy.arn
+  policy_arn = aws_iam_policy.eks_kubeconfig_policy[0].arn
 }
