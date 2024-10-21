@@ -31,6 +31,7 @@ module "eks_vpc" {
   grafana_saml_metadata_xml      = var.grafana_saml_metadata_xml
   common_static_s3_bucket_arn    = var.common_static_s3_bucket_arn
   common_external_s3_bucket_arn  = var.common_external_s3_bucket_arn
+  root_volume_size_gb            = var.eks_root_volume_size_gb
 
   preserve_coredns = var.preserve_coredns
 
