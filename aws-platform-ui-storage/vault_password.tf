@@ -1,7 +1,7 @@
 module "luthername_vault_password_secret" {
   count = var.has_vault ? 1 : 0
 
-  source         = "github.com/luthersystems/tf-modules//luthername?ref=v54.0.0"
+  source         = "../luthername"
   luther_project = var.luther_project
   aws_region     = local.region
   luther_env     = var.luther_env
