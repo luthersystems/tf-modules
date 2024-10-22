@@ -48,7 +48,8 @@ module "eks_vpc" {
   has_alt_admin_role     = var.has_alt_admin_role
   k8s_alt_admin_role_arn = var.k8s_alt_admin_role_arn
 
-  custom_instance_userdata = var.custom_instance_userdata
+  custom_instance_userdata         = var.custom_instance_userdata
+  custom_instance_userdata_version = var.custom_instance_userdata_version
 
   providers = {
     aws           = aws
