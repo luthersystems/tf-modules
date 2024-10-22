@@ -172,7 +172,7 @@ resource "terraform_data" "worker_user_data" {
     ignore_changes = [input]
   }
 
-  triggers_replace = [var.kubernetes_version, var.customer_instance_userdata_version]
+  triggers_replace = [var.kubernetes_version, var.custom_instance_userdata_version]
 }
 
 

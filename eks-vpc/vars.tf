@@ -383,7 +383,7 @@ variable "custom_instance_userdata" {
   default = ""
 }
 
-variable "customer_instance_userdata_version" {
+variable "custom_instance_userdata_version" {
   type    = string
   default = ""
 }
