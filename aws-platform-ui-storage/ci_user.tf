@@ -1,5 +1,5 @@
 module "luthername_env_admin_role" {
-  source         = "github.com/luthersystems/tf-modules//luthername?ref=v52.0.2"
+  source         = "../luthername"
   luther_project = var.luther_project
   aws_region     = local.region
   luther_env     = var.luther_env
@@ -106,7 +106,7 @@ data "aws_iam_policy_document" "ci_assume_role" {
 }
 
 module "luthername_ci_role" {
-  source         = "github.com/luthersystems/tf-modules//luthername?ref=v52.0.2"
+  source         = "../luthername"
   luther_project = var.luther_project
   aws_region     = local.region
   luther_env     = var.luther_env

@@ -124,3 +124,14 @@ variable "custom_instance_userdata" {
   type    = string
   default = ""
 }
+
+variable "custom_instance_userdata_version" {
+  type    = string
+  default = ""
+}
+
+variable "eks_root_volume_size_gb" {
+  type    = number
+  default = 30
+}
+
