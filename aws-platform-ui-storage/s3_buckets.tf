@@ -39,7 +39,8 @@ data "aws_iam_policy_document" "external_access" {
         "s3:GetObject",
         "s3:PutObject",
         "s3:AbortMultipartUpload",
-        "s3:ListMultipartUploadParts"
+        "s3:ListMultipartUploadParts",
+        "s3:DeleteObject",
       ]
       resources = ["arn:aws:s3:::${module.static_bucket.bucket}/*"]
     }
