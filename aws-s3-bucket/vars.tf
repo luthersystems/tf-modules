@@ -55,9 +55,11 @@ variable "lifecycle_rules" {
 }
 
 variable "force_destroy" {
+  type    = bool
   default = false
 }
 
 variable "replicate_deletes" {
+  type    = bool
   default = true
 }

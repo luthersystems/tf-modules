@@ -55,6 +55,7 @@ data "aws_iam_policy_document" "external_access" {
       resources = ["arn:aws:s3:::${module.static_bucket.bucket}"]
     }
   }
+
 }
 
 output "static_bucket" {

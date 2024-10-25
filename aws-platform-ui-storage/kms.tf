@@ -43,33 +43,6 @@ data "aws_iam_policy_document" "kms_key_main" {
     for_each = length(var.external_access_principals) == 0 ? [] : [1]
 
     content {
-      sid = "External account S3 Decrypt access"
-
-      principals {
-        type        = "AWS"
-        identifiers = var.external_access_principals
-      }
-
-      actions = [
-        "kms:Decrypt",
-      ]
-      resources = ["*"]
-
-      condition {
-        test     = "StringEquals"
-        variable = "kms:ViaService"
-
-        values = [
-          "s3.${local.region}.amazonaws.com",
-        ]
-      }
-    }
-  }
-
-  dynamic "statement" {
-    for_each = length(var.external_access_principals) == 0 ? [] : [1]
-
-    content {
       sid = "External account key info access"
 
       principals {
@@ -97,6 +70,39 @@ data "aws_iam_policy_document" "kms_key_main" {
     principals {
       type        = "AWS"
       identifiers = [data.aws_iam_role.autoscaling_service_role.arn]
+    }
+  }
+
+  dynamic "statement" {
+    for_each = length(local.s3_access_principals) == 0 ? [] : [1]
+
+    content {
+      sid = "ExternalAccountS3Access"
+
+      principals {
+        type        = "AWS"
+        identifiers = local.s3_access_principals
+      }
+
+      actions = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:GenerateDataKeyWithoutPlaintext",
+        "kms:DescribeKey"
+      ]
+
+      resources = ["*"]
+
+      condition {
+        test     = "StringEquals"
+        variable = "kms:ViaService"
+
+        values = [
+          "s3.${local.region}.amazonaws.com",
+        ]
+      }
     }
   }
 
