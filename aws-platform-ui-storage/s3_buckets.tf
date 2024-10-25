@@ -28,14 +28,19 @@ data "aws_iam_policy_document" "external_access" {
     for_each = length(local.s3_access_principals) == 0 ? [] : [1]
 
     content {
-      sid = "externalGet"
+      sid = "externalGetPut"
 
       principals {
         type        = "AWS"
         identifiers = local.s3_access_principals
       }
 
-      actions   = ["s3:GetObject"]
+      actions = [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ]
       resources = ["arn:aws:s3:::${module.static_bucket.bucket}/*"]
     }
   }
