@@ -134,4 +134,3 @@ variable "eks_root_volume_size_gb" {
   type    = number
   default = 30
 }
-

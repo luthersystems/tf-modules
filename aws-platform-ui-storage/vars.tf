@@ -54,3 +54,8 @@ variable "ci_ecr_push_arns" {
   type    = list(string)
   default = []
 }
+
+variable "ci_static_access" {
+  type    = bool
+  default = false
+}

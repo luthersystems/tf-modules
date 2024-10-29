@@ -17,38 +17,51 @@ resource "aws_s3_bucket_policy" "static" {
   policy = data.aws_iam_policy_document.external_access.json
 }
 
+locals {
+  s3_access_principals = compact(
+    concat(var.external_access_principals, var.ci_static_access ? [aws_iam_role.ci_role.arn] : [])
+  )
+}
+
 data "aws_iam_policy_document" "external_access" {
   dynamic "statement" {
-    for_each = length(var.external_access_principals) == 0 ? [] : [1]
+    for_each = length(local.s3_access_principals) == 0 ? [] : [1]
 
     content {
-      sid = "externalGet"
+      sid = "externalGetPut"
 
       principals {
         type        = "AWS"
-        identifiers = var.external_access_principals
+        identifiers = local.s3_access_principals
       }
 
-      actions   = ["s3:GetObject"]
+      actions = [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts",
+        "s3:DeleteObject",
+      ]
       resources = ["arn:aws:s3:::${module.static_bucket.bucket}/*"]
     }
   }
 
   dynamic "statement" {
-    for_each = length(var.external_access_principals) == 0 ? [] : [1]
+    for_each = length(local.s3_access_principals) == 0 ? [] : [1]
 
     content {
       sid = "externalList"
 
       principals {
         type        = "AWS"
-        identifiers = var.external_access_principals
+        identifiers = local.s3_access_principals
       }
 
       actions   = ["s3:ListBucket"]
       resources = ["arn:aws:s3:::${module.static_bucket.bucket}"]
     }
   }
+
 }
 
 output "static_bucket" {
