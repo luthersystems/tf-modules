@@ -9,7 +9,7 @@ module "common_userdata" {
   cloudwatch_log_group = aws_cloudwatch_log_group.main.name
   distro               = "amazon_linux"
   log_namespace        = "worker"
-  arch                 = loca.is_graviton ? "arm64" : "amd64"
+  arch                 = local.is_graviton ? "arm64" : "amd64"
 
   timestamped_log_files = [
     {
