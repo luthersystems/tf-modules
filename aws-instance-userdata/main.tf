@@ -2,8 +2,8 @@ locals {
   s3_root = "https://s3.${var.aws_region}.amazonaws.com/amazoncloudwatch-agent-${var.aws_region}"
 
   cloudwatch_sources = {
-    amazon_linux = "${local.s3_root}/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm",
-    ubuntu       = "${local.s3_root}/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb",
+    amazon_linux = "${local.s3_root}/amazon_linux/${var.arch}/latest/amazon-cloudwatch-agent.rpm",
+    ubuntu       = "${local.s3_root}/ubuntu/${var.arch}/latest/amazon-cloudwatch-agent.deb",
   }
 
   package_install = {

@@ -37,3 +37,8 @@ variable "custom_script" {
   type    = string
   default = ""
 }
+
+variable "arch" {
+  type    = string
+  default = "amd64"
+}
