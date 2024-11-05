@@ -19,7 +19,9 @@ resource "aws_prometheus_workspace" "k8s" {
   count = local.monitoring ? 1 : 0
 
   alias = module.luthername_prometheus.name
-  tags  = module.luthername_prometheus.tags
+  tags = merge(module.luthername_prometheus.tags, {
+    AMPAgentlessScraper = ""
+  })
 }
 
 locals {
@@ -537,4 +539,27 @@ resource "aws_iam_role_policy_attachment" "prometheus_query_role_attachment" {
 output "prometheus_query_role_arn" {
   value       = try(aws_iam_role.prometheus_query_role[0].arn, null)
   description = "The ARN of the Prometheus query role for remote access"
+}
+
+data "aws_prometheus_default_scraper_configuration" "k8s" {}
+
+resource "aws_prometheus_scraper" "k8s" {
+  count = local.monitoring ? 1 : 0
+
+  source {
+    eks {
+      cluster_arn = aws_eks_cluster.app.arn
+      subnet_ids  = aws_eks_cluster.app.vpc_config[0].subnet_ids
+    }
+  }
+
+  destination {
+    amp {
+      workspace_arn = aws_prometheus_workspace.k8s[0].arn
+    }
+  }
+
+  scrape_configuration = data.aws_prometheus_default_scraper_configuration.k8s.configuration
+
+  tags = module.luthername_prometheus.tags
 }
