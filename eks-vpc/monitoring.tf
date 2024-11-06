@@ -24,7 +24,7 @@ resource "aws_prometheus_workspace" "k8s" {
   })
 
   logging_configuration {
-    log_group_arn = "${aws_cloudwatch_log_group.main.arn}:log-stream:*"
+    log_group_arn = "${aws_cloudwatch_log_group.main.arn}:*"
   }
 }
 
