@@ -24,7 +24,11 @@ resource "aws_eks_cluster" "app" {
     endpoint_private_access = true
     endpoint_public_access  = var.public_api
     security_group_ids      = [aws_security_group.eks_master.id]
-    subnet_ids              = aws_subnet.net.*.id
+    subnet_ids              = aws_subnet.net[*].id
+  }
+
+  access_config {
+    authentication_mode = "API_AND_CONFIG_MAP"
   }
 
   tags = module.luthername_eks_cluster.tags
@@ -53,13 +57,13 @@ output "aws_eks_cluster_endpoint" {
 }
 
 data "tls_certificate" "eks" {
-  url = aws_eks_cluster.app.identity.0.oidc.0.issuer
+  url = aws_eks_cluster.app.identity[0].oidc[0].issuer
 }
 
 resource "aws_iam_openid_connect_provider" "app" {
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.eks.certificates.0.sha1_fingerprint]
-  url             = aws_eks_cluster.app.identity.0.oidc.0.issuer
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.app.identity[0].oidc[0].issuer
 }
 
 locals {
