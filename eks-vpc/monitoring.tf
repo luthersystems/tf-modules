@@ -22,6 +22,10 @@ resource "aws_prometheus_workspace" "k8s" {
   tags = merge(module.luthername_prometheus.tags, {
     AMPAgentlessScraper = ""
   })
+
+  logging_configuration {
+    log_group_arn = aws_cloudwatch_log_group.main.arn
+  }
 }
 
 locals {
