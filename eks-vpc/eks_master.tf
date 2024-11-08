@@ -39,6 +39,12 @@ resource "aws_eks_cluster" "app" {
     aws_iam_role_policy_attachment.eks_master_AmazonEKSServicePolicy,
     aws_cloudwatch_log_group.eks_cluster,
   ]
+
+  lifecycle {
+    ignore_changes = [
+      access_config[0].bootstrap_cluster_creator_admin_permissions
+    ]
+  }
 }
 
 output "aws_eks_cluster_version" {
