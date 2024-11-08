@@ -134,3 +134,32 @@ variable "eks_root_volume_size_gb" {
   type    = number
   default = 30
 }
+
+
+variable "enable_dlm_snapshots" {
+  description = "Enable EBS volume snapshots"
+  type        = bool
+  default     = false
+}
+
+variable "ebs_cross_region_settings" {
+  type = list(object({
+    region        = string
+    cmk_arn       = string
+    interval      = number
+    interval_unit = string
+  }))
+  default = []
+}
+
+variable "snapshot_retention_days" {
+  description = "Number of days to retain snapshots"
+  type        = number
+  default     = 7
+}
+
+variable "snapshot_frequency_hours" {
+  description = "Frequency of snapshots in hours"
+  type        = number
+  default     = 2
+}
