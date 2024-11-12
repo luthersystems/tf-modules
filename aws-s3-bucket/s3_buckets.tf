@@ -6,7 +6,7 @@ resource "random_string" "id" {
 }
 
 locals {
-  random_id = var.random_identifier == "" ? random_string.id.0.result : var.random_identifier
+  random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
 }
 
 data "aws_region" "current" {}

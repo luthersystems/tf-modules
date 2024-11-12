@@ -1,8 +1,3 @@
-# This data source is included for ease of sample architecture deployment
-# and can be swapped out as necessary.
-data "aws_region" "current" {
-}
-
 locals {
   syslog_timestamp_format = "%b %d %H:%M:%S"
 }
@@ -14,6 +9,7 @@ module "common_userdata" {
   cloudwatch_log_group = aws_cloudwatch_log_group.main.name
   distro               = "amazon_linux"
   log_namespace        = "worker"
+  arch                 = local.is_graviton ? "arm64" : "amd64"
 
   timestamped_log_files = [
     {
@@ -130,7 +126,7 @@ resource "aws_autoscaling_group" "eks_worker" {
   max_size            = var.autoscaling_desired
   min_size            = var.autoscaling_desired
   name                = module.luthername_eks_worker_autoscaling_group.name
-  vpc_zone_identifier = slice(aws_subnet.net.*.id, 0, local.num_azs)
+  vpc_zone_identifier = slice(aws_subnet.net[*].id, 0, local.num_azs)
 
   target_group_arns = var.worker_asg_target_group_arns
 
@@ -287,7 +283,7 @@ resource "aws_eks_node_group" "eks_worker" {
 
   cluster_name  = aws_eks_cluster.app.name
   node_role_arn = aws_iam_role.eks_worker.arn
-  subnet_ids    = slice(aws_subnet.net.*.id, 0, local.num_azs)
+  subnet_ids    = slice(aws_subnet.net[*].id, 0, local.num_azs)
 
   capacity_type = length(var.spot_price) > 0 ? "SPOT" : "ON_DEMAND"
 

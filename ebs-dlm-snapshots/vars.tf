@@ -3,14 +3,17 @@ variable "target_tags" {
 }
 
 variable "interval_hours" {
+  type    = number
   default = 24
 }
 
 variable "times" {
+  type    = list(string)
   default = ["23:45"]
 }
 
 variable "retain_count" {
+  type    = number
   default = 14
 }
 
