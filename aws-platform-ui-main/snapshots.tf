@@ -16,7 +16,7 @@ module "fabric_snapshots" {
   luther_project = var.luther_project
   luther_env     = var.luther_env
 
-  retain_count   = (24 / var.snapshot_frequency_hours) * var.snapshot_retention_days
+  retain_count   = ceil(24 / var.snapshot_frequency_hours) * var.snapshot_retention_days
   interval_hours = var.snapshot_frequency_hours
   times          = ["01:00"]
 
