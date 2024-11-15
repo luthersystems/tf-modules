@@ -438,9 +438,9 @@ module "grafana_frontend_url" {
 }
 
 locals {
-  grafana_endpoint     = try(aws_grafana_workspace.grafana[0].endpoint, null)
+  grafana_endpoint     = local.monitoring ? aws_grafana_workspace.grafana[0].endpoint : null
   grafana_human_domain = local.monitoring && var.human_domain != "" ? "${module.grafana_frontend_url.prefix}.${var.human_domain}" : null
-  grafana_endpoint_url = try(format("https://%s", local.grafana_endpoint), "")
+  grafana_endpoint_url = local.monitoring ? format("https://%s", local.grafana_endpoint) : ""
 }
 
 module "grafana_frontend" {
@@ -465,23 +465,23 @@ output "grafana_endpoint_url" {
 }
 
 output "grafana_human_url" {
-  value = try(format("https://%s", local.grafana_human_domain), "")
+  value = local.monitoring ? format("https://%s", local.grafana_human_domain) : ""
 }
 
 output "grafana_saml_acs_url" {
-  value = try(format("%s/saml/acs", local.grafana_endpoint_url), "")
+  value = local.monitoring ? format("%s/saml/acs", local.grafana_endpoint_url) : ""
 }
 
 output "grafana_saml_entity_id" {
-  value = try(format("%s/saml/metadata", local.grafana_endpoint_url), "")
+  value = local.monitoring ? format("%s/saml/metadata", local.grafana_endpoint_url) : ""
 }
 
 output "grafana_saml_start_url" {
-  value = try(format("%s/login/saml", local.grafana_endpoint_url), "")
+  value = local.monitoring ? format("%s/login/saml", local.grafana_endpoint_url) : ""
 }
 
 output "grafana_workspace_id" {
-  value = try(aws_grafana_workspace.grafana[0].id, "")
+  value = local.monitoring ? aws_grafana_workspace.grafana[0].id : ""
 }
 
 locals {
