@@ -439,12 +439,12 @@ module "grafana_frontend_url" {
 
 locals {
   grafana_endpoint     = local.monitoring ? aws_grafana_workspace.grafana[0].endpoint : null
-  grafana_human_domain = local.monitoring && var.human_domain != "" ? "${module.grafana_frontend_url.prefix}.${var.human_domain}" : null
+  grafana_human_domain = local.monitoring && var.human_domain != "" ? "${module.grafana_frontend_url.prefix}.${var.human_domain}" : ""
   grafana_endpoint_url = local.monitoring ? format("https://%s", local.grafana_endpoint) : ""
 }
 
 module "grafana_frontend" {
-  count = local.grafana_human_domain != null ? 1 : 0
+  count = local.grafana_human_domain != "" ? 1 : 0
 
   source            = "../aws-cf-reverse-proxy"
   luther_env        = var.luther_env
@@ -465,7 +465,7 @@ output "grafana_endpoint_url" {
 }
 
 output "grafana_human_url" {
-  value = local.monitoring ? format("https://%s", local.grafana_human_domain) : ""
+  value = local.monitoring && local.grafana_human_domain != "" ? format("https://%s", local.grafana_human_domain) : ""
 }
 
 output "grafana_saml_acs_url" {
