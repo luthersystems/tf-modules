@@ -545,8 +545,6 @@ output "prometheus_query_role_arn" {
   description = "The ARN of the Prometheus query role for remote access"
 }
 
-data "aws_prometheus_default_scraper_configuration" "k8s" {}
-
 resource "aws_prometheus_scraper" "k8s" {
   count = local.monitoring ? 1 : 0
 
@@ -563,7 +561,7 @@ resource "aws_prometheus_scraper" "k8s" {
     }
   }
 
-  scrape_configuration = data.aws_prometheus_default_scraper_configuration.k8s.configuration
+  scrape_configuration = file("${path.module}/prom_scraper_config.yaml")
 
   tags = module.luthername_prometheus.tags
 }
