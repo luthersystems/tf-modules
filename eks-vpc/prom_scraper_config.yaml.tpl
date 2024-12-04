@@ -26,13 +26,17 @@ scrape_configs:
         target_label: namespace
       - source_labels: [__meta_kubernetes_pod_name]
         target_label: pod
-    metric_relabel_configs:
-      - source_labels: [__name__]
-        regex: "pod_network_receive_bytes_total|pod_network_transmit_bytes_total|pod_cpu_usage_seconds_total|pod_memory_usage_bytes"
-        action: keep
-      - source_labels: [__name__]
-        regex: ".*"
-        action: drop  # Drop any unfiltered metrics to minimize ingestion
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: service
+    # Adjust below for aggressive filtering of metrics
+    #metric_relabel_configs:
+    #  - source_labels: [__name__]
+    #    regex: "pod_network_receive_bytes_total|pod_network_transmit_bytes_total|pod_cpu_usage_seconds_total|pod_memory_usage_bytes"
+    #    action: keep
+    #  - source_labels: [__name__]
+    #    regex: ".*"
+    #    action: drop  # Drop any unfiltered metrics to minimize ingestion
+
 
   # cAdvisor
   - job_name: cadvisor
