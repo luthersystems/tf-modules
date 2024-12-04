@@ -198,7 +198,7 @@ variable "cni_addon_version" {
     "1.28" = "v1.17.1-eksbuild.1"
     "1.29" = "v1.18.2-eksbuild.1"
     "1.30" = "v1.18.3-eksbuild.1"
-    "1.31" = "1.18.3-eksbuild.3"
+    "1.31" = "v1.18.3-eksbuild.3"
   }
 }
 
