@@ -198,6 +198,7 @@ variable "cni_addon_version" {
     "1.28" = "v1.17.1-eksbuild.1"
     "1.29" = "v1.18.2-eksbuild.1"
     "1.30" = "v1.18.3-eksbuild.1"
+    "1.31" = "1.18.3-eksbuild.3"
   }
 }
 
@@ -215,6 +216,7 @@ variable "csi_addon_version" {
     "1.28" = "v1.28.0-eksbuild.1"
     "1.29" = "v1.31.0-eksbuild.1"
     "1.30" = "v1.31.1-eksbuild.1"
+    "1.31" = "v1.35.0-eksbuild.1"
   }
 }
 
@@ -231,6 +233,7 @@ variable "kubeproxy_addon_version" {
     "1.28" = "v1.28.1-eksbuild.1"
     "1.29" = "v1.29.0-eksbuild.2"
     "1.30" = "v1.30.0-eksbuild.3"
+    "1.31" = "v1.31.0-eksbuild.5"
   }
 }
 
@@ -247,6 +250,7 @@ variable "coredns_addon_version" {
     "1.28" = "v1.10.1-eksbuild.4"
     "1.29" = "v1.11.1-eksbuild.4"
     "1.30" = "v1.11.1-eksbuild.9"
+    "1.31" = "v1.11.3-eksbuild.1"
   }
 }
 
