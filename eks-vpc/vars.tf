@@ -393,3 +393,14 @@ variable "remote_prom_query_role_arn" {
   type        = string
   default     = ""
 }
+
+variable "prom_scrape_interval" {
+  type    = string
+  default = "1m"
+}
+
+variable "prom_eval_interval" {
+  type    = string
+  default = "1m"
+}
+
