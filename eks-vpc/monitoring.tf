@@ -249,11 +249,11 @@ EOT
 }
 
 output "prometheus_workspace_id" {
-  value = try(aws_prometheus_workspace.k8s[0].id, null)
+  value = local.monitoring ? aws_prometheus_workspace.k8s[0].id : null
 }
 
 output "prometheus_endpoint" {
-  value = try(aws_prometheus_workspace.k8s[0].prometheus_endpoint, null)
+  value = local.monitoring ? aws_prometheus_workspace.k8s[0].prometheus_endpoint : null
 }
 
 resource "random_string" "grafana" {
@@ -545,8 +545,6 @@ output "prometheus_query_role_arn" {
   description = "The ARN of the Prometheus query role for remote access"
 }
 
-data "aws_prometheus_default_scraper_configuration" "k8s" {}
-
 resource "aws_prometheus_scraper" "k8s" {
   count = local.monitoring ? 1 : 0
 
@@ -563,7 +561,19 @@ resource "aws_prometheus_scraper" "k8s" {
     }
   }
 
-  scrape_configuration = data.aws_prometheus_default_scraper_configuration.k8s.configuration
+  scrape_configuration = templatefile("${path.module}/prom_scraper_config.yaml.tpl", {
+    url                 = aws_prometheus_workspace.k8s[0].prometheus_endpoint
+    cluster_arn         = aws_eks_cluster.app.arn
+    region              = var.aws_region
+    scrape_interval     = var.prom_scrape_interval
+    evaluation_interval = var.prom_eval_interval
+    environment         = aws_eks_cluster.app.name
+
+  })
 
   tags = module.luthername_prometheus.tags
+}
+
+output "aws_prometheus_scraper_role_arn" {
+  value = local.monitoring ? aws_prometheus_scraper.k8s[0].role_arn : null
 }
