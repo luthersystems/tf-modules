@@ -4,11 +4,9 @@
         lameduck 5s
     }
     ready
-
-    %{ for rule in coredns_rewrite_rules }
+    %{ for rule in coredns_rewrite_rules ~}
     rewrite name ${rule.query} ${rule.target}
-    %{ endfor }
-
+    %{ endfor ~}
     kubernetes cluster.local in-addr.arpa ip6.arpa {
         pods insecure
         fallthrough in-addr.arpa ip6.arpa
