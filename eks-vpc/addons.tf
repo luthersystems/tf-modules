@@ -163,7 +163,7 @@ resource "aws_eks_addon" "coredns" {
   resolve_conflicts_on_update = local.preserve_coredns ? "PRESERVE" : "OVERWRITE"
 
   configuration_values = length(var.coredns_rewrite_rules) > 0 ? jsonencode({
-    Corefile = templatefile("${path.module}/corefile.tmpl", {
+    corefile = templatefile("${path.module}/corefile.tmpl", {
       coredns_rewrite_rules = var.coredns_rewrite_rules
     })
   }) : null
