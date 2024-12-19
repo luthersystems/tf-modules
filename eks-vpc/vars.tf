@@ -408,3 +408,10 @@ variable "prom_eval_interval" {
   default = "1m"
 }
 
+variable "coredns_rewrite_rules" {
+  type = list(object({
+    query  = string
+    target = string
+  }))
+  default = []
+}
