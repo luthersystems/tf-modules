@@ -162,6 +162,12 @@ resource "aws_eks_addon" "coredns" {
   addon_version               = var.coredns_addon_version[local.kubernetes_version]
   resolve_conflicts_on_update = local.preserve_coredns ? "PRESERVE" : "OVERWRITE"
 
+  configuration_values = length(var.coredns_rewrite_rules) > 0 ? jsonencode({
+    corefile = templatefile("${path.module}/corefile.tmpl", {
+      coredns_rewrite_rules = var.coredns_rewrite_rules
+    })
+  }) : null
+
   depends_on = [time_sleep.k8s_ready_wait]
 }
 
