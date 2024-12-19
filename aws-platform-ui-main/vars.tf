@@ -174,8 +174,12 @@ variable "coredns_rewrite_rules" {
     { query = "orderer1.luther.systems", target = "fabric-orderer1.fabric-orderer.svc.cluster.local" },
     { query = "orderer2.luther.systems", target = "fabric-orderer2.fabric-orderer.svc.cluster.local" },
     { query = "peer0.org1.luther.systems", target = "fabric-peer0-org1.fabric-org1.svc.cluster.local" },
-    { query = "peer1.org1.luther.systems", target = "fabric-peer1-org1.svc.cluster.local" },
+    { query = "peer1.org1.luther.systems", target = "fabric-peer1-org1.fabric-org1.svc.cluster.local" },
     { query = "peer2.org1.luther.systems", target = "fabric-peer2-org1.fabric-org1.svc.cluster.local" },
-    { query = "ca.org1.luther.systems", target = "fabric-ca.fabric-org1.svc.cluster.local" }
+    { query = "peer0.org2.luther.systems", target = "fabric-peer0-org2.fabric-org2.svc.cluster.local" },
+    { query = "peer1.org2.luther.systems", target = "fabric-peer1-org2.fabric-org2.svc.cluster.local" },
+    { query = "peer2.org2.luther.systems", target = "fabric-peer2-org2.fabric-org2.svc.cluster.local" },
+    { query = "ca.org1.luther.systems", target = "fabric-ca.fabric-org1.svc.cluster.local" },
+    { query = "ca.org2.luther.systems", target = "fabric-ca.fabric-org2.svc.cluster.local" }
   ]
 }
