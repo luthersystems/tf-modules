@@ -51,6 +51,8 @@ module "eks_vpc" {
   custom_instance_userdata         = var.custom_instance_userdata
   custom_instance_userdata_version = var.custom_instance_userdata_version
 
+  coredns_rewrite_rules = var.coredns_rewrite_rules
+
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1
