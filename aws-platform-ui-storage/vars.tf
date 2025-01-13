@@ -59,3 +59,7 @@ variable "ci_static_access" {
   type    = bool
   default = false
 }
+
+variable "aws_region_dr" {
+  type = string
+}
