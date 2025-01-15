@@ -10,7 +10,7 @@ module "replication_role" {
     module.static_bucket.arn,
   ]
   bucket_destination_arns = [
-    lcoal.static_bucket_dr_arn,
+    local.static_bucket_dr_arn,
   ]
   source_kms_key_ids      = [aws_kms_key.main.arn]
   destination_kms_key_ids = [local.kms_key_dr_arn]
@@ -28,7 +28,7 @@ module "static_bucket_dr" {
   aws_kms_key_arn = local.kms_key_dr_arn
 
   providers = {
-    aws    = aws.dr_region
+    aws    = aws.dr
     random = random
   }
 }
@@ -37,7 +37,7 @@ locals {
   static_bucket_replication = local.region_dr != ""
   replication_role_arn      = module.replication_role.role_arn
   static_bucket_dr_arn      = module.static_bucket_dr.arn
-  static_bucket_dr          = module.static_bucket_dr.name
+  static_bucket_dr          = module.static_bucket_dr.bucket
 }
 
 output "static_bucket_dr" {

@@ -13,7 +13,7 @@ module "luthername_kms_key_main_dr" {
 }
 
 resource "aws_kms_key" "main_dr" {
-  provider = aws.dr_region
+  provider = aws.dr
 
   description = "Master DR KMS key for storage encryption"
   policy      = data.aws_iam_policy_document.kms_key_main.json
@@ -21,7 +21,7 @@ resource "aws_kms_key" "main_dr" {
 }
 
 resource "aws_kms_alias" "main_dr" {
-  provider = aws.dr_region
+  provider = aws.dr
 
   name          = "alias/${module.luthername_kms_key_main_dr.name}"
   target_key_id = aws_kms_key.main_dr.key_id
