@@ -28,7 +28,7 @@ resource "aws_kms_alias" "main_dr" {
 }
 
 locals {
-  kms_key_dr_arn    = aws_kms_key.dr.arn
+  kms_key_dr_arn    = aws_kms_key.main_dr.arn
   kms_key_alias_arn = aws_kms_alias.main_dr.arn
 }
 
