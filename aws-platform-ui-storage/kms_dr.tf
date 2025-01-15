@@ -1,7 +1,10 @@
+
+
+
 module "luthername_kms_key_main_dr" {
   source         = "../luthername"
   luther_project = var.luther_project
-  aws_region     = var.aws_region_dr
+  aws_region     = local.region_dr
   luther_env     = var.luther_env
   org_name       = "luther"
   component      = "storage"

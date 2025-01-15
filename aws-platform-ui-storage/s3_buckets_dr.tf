@@ -3,7 +3,7 @@ module "replication_role" {
   source         = "../aws-s3-replication-role"
   luther_project = var.luther_project
   aws_region     = local.region
-  aws_region_dr  = var.aws_region_dr
+  aws_region_dr  = local.region_dr
   luther_env     = var.luther_env
   component      = "app"
   bucket_source_arns = [
@@ -34,7 +34,7 @@ module "static_bucket_dr" {
 }
 
 locals {
-  static_bucket_replication = var.aws_region_dr != ""
+  static_bucket_replication = local.region_dr != ""
   replication_role_arn      = module.replication_role.role_arn
   static_bucket_dr_arn      = module.static_bucket_dr.arn
   static_bucket_dr          = module.static_bucket_dr.name
