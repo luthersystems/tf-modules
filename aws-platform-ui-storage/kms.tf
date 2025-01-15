@@ -25,6 +25,13 @@ data "aws_iam_role" "autoscaling_service_role" {
   name = var.autoscaling_service_role_name
 }
 
+locals {
+  s3_kms_regions = compact([
+    "s3.${local.region}.amazonaws.com",
+    local.region_dr != "" ? "s3.${local.region_dr}.amazonaws.com" : null
+  ])
+}
+
 data "aws_iam_policy_document" "kms_key_main" {
   # Default statement attached to any kms key
   statement {
@@ -99,9 +106,7 @@ data "aws_iam_policy_document" "kms_key_main" {
         test     = "StringEquals"
         variable = "kms:ViaService"
 
-        values = [
-          "s3.${local.region}.amazonaws.com",
-        ]
+        values = local.s3_kms_regions
       }
     }
   }
