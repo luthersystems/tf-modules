@@ -1,5 +1,7 @@
 
 module "replication_role" {
+  count = var.enable_dr ? 1 : 0
+
   source         = "../aws-s3-replication-role"
   luther_project = var.luther_project
   aws_region     = local.region
@@ -21,6 +23,8 @@ module "replication_role" {
 }
 
 module "static_bucket_dr" {
+  count = var.enable_dr ? 1 : 0
+
   source          = "../aws-s3-bucket"
   luther_project  = var.luther_project
   luther_env      = var.luther_env
@@ -34,10 +38,9 @@ module "static_bucket_dr" {
 }
 
 locals {
-  static_bucket_replication = local.region_dr != ""
-  replication_role_arn      = module.replication_role.role_arn
-  static_bucket_dr_arn      = module.static_bucket_dr.arn
-  static_bucket_dr          = module.static_bucket_dr.bucket
+  replication_role_arn = var.enable_dr ? module.replication_role[0].role_arn : ""
+  static_bucket_dr_arn = var.enable_dr ? module.static_bucket_dr[0].arn : ""
+  static_bucket_dr     = var.enable_dr ? module.static_bucket_dr[0].bucket : ""
 }
 
 output "static_bucket_dr" {
