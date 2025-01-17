@@ -27,7 +27,7 @@ resource "aws_kms_alias" "main_dr" {
   provider = aws.dr
 
   name          = "alias/${module.luthername_kms_key_main_dr[0].name}"
-  target_key_id = aws_kms_key.main_dr.key_id
+  target_key_id = aws_kms_key.main_dr[0].key_id
 }
 
 locals {
