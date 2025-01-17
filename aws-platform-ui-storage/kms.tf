@@ -106,7 +106,7 @@ data "aws_iam_policy_document" "kms_key_main" {
         test     = "StringEquals"
         variable = "kms:ViaService"
 
-        values = [local.s3_kms_regions]
+        values = local.s3_kms_regions
       }
     }
   }
