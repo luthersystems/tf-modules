@@ -35,10 +35,10 @@ locals {
   kms_key_alias_arn = var.enable_dr ? aws_kms_alias.main_dr[0].arn : ""
 }
 
-output "kms_key_main_arn_dr" {
+output "kms_key_main_dr_arn" {
   value = local.kms_key_dr_arn
 }
 
-output "kms_alias_main_arn_dr" {
+output "kms_alias_main_dr_arn" {
   value = local.kms_key_alias_arn
 }
