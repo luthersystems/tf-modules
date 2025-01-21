@@ -1,9 +1,14 @@
 data "aws_region" "current" {}
 
+data "aws_region" "dr_region" {
+  provider = aws.dr
+}
+
 data "aws_caller_identity" "current" {}
 
 locals {
   region     = data.aws_region.current.name
+  region_dr  = var.enable_dr ? data.aws_region.dr_region.name : ""
   account_id = data.aws_caller_identity.current.account_id
 }
 
@@ -56,6 +61,11 @@ variable "ci_ecr_push_arns" {
 }
 
 variable "ci_static_access" {
+  type    = bool
+  default = false
+}
+
+variable "enable_dr" {
   type    = bool
   default = false
 }

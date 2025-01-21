@@ -5,6 +5,11 @@ module "static_bucket" {
   component       = "static"
   aws_kms_key_arn = aws_kms_key.main.arn
 
+  dr_bucket_replication       = var.enable_dr
+  replication_role_arn        = local.replication_role_arn
+  replication_destination_arn = local.static_bucket_dr_arn
+  destination_kms_key_arn     = local.kms_key_dr_arn
+
   providers = {
     aws    = aws
     random = random
