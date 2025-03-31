@@ -220,6 +220,17 @@ variable "csi_addon_version" {
   }
 }
 
+variable "snapshot_controller_version" {
+  type = map(string)
+  default = {
+    "1.28" = "v8.1.0-eksbuild.2"
+    "1.29" = "v8.1.0-eksbuild.2"
+    "1.30" = "v8.1.0-eksbuild.2"
+    "1.31" = "v8.1.0-eksbuild.2"
+  }
+}
+
+
 variable "kubeproxy_addon_version" {
   type = map(string)
   default = {

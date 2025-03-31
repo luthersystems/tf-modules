@@ -190,3 +190,12 @@ resource "aws_eks_addon" "ebs-csi" {
 
   depends_on = [time_sleep.k8s_ready_wait]
 }
+
+resource "aws_eks_addon" "snapshot_controller" {
+  cluster_name                = aws_eks_cluster.app.name
+  addon_name                  = "aws-ebs-csi-snapshot-controller"
+  addon_version               = var.snapshot_controller_version[local.kubernetes_version]
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  depends_on = [aws_eks_addon.ebs_csi] # Ensure the EBS CSI driver is installed first
+}
