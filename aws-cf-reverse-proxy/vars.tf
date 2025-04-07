@@ -38,3 +38,9 @@ variable "random_identifier" {
   type    = string
   default = ""
 }
+
+variable "cors_allowed_origins" {
+  type        = list(string)
+  description = "List of allowed origins for CORS"
+  default     = []
+}

@@ -22,6 +22,8 @@ module "test" {
   origin_url        = "origin.example.com"
   use_302           = true
 
+  cors_allowed_origins = ["https://app.luthersystems.com"]
+
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1

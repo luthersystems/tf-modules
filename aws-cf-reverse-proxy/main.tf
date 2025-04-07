@@ -111,6 +111,8 @@ resource "aws_cloudfront_distribution" "site" {
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
 
+    response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
+
     dynamic "lambda_function_association" {
       for_each = var.use_302 ? [1] : []
 
@@ -138,4 +140,36 @@ resource "aws_cloudfront_distribution" "site" {
   aliases = [var.app_target_domain]
 
   tags = module.luthername_site.tags
+}
+
+resource "aws_cloudfront_response_headers_policy" "allow_specified_origins" {
+  count = length(var.cors_allowed_origins) > 0 ? 1 : 0
+
+  name = "allow-specified-cors-origins"
+
+  cors_config {
+    access_control_allow_credentials = false
+
+    access_control_allow_headers {
+      items = ["*"]
+    }
+
+    access_control_allow_methods {
+      items = ["GET", "HEAD", "OPTIONS"]
+    }
+
+    access_control_allow_origins {
+      items = var.cors_allowed_origins
+    }
+
+    origin_override = true
+  }
+
+  custom_headers_config {
+    items {
+      header   = "X-Content-Type-Options"
+      override = true
+      value    = "nosniff"
+    }
+  }
 }
