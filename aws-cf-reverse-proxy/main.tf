@@ -6,16 +6,9 @@ resource "random_string" "id" {
 }
 
 locals {
-  origin_host_and_path = replace(var.origin_url, "https?://", "")
 
-  # Extract domain
-  origin_domain = regex("^([^/]+)", local.origin_host_and_path)[0]
-
-  # Get the path by subtracting the domain from host+path
-  raw_path = replace(local.origin_host_and_path, local.origin_domain, "")
-
-  # If path exists, normalize with leading slash
-  origin_path = trim(local.raw_path, "/") != "" ? format("/%s", trim(local.raw_path, "/")) : null
+  origin_domain = try(regex("^https?://([^/]+)", var.origin_url)[0], null)
+  origin_path   = try(regex("^https?://[^/]+(/.*)", var.origin_url)[0], null)
 
   random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
 
