@@ -7,6 +7,13 @@ resource "random_string" "id" {
 
 locals {
   random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
+
+  origin_domain = replace(var.origin_url, "/(https?://)|(/)/", "")
+  target_record_name = (
+    var.app_target_domain == var.app_route53_zone_name
+    ? "@"
+    : replace(var.app_target_domain, ".${var.app_route53_zone_name}", "")
+  )
 }
 
 module "luthername_site" {
@@ -22,7 +29,7 @@ module "luthername_site" {
 }
 
 data "aws_route53_zone" "site" {
-  name         = "${var.app_naked_domain}."
+  name         = "${var.app_route53_zone_name}."
   private_zone = false
 }
 
@@ -59,14 +66,10 @@ resource "aws_acm_certificate_validation" "site" {
 
 resource "aws_route53_record" "site" {
   zone_id = data.aws_route53_zone.site.zone_id
-  name    = var.app_target_domain
+  name    = local.target_record_name
   type    = "CNAME"
   ttl     = "300"
   records = [aws_cloudfront_distribution.site.domain_name]
-}
-
-locals {
-  origin_domain = replace(var.origin_url, "/(https?://)|(/)/", "")
 }
 
 resource "aws_cloudfront_distribution" "site" {
