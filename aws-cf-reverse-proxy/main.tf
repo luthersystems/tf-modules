@@ -8,11 +8,12 @@ resource "random_string" "id" {
 locals {
   random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
 
-  origin_domain = replace(var.origin_url, "/(https?://)|(/)/", "")
+  origin_domain         = replace(var.origin_url, "/(https?://)|(/)/", "")
+  app_route53_zone_name = var.app_route53_zone_name ? var.app_route53_zone_name : var.app_naked_domain
   target_record_name = (
-    var.app_target_domain == var.app_route53_zone_name
+    var.app_target_domain == local.app_route53_zone_name
     ? "@"
-    : replace(var.app_target_domain, ".${var.app_route53_zone_name}", "")
+    : replace(var.app_target_domain, ".${local.app_route53_zone_name}", "")
   )
 }
 
@@ -29,7 +30,7 @@ module "luthername_site" {
 }
 
 data "aws_route53_zone" "site" {
-  name         = "${var.app_route53_zone_name}."
+  name         = "${local.app_route53_zone_name}."
   private_zone = false
 }
 
