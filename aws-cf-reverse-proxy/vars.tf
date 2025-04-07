@@ -44,6 +44,7 @@ variable "cors_allowed_origins" {
 variable "app_route53_zone_name" {
   type        = string
   description = "The exact Route53 zone name (e.g., app.luthersystems.com) to use for DNS validation and record creation"
+  default     = ""
 }
 
 variable "app_naked_domain" {
