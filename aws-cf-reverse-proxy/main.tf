@@ -68,9 +68,13 @@ resource "aws_acm_certificate_validation" "site" {
 resource "aws_route53_record" "site" {
   zone_id = data.aws_route53_zone.site.zone_id
   name    = local.target_record_name
-  type    = "CNAME"
-  ttl     = "300"
-  records = [aws_cloudfront_distribution.site.domain_name]
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.site.domain_name
+    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
+    evaluate_target_health = false
+  }
 }
 
 resource "aws_cloudfront_distribution" "site" {
