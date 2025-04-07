@@ -9,7 +9,7 @@ locals {
   random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
 
   origin_domain         = replace(var.origin_url, "/(https?://)|(/)/", "")
-  app_route53_zone_name = var.app_route53_zone_name ? var.app_route53_zone_name : var.app_naked_domain
+  app_route53_zone_name = var.app_route53_zone_name != "" ? var.app_route53_zone_name : var.app_naked_domain
   target_record_name = (
     var.app_target_domain == local.app_route53_zone_name
     ? "@"
