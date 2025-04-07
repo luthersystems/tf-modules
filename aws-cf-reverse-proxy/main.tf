@@ -6,10 +6,21 @@ resource "random_string" "id" {
 }
 
 locals {
+  # Remove protocol prefix
+  origin_host_and_path = replace(var.origin_url, "https?://", "")
+
+  # Extract the origin domain (e.g., dev.luthersystems.com)
+  origin_domain = regex("^([^/]+)", local.origin_host_and_path)[0]
+
+  # Extract the origin path (if any), starting with "/"
+  raw_path = replace(local.origin_host_and_path, local.origin_domain, "")
+
+  origin_path = trim(local.raw_path, "/") != "" ? "/" + trim(local.raw_path, "/") : null
+
   random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
 
-  origin_domain         = replace(var.origin_url, "/(https?://)|(/)/", "")
   app_route53_zone_name = var.app_route53_zone_name != "" ? var.app_route53_zone_name : var.app_naked_domain
+
   target_record_name = (
     var.app_target_domain == local.app_route53_zone_name
     ? ""
@@ -85,6 +96,8 @@ resource "aws_cloudfront_distribution" "site" {
   origin {
     origin_id   = "origin-site"
     domain_name = local.origin_domain
+
+    origin_path = local.origin_path
 
     custom_origin_config {
       origin_protocol_policy = "https-only"
