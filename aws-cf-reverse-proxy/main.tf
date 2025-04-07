@@ -168,11 +168,9 @@ resource "aws_cloudfront_response_headers_policy" "allow_specified_origins" {
     origin_override = true
   }
 
-  custom_headers_config {
-    items {
-      header   = "X-Content-Type-Options"
+  security_headers_config {
+    content_type_options {
       override = true
-      value    = "nosniff"
     }
   }
 }
