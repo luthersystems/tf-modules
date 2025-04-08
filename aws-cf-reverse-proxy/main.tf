@@ -6,7 +6,19 @@ resource "random_string" "id" {
 }
 
 locals {
+
+  origin_domain = try(regex("^https?://([^/]+)", var.origin_url)[0], null)
+  origin_path   = try(regex("^https?://[^/]+(/.*)", var.origin_url)[0], null)
+
   random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
+
+  app_route53_zone_name = var.app_route53_zone_name != "" ? var.app_route53_zone_name : var.app_naked_domain
+
+  target_record_name = (
+    var.app_target_domain == local.app_route53_zone_name
+    ? ""
+    : replace(var.app_target_domain, ".${local.app_route53_zone_name}", "")
+  )
 }
 
 module "luthername_site" {
@@ -22,7 +34,7 @@ module "luthername_site" {
 }
 
 data "aws_route53_zone" "site" {
-  name         = "${var.app_naked_domain}."
+  name         = "${local.app_route53_zone_name}."
   private_zone = false
 }
 
@@ -59,14 +71,14 @@ resource "aws_acm_certificate_validation" "site" {
 
 resource "aws_route53_record" "site" {
   zone_id = data.aws_route53_zone.site.zone_id
-  name    = var.app_target_domain
-  type    = "CNAME"
-  ttl     = "300"
-  records = [aws_cloudfront_distribution.site.domain_name]
-}
+  name    = local.target_record_name
+  type    = "A"
 
-locals {
-  origin_domain = replace(var.origin_url, "/(https?://)|(/)/", "")
+  alias {
+    name                   = aws_cloudfront_distribution.site.domain_name
+    zone_id                = aws_cloudfront_distribution.site.hosted_zone_id
+    evaluate_target_health = false
+  }
 }
 
 resource "aws_cloudfront_distribution" "site" {
@@ -77,6 +89,8 @@ resource "aws_cloudfront_distribution" "site" {
   origin {
     origin_id   = "origin-site"
     domain_name = local.origin_domain
+
+    origin_path = local.origin_path
 
     custom_origin_config {
       origin_protocol_policy = "https-only"
@@ -111,6 +125,8 @@ resource "aws_cloudfront_distribution" "site" {
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
 
+    response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
+
     dynamic "lambda_function_association" {
       for_each = var.use_302 ? [1] : []
 
@@ -138,4 +154,34 @@ resource "aws_cloudfront_distribution" "site" {
   aliases = [var.app_target_domain]
 
   tags = module.luthername_site.tags
+}
+
+resource "aws_cloudfront_response_headers_policy" "allow_specified_origins" {
+  count = length(var.cors_allowed_origins) > 0 ? 1 : 0
+
+  name = "allow-specified-cors-origins"
+
+  cors_config {
+    access_control_allow_credentials = false
+
+    access_control_allow_headers {
+      items = ["*"]
+    }
+
+    access_control_allow_methods {
+      items = ["GET", "HEAD", "OPTIONS"]
+    }
+
+    access_control_allow_origins {
+      items = var.cors_allowed_origins
+    }
+
+    origin_override = true
+  }
+
+  security_headers_config {
+    content_type_options {
+      override = true
+    }
+  }
 }

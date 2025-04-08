@@ -14,13 +14,17 @@ provider "aws" {
 }
 
 module "test" {
-  source            = "../../"
-  luther_env        = "env"
-  luther_project    = "project"
-  app_naked_domain  = "example.com"
-  app_target_domain = "target.example.com"
-  origin_url        = "origin.example.com"
-  use_302           = true
+  source         = "../../"
+  luther_env     = "env"
+  luther_project = "project"
+
+  app_target_domain     = "target.example.com"
+  app_route53_zone_name = "app.luthersystems.com"
+
+  origin_url = "origin.example.com"
+  use_302    = true
+
+  cors_allowed_origins = ["https://app.luthersystems.com"]
 
   providers = {
     aws           = aws

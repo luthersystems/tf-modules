@@ -12,10 +12,6 @@ variable "luther_env" {
   type = string
 }
 
-variable "app_naked_domain" {
-  type = string
-}
-
 variable "app_target_domain" {
   type = string
 }
@@ -37,4 +33,22 @@ variable "use_302" {
 variable "random_identifier" {
   type    = string
   default = ""
+}
+
+variable "cors_allowed_origins" {
+  type        = list(string)
+  description = "List of allowed origins for CORS"
+  default     = []
+}
+
+variable "app_route53_zone_name" {
+  type        = string
+  description = "The exact Route53 zone name (e.g., app.luthersystems.com) to use for DNS validation and record creation"
+  default     = ""
+}
+
+variable "app_naked_domain" {
+  type        = string
+  description = "Renamed to `app_route53_zone`"
+  default     = ""
 }
