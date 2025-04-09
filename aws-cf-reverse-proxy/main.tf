@@ -134,8 +134,9 @@ resource "aws_cloudfront_distribution" "site" {
 
       forwarded_values {
         query_string = true
+        # TODO headers
         cookies {
-          forward = "none"
+          forward = "all"
         }
       }
 
