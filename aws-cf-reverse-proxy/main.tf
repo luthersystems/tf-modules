@@ -119,55 +119,37 @@ resource "aws_cloudfront_distribution" "site" {
     }
   }
   default_cache_behavior {
-    target_origin_id       = local.origin_configs["/*"].origin_id
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    compress               = true
+    allowed_methods = ["GET", "HEAD"]
+    cached_methods  = ["GET", "HEAD"]
 
     forwarded_values {
-      headers      = ["*"]
-      query_string = true
+      query_string = false
+
       cookies {
-        forward = "all"
+        forward = "none"
       }
     }
+
+    min_ttl          = "0"
+    default_ttl      = "300"
+    max_ttl          = "1200"
+    target_origin_id = "origin-site"
+
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
 
     response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
 
     dynamic "lambda_function_association" {
       for_each = var.use_302 ? [1] : []
+
       content {
         event_type   = "viewer-request"
         lambda_arn   = aws_lambda_function.edge_function[0].qualified_arn
         include_body = false
       }
     }
-  }
 
-  dynamic "ordered_cache_behavior" {
-    for_each = {
-      for k, v in local.origin_configs : k => v if k != "/*"
-    }
-
-    content {
-      path_pattern           = ordered_cache_behavior.key
-      target_origin_id       = ordered_cache_behavior.value.origin_id
-      viewer_protocol_policy = "redirect-to-https"
-      allowed_methods        = ["GET", "HEAD"]
-      cached_methods         = ["GET", "HEAD"]
-      compress               = true
-
-      forwarded_values {
-        headers      = ["*"]
-        query_string = true
-        cookies {
-          forward = "all"
-        }
-      }
-
-      response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
-    }
   }
 
   restrictions {
@@ -286,4 +268,8 @@ resource "aws_s3_bucket_ownership_controls" "cf_logs" {
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
+}
+
+output "origin_configs" {
+  value = local.origin_configs
 }
