@@ -232,6 +232,7 @@ resource "aws_s3_bucket" "cf_logs" {
 
 data "aws_caller_identity" "current" {}
 
+
 resource "aws_s3_bucket_policy" "cf_logs" {
   bucket = aws_s3_bucket.cf_logs.id
 
@@ -249,6 +250,20 @@ resource "aws_s3_bucket_policy" "cf_logs" {
         Condition = {
           StringEquals = {
             "AWS:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+        }
+      },
+      {
+        Sid : "AllowBucketACLForCloudFront",
+        Effect : "Allow",
+        Principal : {
+          Service : "cloudfront.amazonaws.com"
+        },
+        Action : "s3:PutObjectAcl",
+        Resource : "${aws_s3_bucket.cf_logs.arn}/cloudfront/*",
+        Condition : {
+          StringEquals : {
+            "AWS:SourceAccount" : data.aws_caller_identity.current.account_id
           }
         }
       }
