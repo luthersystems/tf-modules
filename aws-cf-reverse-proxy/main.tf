@@ -118,6 +118,35 @@ resource "aws_cloudfront_distribution" "site" {
       }
     }
   }
+
+  dynamic "ordered_cache_behavior" {
+    for_each = {
+      for k, v in local.origin_configs : k => v if k != "/*"
+    }
+
+    content {
+      path_pattern           = ordered_cache_behavior.key
+      target_origin_id       = ordered_cache_behavior.value.origin_id
+      viewer_protocol_policy = "redirect-to-https"
+      allowed_methods        = ["GET", "HEAD"]
+      cached_methods         = ["GET", "HEAD"]
+      compress               = true
+
+      forwarded_values {
+        query_string = false
+        cookies {
+          forward = "none"
+        }
+      }
+
+      min_ttl     = 0
+      default_ttl = 300
+      max_ttl     = 1200
+
+      response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
+    }
+  }
+
   default_cache_behavior {
     allowed_methods = ["GET", "HEAD"]
     cached_methods  = ["GET", "HEAD"]
