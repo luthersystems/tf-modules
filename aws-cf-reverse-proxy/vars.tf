@@ -52,3 +52,9 @@ variable "app_naked_domain" {
   description = "Renamed to `app_route53_zone`"
   default     = ""
 }
+
+variable "origin_routes" {
+  type        = map(string)
+  description = "Optional map of path_pattern => origin_url. Overrides origin_url if set."
+  default     = {}
+}

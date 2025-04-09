@@ -6,9 +6,21 @@ resource "random_string" "id" {
 }
 
 locals {
+  # Default route from origin_url if origin_routes not provided
+  base_routes = length(var.origin_url) > 0 ? {
+    "/*" = var.origin_url
+  } : {}
 
-  origin_domain = try(regex("^https?://([^/]+)", var.origin_url)[0], null)
-  origin_path   = try(regex("^https?://[^/]+(/.*)", var.origin_url)[0], null)
+  merged_origin_routes = merge(local.base_routes, var.origin_routes)
+
+  origin_configs = {
+    for path, url in local.merged_origin_routes :
+    path => {
+      origin_id     = "origin-${replace(trim(path, "/*"), "[^a-zA-Z0-9]", "-")}"
+      origin_domain = regex("^https?://([^/]+)", url)[0]
+      origin_path   = try(regex("^https?://[^/]+(/.*)", url)[0], null)
+    }
+  }
 
   random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
 
@@ -86,57 +98,74 @@ resource "aws_cloudfront_distribution" "site" {
   price_class  = "PriceClass_200"
   http_version = "http2"
 
-  origin {
-    origin_id   = "origin-site"
-    domain_name = local.origin_domain
+  dynamic "origin" {
+    for_each = local.origin_configs
+    content {
+      origin_id   = origin.value.origin_id
+      domain_name = origin.value.origin_domain
+      origin_path = origin.value.origin_path
 
-    origin_path = local.origin_path
+      custom_origin_config {
+        origin_protocol_policy = "https-only"
+        http_port              = 80
+        https_port             = 443
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
 
-    custom_origin_config {
-      origin_protocol_policy = "https-only"
-      http_port              = "80"
-      https_port             = "443"
-      origin_ssl_protocols   = ["TLSv1.2"]
-    }
-
-    custom_header {
-      name  = "User-Agent"
-      value = var.duplicate_content_penalty_secret
+      custom_header {
+        name  = "User-Agent"
+        value = var.duplicate_content_penalty_secret
+      }
     }
   }
-
   default_cache_behavior {
-    allowed_methods = ["GET", "HEAD"]
-    cached_methods  = ["GET", "HEAD"]
+    target_origin_id       = local.origin_configs["/*"].origin_id
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    compress               = true
 
     forwarded_values {
       query_string = false
-
       cookies {
         forward = "none"
       }
     }
 
-    min_ttl          = "0"
-    default_ttl      = "300"
-    max_ttl          = "1200"
-    target_origin_id = "origin-site"
-
-    viewer_protocol_policy = "redirect-to-https"
-    compress               = true
-
     response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
 
     dynamic "lambda_function_association" {
       for_each = var.use_302 ? [1] : []
-
       content {
         event_type   = "viewer-request"
         lambda_arn   = aws_lambda_function.edge_function[0].qualified_arn
         include_body = false
       }
     }
+  }
 
+  dynamic "ordered_cache_behavior" {
+    for_each = {
+      for k, v in local.origin_configs : k => v if k != "/*"
+    }
+
+    content {
+      path_pattern           = ordered_cache_behavior.key
+      target_origin_id       = ordered_cache_behavior.value.origin_id
+      viewer_protocol_policy = "redirect-to-https"
+      allowed_methods        = ["GET", "HEAD"]
+      cached_methods         = ["GET", "HEAD"]
+      compress               = true
+
+      forwarded_values {
+        query_string = false
+        cookies {
+          forward = "none"
+        }
+      }
+
+      response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
+    }
   }
 
   restrictions {
