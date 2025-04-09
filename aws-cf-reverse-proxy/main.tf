@@ -126,9 +126,10 @@ resource "aws_cloudfront_distribution" "site" {
     compress               = true
 
     forwarded_values {
-      query_string = false
+      headers      = ["*"]
+      query_string = true
       cookies {
-        forward = "none"
+        forward = "all"
       }
     }
 
@@ -158,9 +159,10 @@ resource "aws_cloudfront_distribution" "site" {
       compress               = true
 
       forwarded_values {
-        query_string = false
+        headers      = ["*"]
+        query_string = true
         cookies {
-          forward = "none"
+          forward = "all"
         }
       }
 
