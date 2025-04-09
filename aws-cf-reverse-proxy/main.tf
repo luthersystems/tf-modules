@@ -16,7 +16,7 @@ locals {
   origin_configs = {
     for path, url in local.merged_origin_routes :
     path => {
-      origin_id     = "origin-${replace(trim(path, "/*"), "[^a-zA-Z0-9]", "-")}"
+      origin_id     = "origin-${path == "/*" ? "site" : replace(trim(path, "/*"), "[^a-zA-Z0-9]", "-")}"
       origin_domain = regex("^https?://([^/]+)", url)[0]
       origin_path   = try(regex("^https?://[^/]+(/.*)", url)[0], null)
     }
