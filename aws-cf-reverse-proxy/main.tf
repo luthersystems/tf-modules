@@ -184,6 +184,12 @@ resource "aws_cloudfront_distribution" "site" {
 
   aliases = [var.app_target_domain]
 
+  logging_config {
+    include_cookies = true
+    bucket          = aws_s3_bucket.cf_logs.bucket_domain_name
+    prefix          = "cloudfront/"
+  }
+
   tags = module.luthername_site.tags
 }
 
@@ -215,4 +221,46 @@ resource "aws_cloudfront_response_headers_policy" "allow_specified_origins" {
       override = true
     }
   }
+}
+
+resource "aws_s3_bucket" "cf_logs" {
+  bucket        = "${module.luthername_site.name}-cf-logs"
+  force_destroy = true
+
+  tags = module.luthername_site.tags
+}
+
+data "aws_caller_identity" "current" {}
+
+resource "aws_s3_bucket_policy" "cf_logs" {
+  bucket = aws_s3_bucket.cf_logs.id
+
+  policy = jsonencode({
+    Version = "2008-10-17",
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontServicePrincipal",
+        Effect = "Allow",
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        },
+        Action   = "s3:PutObject",
+        Resource = "${aws_s3_bucket.cf_logs.arn}/cloudfront/*",
+        Condition = {
+          StringEquals = {
+            "AWS:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_public_access_block" "cf_logs" {
+  bucket = aws_s3_bucket.cf_logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
