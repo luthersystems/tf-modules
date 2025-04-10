@@ -133,19 +133,8 @@ resource "aws_cloudfront_distribution" "site" {
       compress               = true
 
       cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
-      #origin_request_policy_id = aws_cloudfront_origin_request_policy.respect_all_viewer.id
 
       response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
-
-      #forwarded_values {
-      #  query_string = false
-      #  cookies {
-      #    forward = "none"
-      #  }
-      #}
-      #min_ttl     = 0
-      #default_ttl = 300
-      #max_ttl     = 1200
     }
   }
 
@@ -157,17 +146,8 @@ resource "aws_cloudfront_distribution" "site" {
     compress               = true
 
     cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
-    #origin_request_policy_id = aws_cloudfront_origin_request_policy.respect_all_viewer.id
 
-    #forwarded_values {
-    #  query_string = false
-    #  cookies {
-    #    forward = "none"
-    #  }
-    #}
-    #min_ttl     = 0
-    #default_ttl = 300
-    #max_ttl     = 1200
+    response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
 
     dynamic "lambda_function_association" {
       for_each = var.use_302 ? [1] : []
@@ -304,6 +284,8 @@ output "origin_configs" {
 resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
   name = "${module.luthername_site.name}-default-policy"
 
+  # omitting these should use origin cache settings
+  # https://github.com/hashicorp/terraform-provider-aws/issues/19382
   #min_ttl     = 0
   #default_ttl = 300
   #max_ttl     = 1200
@@ -326,22 +308,5 @@ resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
 
     enable_accept_encoding_gzip   = true
     enable_accept_encoding_brotli = true
-  }
-}
-
-resource "aws_cloudfront_origin_request_policy" "respect_all_viewer" {
-  name    = "${module.luthername_site.name}-respect-all-viewer"
-  comment = "Forward all headers, cookies, and query strings to origin"
-
-  cookies_config {
-    cookie_behavior = "all"
-  }
-
-  headers_config {
-    header_behavior = "allViewer"
-  }
-
-  query_strings_config {
-    query_string_behavior = "all"
   }
 }
