@@ -132,7 +132,7 @@ resource "aws_cloudfront_distribution" "site" {
       cached_methods         = ["GET", "HEAD"]
       compress               = true
 
-      cache_policy_id          = aws_cloudfront_cache_policy.default_behavior_policy.id
+      cache_policy_id          = aws_cloudfront_cache_policy.respect_origin_headers.id
       origin_request_policy_id = aws_cloudfront_origin_request_policy.respect_all_viewer.id
 
       response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
@@ -146,7 +146,7 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     compress               = true
 
-    cache_policy_id          = aws_cloudfront_cache_policy.default_behavior_policy.id
+    cache_policy_id          = aws_cloudfront_cache_policy.respect_origin_headers.id
     origin_request_policy_id = aws_cloudfront_origin_request_policy.respect_all_viewer.id
 
     response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
@@ -284,38 +284,7 @@ output "origin_configs" {
   value = local.origin_configs
 }
 
-# resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
-#   name    = "${module.luthername_site.name}-respect-origin-headers"
-#   comment = "Use origin cache headers when present; otherwise no cache"
-#
-#   # Use origin cache settings:
-#   # https://github.com/hashicorp/terraform-provider-aws/issues/19382
-#   #default_ttl = 0
-#   #min_ttl     = 0
-#   #max_ttl     = 31536000
-#
-#   parameters_in_cache_key_and_forwarded_to_origin {
-#     cookies_config {
-#       cookie_behavior = "all"
-#     }
-#
-#     headers_config {
-#       header_behavior = "whitelist"
-#       headers {
-#         items = ["Origin", "Authorization", "Accept", "Content-Type", "User-Agent"]
-#       }
-#     }
-#
-#     query_strings_config {
-#       query_string_behavior = "all"
-#     }
-#
-#     enable_accept_encoding_gzip   = true
-#     enable_accept_encoding_brotli = true
-#   }
-#
-# }
-resource "aws_cloudfront_cache_policy" "default_behavior_policy" {
+resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
   name        = "${module.luthername_site.name}-default-policy"
   min_ttl     = 0
   default_ttl = 300
