@@ -282,24 +282,25 @@ output "origin_configs" {
 }
 
 resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
-  name = "respect-origin-cache-or-donot"
+  name = "${module.luthername_site.name}-respect-origin-headers"
 
-  # no caching if origin does not set cache headers
-  default_ttl = 0
-  min_ttl     = 0
-  max_ttl     = 31536000
+  # omitting ttls should use origin settings
+  # https://github.com/hashicorp/terraform-provider-aws/issues/19382
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
-      cookie_behavior = "none"
+      cookie_behavior = "all"
     }
 
     headers_config {
-      header_behavior = "none"
+      header_behavior = "whitelist"
+      headers {
+        items = ["*"]
+      }
     }
 
     query_strings_config {
-      query_string_behavior = "none"
+      query_string_behavior = "all"
     }
 
     enable_accept_encoding_gzip = true
