@@ -132,21 +132,20 @@ resource "aws_cloudfront_distribution" "site" {
       cached_methods         = ["GET", "HEAD"]
       compress               = true
 
-      #cache_policy_id          = aws_cloudfront_cache_policy.respect_origin_headers.id
+      cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
       #origin_request_policy_id = aws_cloudfront_origin_request_policy.respect_all_viewer.id
 
       response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
 
-      forwarded_values {
-        query_string = false
-        cookies {
-          forward = "none"
-        }
-      }
-
-      min_ttl     = 0
-      default_ttl = 300
-      max_ttl     = 1200
+      #forwarded_values {
+      #  query_string = false
+      #  cookies {
+      #    forward = "none"
+      #  }
+      #}
+      #min_ttl     = 0
+      #default_ttl = 300
+      #max_ttl     = 1200
     }
   }
 
