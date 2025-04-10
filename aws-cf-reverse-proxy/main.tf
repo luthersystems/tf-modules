@@ -31,6 +31,8 @@ locals {
     ? ""
     : replace(var.app_target_domain, ".${local.app_route53_zone_name}", "")
   )
+
+  use_cors = var.use_cors && length(var.cors_allowed_origins) > 0
 }
 
 module "luthername_site" {
@@ -134,7 +136,7 @@ resource "aws_cloudfront_distribution" "site" {
 
       cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
 
-      response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
+      response_headers_policy_id = local.use_cors ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
     }
   }
 
@@ -147,7 +149,7 @@ resource "aws_cloudfront_distribution" "site" {
 
     cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
 
-    response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
+    response_headers_policy_id = local.use_cors ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
 
     dynamic "lambda_function_association" {
       for_each = var.use_302 ? [1] : []

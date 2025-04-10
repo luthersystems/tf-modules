@@ -59,3 +59,8 @@ variable "origin_routes" {
   description = "Optional map of path_pattern => origin_url. Overrides origin_url if set."
   default     = {}
 }
+
+variable "use_cors" {
+  type    = bool
+  default = false
+}
