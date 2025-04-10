@@ -132,8 +132,8 @@ resource "aws_cloudfront_distribution" "site" {
       cached_methods         = ["GET", "HEAD"]
       compress               = true
 
-      cache_policy_id          = aws_cloudfront_cache_policy.respect_origin_headers.id
-      origin_request_policy_id = aws_cloudfront_origin_request_policy.respect_all_viewer.id
+      cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
+      #origin_request_policy_id = aws_cloudfront_origin_request_policy.respect_all_viewer.id
 
       response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
 
@@ -311,7 +311,7 @@ resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
-      cookie_behavior = "none"
+      cookie_behavior = "all"
     }
 
     headers_config {
@@ -319,7 +319,7 @@ resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
     }
 
     query_strings_config {
-      query_string_behavior = "none"
+      query_string_behavior = "all"
     }
 
     enable_accept_encoding_gzip = true
