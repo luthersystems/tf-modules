@@ -132,54 +132,31 @@ resource "aws_cloudfront_distribution" "site" {
       cached_methods         = ["GET", "HEAD"]
       compress               = true
 
-      forwarded_values {
-        query_string = true
-        # TODO headers
-        cookies {
-          forward = "all"
-        }
-      }
-
-      min_ttl     = 0
-      default_ttl = 300
-      max_ttl     = 1200
+      cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
 
       response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
     }
   }
 
   default_cache_behavior {
-    allowed_methods = ["GET", "HEAD"]
-    cached_methods  = ["GET", "HEAD"]
-
-    forwarded_values {
-      query_string = true
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    min_ttl          = "0"
-    default_ttl      = "300"
-    max_ttl          = "1200"
-    target_origin_id = "origin-site"
-
+    target_origin_id       = "origin-site"
     viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
     compress               = true
+
+    cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
 
     response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
 
     dynamic "lambda_function_association" {
       for_each = var.use_302 ? [1] : []
-
       content {
         event_type   = "viewer-request"
         lambda_arn   = aws_lambda_function.edge_function[0].qualified_arn
         include_body = false
       }
     }
-
   }
 
   restrictions {
@@ -302,4 +279,29 @@ resource "aws_s3_bucket_ownership_controls" "cf_logs" {
 
 output "origin_configs" {
   value = local.origin_configs
+}
+
+resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
+  name = "respect-origin-cache-or-donot"
+
+  # no caching if origin does not set cache headers
+  default_ttl = 0
+  min_ttl     = 0
+  max_ttl     = 31536000
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    cookies_config {
+      cookie_behavior = "none"
+    }
+
+    headers_config {
+      header_behavior = "none"
+    }
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+
+    enable_accept_encoding_gzip = true
+  }
 }
