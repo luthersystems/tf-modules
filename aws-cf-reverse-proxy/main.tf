@@ -302,10 +302,11 @@ output "origin_configs" {
 }
 
 resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
-  name        = "${module.luthername_site.name}-default-policy"
-  min_ttl     = 0
-  default_ttl = 300
-  max_ttl     = 1200
+  name = "${module.luthername_site.name}-default-policy"
+
+  #min_ttl     = 0
+  #default_ttl = 300
+  #max_ttl     = 1200
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
