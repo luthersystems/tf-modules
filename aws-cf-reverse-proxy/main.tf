@@ -315,14 +315,18 @@ resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
     }
 
     headers_config {
-      header_behavior = "none"
+      header_behavior = "whitelist"
+      headers {
+        items = ["Origin", "Authorization", "Accept", "Content-Type", "User-Agent"]
+      }
     }
 
     query_strings_config {
       query_string_behavior = "all"
     }
 
-    enable_accept_encoding_gzip = true
+    enable_accept_encoding_gzip   = true
+    enable_accept_encoding_brotli = true
   }
 }
 
