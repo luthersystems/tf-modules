@@ -6,9 +6,21 @@ resource "random_string" "id" {
 }
 
 locals {
+  # Default route from origin_url if origin_routes not provided
+  base_routes = length(var.origin_url) > 0 ? {
+    "/*" = var.origin_url
+  } : {}
 
-  origin_domain = try(regex("^https?://([^/]+)", var.origin_url)[0], null)
-  origin_path   = try(regex("^https?://[^/]+(/.*)", var.origin_url)[0], null)
+  merged_origin_routes = merge(local.base_routes, var.origin_routes)
+
+  origin_configs = {
+    for path, url in local.merged_origin_routes :
+    path => {
+      origin_id     = "origin-${path == "/*" ? "site" : replace(trim(path, "/*"), "[^a-zA-Z0-9]", "-")}"
+      origin_domain = regex("^https?://([^/]+)", url)[0]
+      origin_path   = try(regex("^https?://[^/]+(/.*)", url)[0], null)
+    }
+  }
 
   random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
 
@@ -19,6 +31,8 @@ locals {
     ? ""
     : replace(var.app_target_domain, ".${local.app_route53_zone_name}", "")
   )
+
+  use_cors = var.use_cors && length(var.cors_allowed_origins) > 0
 }
 
 module "luthername_site" {
@@ -86,57 +100,65 @@ resource "aws_cloudfront_distribution" "site" {
   price_class  = "PriceClass_200"
   http_version = "http2"
 
-  origin {
-    origin_id   = "origin-site"
-    domain_name = local.origin_domain
+  dynamic "origin" {
+    for_each = local.origin_configs
+    content {
+      origin_id   = origin.value.origin_id
+      domain_name = origin.value.origin_domain
+      origin_path = origin.value.origin_path
 
-    origin_path = local.origin_path
+      custom_origin_config {
+        origin_protocol_policy = "https-only"
+        http_port              = 80
+        https_port             = 443
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
 
-    custom_origin_config {
-      origin_protocol_policy = "https-only"
-      http_port              = "80"
-      https_port             = "443"
-      origin_ssl_protocols   = ["TLSv1.2"]
+      custom_header {
+        name  = "User-Agent"
+        value = var.duplicate_content_penalty_secret
+      }
+    }
+  }
+
+  dynamic "ordered_cache_behavior" {
+    for_each = {
+      for k, v in local.origin_configs : k => v if k != "/*"
     }
 
-    custom_header {
-      name  = "User-Agent"
-      value = var.duplicate_content_penalty_secret
+    content {
+      path_pattern           = ordered_cache_behavior.key
+      target_origin_id       = ordered_cache_behavior.value.origin_id
+      viewer_protocol_policy = "redirect-to-https"
+      allowed_methods        = ["GET", "HEAD"]
+      cached_methods         = ["GET", "HEAD"]
+      compress               = true
+
+      cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
+
+      response_headers_policy_id = local.use_cors ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
     }
   }
 
   default_cache_behavior {
-    allowed_methods = ["GET", "HEAD"]
-    cached_methods  = ["GET", "HEAD"]
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-
-    min_ttl          = "0"
-    default_ttl      = "300"
-    max_ttl          = "1200"
-    target_origin_id = "origin-site"
-
+    target_origin_id       = "origin-site"
     viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
     compress               = true
 
-    response_headers_policy_id = length(var.cors_allowed_origins) > 0 ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
+    cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
+
+    response_headers_policy_id = local.use_cors ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
 
     dynamic "lambda_function_association" {
       for_each = var.use_302 ? [1] : []
-
       content {
         event_type   = "viewer-request"
         lambda_arn   = aws_lambda_function.edge_function[0].qualified_arn
         include_body = false
       }
     }
-
   }
 
   restrictions {
@@ -152,6 +174,12 @@ resource "aws_cloudfront_distribution" "site" {
   }
 
   aliases = [var.app_target_domain]
+
+  logging_config {
+    include_cookies = true
+    bucket          = aws_s3_bucket.cf_logs.bucket_domain_name
+    prefix          = "cloudfront/"
+  }
 
   tags = module.luthername_site.tags
 }
@@ -183,5 +211,104 @@ resource "aws_cloudfront_response_headers_policy" "allow_specified_origins" {
     content_type_options {
       override = true
     }
+  }
+}
+
+resource "aws_s3_bucket" "cf_logs" {
+  bucket        = "${module.luthername_site.name}-cf-logs"
+  force_destroy = true
+
+  tags = module.luthername_site.tags
+}
+
+data "aws_caller_identity" "current" {}
+
+
+resource "aws_s3_bucket_policy" "cf_logs" {
+  bucket = aws_s3_bucket.cf_logs.id
+
+  policy = jsonencode({
+    Version = "2008-10-17",
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontServicePrincipal",
+        Effect = "Allow",
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        },
+        Action   = "s3:PutObject",
+        Resource = "${aws_s3_bucket.cf_logs.arn}/cloudfront/*",
+        Condition = {
+          StringEquals = {
+            "AWS:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+        }
+      },
+      {
+        Sid : "AllowBucketACLForCloudFront",
+        Effect : "Allow",
+        Principal : {
+          Service : "cloudfront.amazonaws.com"
+        },
+        Action : "s3:PutObjectAcl",
+        Resource : "${aws_s3_bucket.cf_logs.arn}/cloudfront/*",
+        Condition : {
+          StringEquals : {
+            "AWS:SourceAccount" : data.aws_caller_identity.current.account_id
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_public_access_block" "cf_logs" {
+  bucket = aws_s3_bucket.cf_logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_ownership_controls" "cf_logs" {
+  bucket = aws_s3_bucket.cf_logs.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+output "origin_configs" {
+  value = local.origin_configs
+}
+
+resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
+  name = "${module.luthername_site.name}-default-policy"
+
+  # omitting these should use origin cache settings
+  # https://github.com/hashicorp/terraform-provider-aws/issues/19382
+  #min_ttl     = 0
+  #default_ttl = 300
+  #max_ttl     = 1200
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    cookies_config {
+      cookie_behavior = "all"
+    }
+
+    headers_config {
+      header_behavior = "whitelist"
+      headers {
+        items = ["Origin", "Authorization", "Accept", "Content-Type", "User-Agent"]
+      }
+    }
+
+    query_strings_config {
+      query_string_behavior = "all"
+    }
+
+    enable_accept_encoding_gzip   = true
+    enable_accept_encoding_brotli = true
   }
 }

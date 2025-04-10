@@ -22,7 +22,8 @@ variable "duplicate_content_penalty_secret" {
 }
 
 variable "origin_url" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "use_302" {
@@ -51,4 +52,15 @@ variable "app_naked_domain" {
   type        = string
   description = "Renamed to `app_route53_zone`"
   default     = ""
+}
+
+variable "origin_routes" {
+  type        = map(string)
+  description = "Optional map of path_pattern => origin_url. Overrides origin_url if set."
+  default     = {}
+}
+
+variable "use_cors" {
+  type    = bool
+  default = false
 }
