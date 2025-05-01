@@ -130,9 +130,11 @@ resource "aws_cloudfront_distribution" "site" {
       path_pattern           = ordered_cache_behavior.key
       target_origin_id       = ordered_cache_behavior.value.origin_id
       viewer_protocol_policy = "redirect-to-https"
-      allowed_methods        = ["GET", "HEAD"]
-      cached_methods         = ["GET", "HEAD"]
-      compress               = true
+
+      allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+      cached_methods  = ["GET", "HEAD"]
+
+      compress = true
 
       cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
 
@@ -143,9 +145,11 @@ resource "aws_cloudfront_distribution" "site" {
   default_cache_behavior {
     target_origin_id       = "origin-site"
     viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    compress               = true
+
+    allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods  = ["GET", "HEAD"]
+
+    compress = true
 
     cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
 
@@ -288,9 +292,9 @@ resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
 
   # omitting these should use origin cache settings
   # https://github.com/hashicorp/terraform-provider-aws/issues/19382
-  #min_ttl     = 0
-  #default_ttl = 300
-  #max_ttl     = 1200
+  min_ttl     = var.cache_min_ttl
+  default_ttl = var.cache_default_ttl
+  max_ttl     = var.cache_max_ttl
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
