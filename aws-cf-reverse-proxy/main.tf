@@ -292,9 +292,9 @@ resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
 
   # omitting these should use origin cache settings
   # https://github.com/hashicorp/terraform-provider-aws/issues/19382
-  #min_ttl     = 0
-  #default_ttl = 300
-  #max_ttl     = 1200
+  min_ttl     = var.cache_min_ttl
+  default_ttl = var.cache_default_ttl
+  max_ttl     = var.cache_max_ttl
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {

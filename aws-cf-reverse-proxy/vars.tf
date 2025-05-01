@@ -64,3 +64,19 @@ variable "use_cors" {
   type    = bool
   default = false
 }
+
+variable "cache_min_ttl" {
+  type    = number
+  default = 0
+}
+
+variable "cache_max_ttl" {
+  type    = number
+  default = 300
+}
+
+variable "cache_default_ttl" {
+  type    = number
+  default = 60
+}
+
