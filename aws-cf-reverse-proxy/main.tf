@@ -108,10 +108,12 @@ resource "aws_cloudfront_distribution" "site" {
       origin_path = origin.value.origin_path
 
       custom_origin_config {
-        origin_protocol_policy = "https-only"
-        http_port              = 80
-        https_port             = 443
-        origin_ssl_protocols   = ["TLSv1.2"]
+        origin_protocol_policy   = "https-only"
+        http_port                = 80
+        https_port               = 443
+        origin_ssl_protocols     = ["TLSv1.2"]
+        origin_read_timeout      = var.origin_read_timeout
+        origin_keepalive_timeout = 60
       }
 
       custom_header {
