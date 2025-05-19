@@ -80,3 +80,8 @@ variable "cache_default_ttl" {
   default = 60
 }
 
+variable "origin_read_timeout" {
+  description = "How long CloudFront should wait for a response from the origin (in seconds)"
+  type        = number
+  default     = 60
+}
