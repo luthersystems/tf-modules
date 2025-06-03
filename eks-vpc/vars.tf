@@ -121,11 +121,6 @@ variable "worker_asg_target_group_arns" {
   default = []
 }
 
-variable "inspector_rules_package_arns" {
-  type    = list(string)
-  default = []
-}
-
 variable "public_api" {
   type    = bool
   default = false
