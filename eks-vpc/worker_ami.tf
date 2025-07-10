@@ -7,24 +7,29 @@ locals {
   arch        = local.is_graviton ? "arm64" : "x86_64"
   k8s_version = aws_eks_cluster.app.version
 
-  ssm_param_al2023 = "/aws/service/eks/optimized-ami/${local.k8s_version}/amazon-linux-2023-${local.arch}/recommended/image_id"
-  ssm_param_al2    = "/aws/service/eks/optimized-ami/${local.k8s_version}/amazon-linux-2-${local.arch}/recommended/image_id"
+  ami_name_filters = [
+    "amazon-eks-node-${local.k8s_version}-v*",
+    "amazon-eks-node-al2023-${local.arch}-standard-${local.k8s_version}-v*"
+  ]
 }
 
-data "aws_ssm_parameter" "eks_image_al2023" {
-  name = local.ssm_param_al2023
-}
-
-data "aws_ssm_parameter" "eks_image_al2" {
-  name = local.ssm_param_al2
+data "aws_ami" "eks_worker" {
+  for_each = toset(local.ami_name_filters)
+  filter {
+    name   = "name"
+    values = [each.value]
+  }
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+  most_recent = true
+  owners      = ["amazon"]
 }
 
 locals {
-  selected_image_id = try(
-    data.aws_ssm_parameter.eks_image_al2023.value,
-    data.aws_ssm_parameter.eks_image_al2.value,
-    null
-  )
+  eks_worker_ami_ids = [for a in data.aws_ami.eks_worker : a.id]
+  selected_image_id  = length(local.eks_worker_ami_ids) > 0 ? sort(local.eks_worker_ami_ids)[length(local.eks_worker_ami_ids) - 1] : null
 }
 
 resource "terraform_data" "image_id" {
@@ -33,6 +38,7 @@ resource "terraform_data" "image_id" {
   lifecycle {
     ignore_changes = [input]
   }
+
   triggers_replace = [aws_eks_cluster.app.version, var.worker_instance_type]
 }
 
@@ -43,6 +49,6 @@ locals {
 resource "null_resource" "fail_if_no_ami" {
   count = local.selected_image_id == null ? 1 : 0
   provisioner "local-exec" {
-    command = "echo 'ERROR: No EKS worker AMI found via SSM!' && exit 1"
+    command = "echo 'ERROR: No EKS worker AMI found via filters!' && exit 1"
   }
 }
