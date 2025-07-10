@@ -63,5 +63,5 @@ data "aws_ami" "selected" {
 }
 
 locals {
-  is_al2023 = contains(lower(data.aws_ami.selected.name), "al2023")
+  is_al2023 = can(regex("al2023", lower(data.aws_ami.selected.name)))
 }
