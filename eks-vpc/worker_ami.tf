@@ -58,10 +58,14 @@ data "aws_ami" "selected" {
   owners      = ["amazon"]
   filter {
     name   = "image-id"
-    values = [local.image_id]
+    values = [local.selected_image_id]
   }
 }
 
 locals {
   is_al2023 = can(regex("al2023", lower(data.aws_ami.selected.name)))
+}
+
+output "is_al2023" {
+  value = local.is_al2023
 }
