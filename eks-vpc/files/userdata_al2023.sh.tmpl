@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euxo pipefail
+
+# NOTE: No bootstrap.sh call for AL2023 (EKS uses nodeadm instead)
+
+# Additional customizations
+
+# Install latest security updates
+yum update --security -y
+
+# Disable root SSH
+sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+systemctl reload sshd
+
+${common_userdata}
