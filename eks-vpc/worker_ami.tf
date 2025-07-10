@@ -1,6 +1,8 @@
 # # Only update the AMI when k8s version or instance type has changed. This avoids accidently
 # refreshing the nodes due to a new AMI added to AWS.
 locals {
+  image_id = terraform_data.worker_ami.output
+
   # Determine if the instance type is Graviton (ARM architecture)
   core        = substr(var.worker_instance_type, 0, 3)
   is_graviton = contains(["a1", "c6g", "m6g", "r6g", "t4g"], local.core)
