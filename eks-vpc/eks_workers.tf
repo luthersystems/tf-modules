@@ -60,14 +60,17 @@ locals {
     local.docker_config,
   local.awslogs_config)
 
-  docker_config_json = var.awslogs_driver ? jsonencode(local.docker_config_awslogs) : jsonencode(local.docker_config)
+  docker_config_json = (var.awslogs_driver && !var.disable_docker) ? jsonencode(local.docker_config_awslogs) : ""
+
+  # newer AMIs AL2023+ do not have docker installed!
+  docker_config_json_arg = local.docker_config_json != "" ? "--docker-config-json '${local.docker_config_json}'" : ""
 
   user_data_vars = {
-    docker_config_json = local.docker_config_json
-    endpoint           = aws_eks_cluster.app.endpoint,
-    cluster_ca         = aws_eks_cluster.app.certificate_authority[0].data,
-    cluster_name       = aws_eks_cluster.app.name,
-    common_userdata    = module.common_userdata.user_data
+    docker_config_json_arg = local.docker_config_json_arg
+    endpoint               = aws_eks_cluster.app.endpoint,
+    cluster_ca             = aws_eks_cluster.app.certificate_authority[0].data,
+    cluster_name           = aws_eks_cluster.app.name,
+    common_userdata        = module.common_userdata.user_data
   }
 
   user_data = templatefile("${path.module}/files/userdata.sh.tmpl", local.user_data_vars)

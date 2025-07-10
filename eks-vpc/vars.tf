@@ -310,6 +310,11 @@ variable "alert_rules" {
   default = ""
 }
 
+variable "disable_docker" {
+  type    = bool
+  default = false
+}
+
 variable "awslogs_driver" {
   type    = bool
   default = true
