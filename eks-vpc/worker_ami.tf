@@ -7,43 +7,41 @@ locals {
   arch        = local.is_graviton ? "arm64" : "x86_64"
   k8s_version = aws_eks_cluster.app.version
 
-  # SSM parameter paths: prefer AL2023, fallback to AL2
-  ssm_param_paths = [
-    "/aws/service/eks/optimized-ami/${local.k8s_version}/amazon-linux-2023-${local.arch}/recommended/image_id",
-    "/aws/service/eks/optimized-ami/${local.k8s_version}/amazon-linux-2-${local.arch}/recommended/image_id"
-  ]
+  ssm_param_al2023 = "/aws/service/eks/optimized-ami/${local.k8s_version}/amazon-linux-2023-${local.arch}/recommended/image_id"
+  ssm_param_al2    = "/aws/service/eks/optimized-ami/${local.k8s_version}/amazon-linux-2-${local.arch}/recommended/image_id"
 }
 
-data "aws_ssm_parameter" "eks_worker_ami" {
-  for_each = toset(local.ssm_param_paths)
-  name     = each.value
+data "aws_ssm_parameter" "eks_image_al2023" {
+  name = local.ssm_param_al2023
+}
+
+data "aws_ssm_parameter" "eks_image_al2" {
+  name = local.ssm_param_al2
 }
 
 locals {
-  # Pick the first AMI found (AL2023 preferred)
-  selected_worker_ami = compact([
-    for path in local.ssm_param_paths :
-    try(data.aws_ssm_parameter.eks_worker_ami[path].value, null)
-  ])[0]
+  selected_image_id = try(
+    data.aws_ssm_parameter.eks_image_al2023.value,
+    data.aws_ssm_parameter.eks_image_al2.value,
+    null
+  )
 }
 
-resource "terraform_data" "worker_ami" {
-  input = local.selected_worker_ami
+resource "terraform_data" "image_id" {
+  input = local.selected_image_id
 
   lifecycle {
     ignore_changes = [input]
   }
-
   triggers_replace = [aws_eks_cluster.app.version, var.worker_instance_type]
 }
 
-# Use this everywhere else!
 locals {
-  image_id = terraform_data.worker_ami.output
+  image_id = terraform_data.image_id.output
 }
 
 resource "null_resource" "fail_if_no_ami" {
-  count = local.selected_worker_ami == null ? 1 : 0
+  count = local.selected_image_id == null ? 1 : 0
   provisioner "local-exec" {
     command = "echo 'ERROR: No EKS worker AMI found via SSM!' && exit 1"
   }
