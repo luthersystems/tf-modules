@@ -52,3 +52,16 @@ resource "null_resource" "fail_if_no_ami" {
     command = "echo 'ERROR: No EKS worker AMI found via filters!' && exit 1"
   }
 }
+
+data "aws_ami" "selected" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "image-id"
+    values = [local.image_id]
+  }
+}
+
+locals {
+  is_al2023 = contains(lower(data.aws_ami.selected.name), "al2023")
+}
