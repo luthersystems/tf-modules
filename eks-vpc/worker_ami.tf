@@ -6,30 +6,31 @@ locals {
   is_graviton = contains(["a1", "c6g", "m6g", "r6g", "t4g"], local.core)
   arch        = local.is_graviton ? "arm64" : "x86_64"
   k8s_version = aws_eks_cluster.app.version
-
-  ami_name_filters = [
-    "amazon-eks-node-${local.k8s_version}-v*",
-    "amazon-eks-node-al2023-${local.arch}-standard-${local.k8s_version}-v*"
-  ]
 }
 
-data "aws_ami" "eks_worker" {
-  for_each = toset(local.ami_name_filters)
+data "aws_ami" "al2023" {
+  owners = ["amazon"]
   filter {
     name   = "name"
-    values = [each.value]
+    values = ["amazon-eks-node-al2023-${local.arch}-standard-${local.k8s_version}-v*"]
   }
-  filter {
-    name   = "state"
-    values = ["available"]
-  }
-  most_recent = true
-  owners      = ["amazon"]
 }
 
+data "aws_ami" "al2" {
+  owners = ["amazon"]
+  filter {
+    name   = "name"
+    values = [local.is_graviton ? "amazon-eks-arm64-node-${local.arch}-v*" : "amazon-eks-node-${local.k8s_version}-v*"]
+  }
+}
+
+
 locals {
-  eks_worker_ami_ids = [for a in data.aws_ami.eks_worker : a.id]
-  selected_image_id  = length(local.eks_worker_ami_ids) > 0 ? sort(local.eks_worker_ami_ids)[length(local.eks_worker_ami_ids) - 1] : null
+  latest_al2023_ami = data.aws_ami.al2023.id
+  latest_al2_ami    = data.aws_ami.al2.id
+
+  # Prefer AL2023, fallback to AL2
+  selected_image_id = local.latest_al2023_ami != null ? local.latest_al2023_ami : local.latest_al2_ami
 }
 
 resource "terraform_data" "image_id" {
@@ -68,4 +69,12 @@ locals {
 
 output "is_al2023" {
   value = local.is_al2023
+}
+
+output "worker_ami_id" {
+  value = data.aws_ami.selected.id
+}
+
+output "worker_ami_name" {
+  value = data.aws_ami.selected.name
 }
