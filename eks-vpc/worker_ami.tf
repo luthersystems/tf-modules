@@ -34,7 +34,8 @@ resource "terraform_data" "image_id" {
     ignore_changes = [input]
   }
 
-  triggers_replace = [aws_eks_cluster.app.version, var.worker_instance_type]
+  # pull latest AMI if user data version changes
+  triggers_replace = [aws_eks_cluster.app.version, var.worker_instance_type, var.custom_instance_userdata_version]
 }
 
 locals {
