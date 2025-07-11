@@ -9,7 +9,8 @@ locals {
 }
 
 data "aws_ami" "al2023" {
-  owners = ["amazon"]
+  most_recent = true
+  owners      = ["amazon"]
   filter {
     name   = "name"
     values = ["amazon-eks-node-al2023-${local.arch}-standard-${local.k8s_version}-v*"]
@@ -17,7 +18,8 @@ data "aws_ami" "al2023" {
 }
 
 data "aws_ami" "al2" {
-  owners = ["amazon"]
+  most_recent = true
+  owners      = ["amazon"]
   filter {
     name   = "name"
     values = [local.is_graviton ? "amazon-eks-arm64-node-${local.arch}-v*" : "amazon-eks-node-${local.k8s_version}-v*"]
