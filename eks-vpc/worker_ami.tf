@@ -8,31 +8,23 @@ locals {
   k8s_version = aws_eks_cluster.app.version
 }
 
-data "aws_ami" "al2023" {
-  most_recent = true
-  owners      = ["amazon"]
-  filter {
-    name   = "name"
-    values = ["amazon-eks-node-al2023-${local.arch}-standard-${local.k8s_version}-v*"]
-  }
-}
 
-data "aws_ami" "al2" {
+data "aws_ami" "eks_worker" {
   most_recent = true
   owners      = ["amazon"]
   filter {
-    name   = "name"
-    values = [local.is_graviton ? "amazon-eks-arm64-node-${local.arch}-v*" : "amazon-eks-node-${local.k8s_version}-v*"]
+    name = "name"
+    values = [
+      "amazon-eks-node-al2023-${local.arch}-standard-${local.k8s_version}-v*",
+      local.is_graviton ? "amazon-eks-${local.arch}-node-${local.k8s_version}-v*" : "amazon-eks-node-${local.k8s_version}-v*"
+    ]
   }
 }
 
 
 locals {
-  latest_al2023_ami = data.aws_ami.al2023.id
-  latest_al2_ami    = data.aws_ami.al2.id
-
-  # Prefer AL2023, fallback to AL2
-  selected_image_id = local.latest_al2023_ami != null ? local.latest_al2023_ami : local.latest_al2_ami
+  # Prefer AL2023 since they are newer, fallback to AL2
+  selected_image_id = data.aws_ami.eks_worker.id
 }
 
 resource "terraform_data" "image_id" {
