@@ -62,20 +62,19 @@ locals {
 
   docker_config_json = var.awslogs_driver ? jsonencode(local.docker_config_awslogs) : jsonencode(local.docker_config)
 
+  userdata_vars = {
+    cluster_ca         = aws_eks_cluster.app.certificate_authority[0].data
+    cluster_name       = aws_eks_cluster.app.name
+    endpoint           = aws_eks_cluster.app.endpoint
+    common_userdata    = module.common_userdata.user_data
+    docker_config_json = local.docker_config_json
+  }
+
   user_data = (
     local.is_al2023
-    ? templatefile("${path.module}/files/userdata_al2023.sh.tmpl", {
-      common_userdata = module.common_userdata.user_data
-    })
-    : templatefile("${path.module}/files/userdata_al2.sh.tmpl", {
-      cluster_ca         = aws_eks_cluster.app.certificate_authority[0].data
-      cluster_name       = aws_eks_cluster.app.name
-      docker_config_json = local.docker_config_json
-      endpoint           = aws_eks_cluster.app.endpoint
-      common_userdata    = module.common_userdata.user_data
-    })
+    ? templatefile("${path.module}/files/userdata_al2023.sh.tmpl", local.userdata_vars)
+    : templatefile("${path.module}/files/userdata_al2.sh.tmpl", local.userdata_vars)
   )
-
 }
 
 # Docker log options are output so they can be used to configure a
