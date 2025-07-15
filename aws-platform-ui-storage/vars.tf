@@ -53,6 +53,7 @@ variable "ci_github_repos" {
     repo = string
     env  = string
   }))
+  default = []
 }
 
 variable "ci_ecr_push_arns" {

@@ -24,7 +24,10 @@ resource "aws_s3_bucket_policy" "static" {
 
 locals {
   s3_access_principals = compact(
-    concat(var.external_access_principals, var.ci_static_access ? [aws_iam_role.ci_role.arn] : [])
+    concat(
+      var.external_access_principals,
+      (var.ci_static_access && local.create_ci_role) ? [aws_iam_role.ci_role[0].arn] : []
+    )
   )
 }
 
