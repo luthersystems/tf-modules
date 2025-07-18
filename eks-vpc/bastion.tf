@@ -135,7 +135,7 @@ locals {
     k8s_cluster_storageclass_sc1_encrypted = local.storageclass_sc1_encrypted
     aws_load_balancer_controller_iam_role  = module.aws_lb_controller_service_account_iam_role.arn
     eks_worker_iam_role_arn                = aws_iam_role.eks_worker.arn
-    k8s_admin_role_arn                     = data.aws_iam_role.assumed_role_admin.arn
+    k8s_admin_role_arn                     = local.admin_role_arn
     k8s_alt_admin_role_arn                 = local.k8s_alt_admin_role_arn
     storage_kms_key_id                     = var.volumes_aws_kms_key_id
 

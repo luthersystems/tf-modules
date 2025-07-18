@@ -1,5 +1,11 @@
-data "aws_iam_role" "assumed_role_admin" {
-  name = "admin"
+#data "aws_iam_role" "assumed_role_admin" {
+#  name = "admin"
+#}
+
+data "aws_caller_identity" "current" {}
+
+locals {
+  admin_role_arn = data.aws_caller_identity.current.arn
 }
 
 # deprecated - moved to ansible
@@ -28,7 +34,7 @@ data:
       groups:
         - system:bootstrappers
         - system:nodes
-    - rolearn: ${data.aws_iam_role.assumed_role_admin.arn}
+    - rolearn: ${local.admin_role_arn}
       username: luther:admin
       groups:
         - system:masters
