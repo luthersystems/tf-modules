@@ -79,6 +79,10 @@ output "oidc_provider_arn" {
   value = module.eks_vpc.oidc_provider_arn
 }
 
+output "oidc_provider_thumbprints" {
+  value = module.eks_vpc.oidc_provider_thumbprints
+}
+
 output "aws_cloudwatch_log_group" {
   value = "${module.eks_vpc.aws_cloudwatch_log_group}:*"
 }

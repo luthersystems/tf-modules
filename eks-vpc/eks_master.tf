@@ -90,6 +90,10 @@ output "oidc_provider_arn" {
   value = local.oidc_provider_arn
 }
 
+output "oidc_provider_thumbprints" {
+  value = aws_iam_openid_connect_provider.app.thumbprint_list
+}
+
 module "luthername_eks_master_role" {
   source         = "../luthername"
   luther_project = var.luther_project
