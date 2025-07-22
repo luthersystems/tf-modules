@@ -243,8 +243,8 @@ module "luthername_eip" {
 }
 
 resource "aws_eip" "sftp" {
-  count = length(local.region_availability_zones)
-  vpc   = true
+  count  = length(local.region_availability_zones)
+  domain = "vpc"
 
   depends_on = [aws_internet_gateway.sftp]
 

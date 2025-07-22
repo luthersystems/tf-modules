@@ -1,5 +1,24 @@
-data "aws_iam_role" "assumed_role_admin" {
-  name = "admin"
+data "aws_caller_identity" "current" {}
+
+locals {
+  admin_role_arn = data.aws_iam_role.admin_role.arn
+}
+
+
+# Extract the role name (the segment between "assumed-role/" and the session name)
+locals {
+  sts_arn_parts     = split("/", data.aws_caller_identity.current.arn)
+  assumed_role_name = local.sts_arn_parts[1]
+}
+
+# Look up the IAM Role by name
+data "aws_iam_role" "admin_role" {
+  name = local.assumed_role_name
+}
+
+# Now you have a stable IAM Role ARN
+output "admin_role_arn" {
+  value = local.admin_role_arn
 }
 
 # deprecated - moved to ansible
@@ -28,7 +47,7 @@ data:
       groups:
         - system:bootstrappers
         - system:nodes
-    - rolearn: ${data.aws_iam_role.assumed_role_admin.arn}
+    - rolearn: ${local.admin_role_arn}
       username: luther:admin
       groups:
         - system:masters
