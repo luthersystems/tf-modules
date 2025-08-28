@@ -8,10 +8,8 @@ locals {
   arch        = local.is_graviton ? "arm64" : "x86_64"
 
   # Track the real control plane version
-  k8s_version = aws_eks_cluster.app.version
-
-  # EKS AMIs owner (EKS official account)
-  eks_ami_owner = "602401143452"
+  k8s_version   = aws_eks_cluster.app.version
+  eks_ami_owner = "602401143452" # EKS official AMI account
 }
 
 # Find AL2023 candidates (doesn't fail if zero)
@@ -31,12 +29,9 @@ data "aws_ami_ids" "al2023" {
 data "aws_ami_ids" "al2" {
   owners = [local.eks_ami_owner]
   filter {
-    name   = "name"
+    name = "name"
     values = [
-      # arm64 uses this pattern
-      local.is_graviton ? "amazon-eks-${local.arch}-node-${local.k8s_version}-v*" :
-      # x86_64 uses this pattern
-      "amazon-eks-node-${local.k8s_version}-v*"
+      local.is_graviton ? "amazon-eks-${local.arch}-node-${local.k8s_version}-v*" : "amazon-eks-node-${local.k8s_version}-v*"
     ]
   }
   filter {
@@ -73,8 +68,7 @@ data "aws_ami" "al2" {
   filter {
     name = "name"
     values = [
-      local.is_graviton ? "amazon-eks-${local.arch}-node-${local.k8s_version}-v*" :
-      "amazon-eks-node-${local.k8s_version}-v*"
+      local.is_graviton ? "amazon-eks-${local.arch}-node-${local.k8s_version}-v*" : "amazon-eks-node-${local.k8s_version}-v*"
     ]
   }
   filter {
@@ -84,9 +78,8 @@ data "aws_ami" "al2" {
 }
 
 locals {
-  selected_image_id = local.has_al2023
-    ? data.aws_ami.al2023[0].id
-    : (local.has_al2 ? data.aws_ami.al2[0].id : null)
+  # Put the conditional on one line to avoid parsing issues
+  selected_image_id = local.has_al2023 ? data.aws_ami.al2023[0].id : (local.has_al2 ? data.aws_ami.al2[0].id : null)
 }
 
 resource "terraform_data" "image_id" {
