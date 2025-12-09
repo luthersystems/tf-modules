@@ -9,9 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: hashicorp/terraform:1.5.7
+    env:
+      TF_PLUGIN_CACHE_DIR: /github/home/.terraform.d/plugin-cache
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Create Plugin Cache Dir
+        run: mkdir -p $TF_PLUGIN_CACHE_DIR
       - name: Check format
         run: terraform fmt -diff=true -check=true
       - name: Validate
