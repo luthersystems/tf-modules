@@ -60,3 +60,9 @@ variable "add_policy" {
 variable "id" {
   default = ""
 }
+
+variable "trusted_role_arns" {
+  type        = list(string)
+  description = "List of AWS IAM Role ARNs that can assume this role"
+  default     = []
+}

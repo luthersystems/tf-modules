@@ -12,5 +12,6 @@ for dir in $dirs; do
     cd $dir
     terraform init
     terraform validate
+    rm -rf .terraform
     cd - > /dev/null
 done

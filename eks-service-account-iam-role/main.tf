@@ -52,6 +52,18 @@ data "aws_iam_policy_document" "assume_role" {
       values   = local.all_service_accounts
     }
   }
+
+  dynamic "statement" {
+    for_each = length(var.trusted_role_arns) > 0 ? [1] : []
+    content {
+      effect = "Allow"
+      principals {
+        type        = "AWS"
+        identifiers = var.trusted_role_arns
+      }
+      actions = ["sts:AssumeRole"]
+    }
+  }
 }
 
 resource "aws_iam_role_policy" "main" {
