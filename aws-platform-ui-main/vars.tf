@@ -120,6 +120,11 @@ variable "logs" {
   default = false
 }
 
+variable "aws_cloudwatch_retention_days" {
+  type    = number
+  default = 90
+}
+
 variable "custom_instance_userdata" {
   type    = string
   default = ""

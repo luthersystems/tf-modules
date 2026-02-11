@@ -26,6 +26,7 @@ module "eks_vpc" {
 
   monitoring                     = var.monitoring
   logs                           = var.logs
+  aws_cloudwatch_retention_days  = var.aws_cloudwatch_retention_days
   grafana_saml_admin_role_values = var.grafana_saml_admin_role_values
   grafana_saml_role_assertion    = var.grafana_saml_role_assertion
   grafana_saml_metadata_xml      = var.grafana_saml_metadata_xml
