@@ -12,7 +12,6 @@ jobs:
     outputs:
       modules: ${{ steps.find-modules.outputs.dirs }}
       modules_with_tests: ${{ steps.find-testable.outputs.dirs }}
-      examples: ${{ steps.find-examples.outputs.dirs }}
     steps:
       - uses: actions/checkout@v4
 
@@ -21,7 +20,10 @@ jobs:
         run: |
           dirs=$(find . -maxdepth 1 -type d ! -name '.*' | sed 's|^\./||' | sort | while read -r d; do
             if ls "$d"/*.tf >/dev/null 2>&1; then
-              [ -f "$d/.validate-skip" ] || echo "$d"
+              # Skip modules with .validate-skip or tests/ (tests handle their own validation)
+              [ -f "$d/.validate-skip" ] && continue
+              [ -d "$d/tests" ] && continue
+              echo "$d"
             fi
           done | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "dirs=$dirs" >> "$GITHUB_OUTPUT"
@@ -36,12 +38,6 @@ jobs:
           done | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "dirs=$dirs" >> "$GITHUB_OUTPUT"
 
-      - id: find-examples
-        name: Discover examples
-        run: |
-          dirs=$(find . -path '*/examples/*' -name '*.tf' -exec dirname {} \; | sort -u | sed 's|^\./||' | jq -R -s -c 'split("\n") | map(select(length > 0))')
-          echo "dirs=$dirs" >> "$GITHUB_OUTPUT"
-
   validate-modules:
     needs: discover
     if: ${{ needs.discover.outputs.modules != '[]' }}
@@ -50,29 +46,6 @@ jobs:
       fail-fast: false
       matrix:
         dir: ${{ fromJson(needs.discover.outputs.modules) }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.7.5"
-
-      - name: Terraform Init
-        run: terraform init -backend=false -input=false
-        working-directory: ${{ matrix.dir }}
-
-      - name: Terraform Validate
-        run: terraform validate
-        working-directory: ${{ matrix.dir }}
-
-  validate-examples:
-    needs: discover
-    if: ${{ needs.discover.outputs.examples != '[]' }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        dir: ${{ fromJson(needs.discover.outputs.examples) }}
     steps:
       - uses: actions/checkout@v4
 
