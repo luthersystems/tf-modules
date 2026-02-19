@@ -50,3 +50,14 @@ variable "delim" {
   type    = string
   default = "-"
 }
+
+variable "max_length" {
+  type        = number
+  default     = 0
+  description = "Maximum length for generated names. 0 means no limit. When set, the prefix is truncated to fit within the limit while preserving the ID suffix for uniqueness."
+
+  validation {
+    condition     = var.max_length >= 0
+    error_message = "max_length must be non-negative."
+  }
+}

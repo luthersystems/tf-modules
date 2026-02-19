@@ -7,3 +7,14 @@ module "luthername" {
   component      = "infra"
   resource       = "tf"
 }
+
+module "luthername_short" {
+  source         = "git::ssh://git@bitbucket.org/luthersystems/tf-modules.git//luthername?ref=master"
+  luther_project = "terraform-test"
+  aws_region     = "eu-west-2"
+  luther_env     = "dev"
+  org_name       = "luther"
+  component      = "infra"
+  resource       = "tf"
+  max_length     = 40
+}

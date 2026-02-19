@@ -12,8 +12,14 @@ locals {
       var.resource,
   ]))
 
-  ids   = [for i in range(var.replication) : "${var.subcomponent}${var.id == "" ? i : var.id}"]
-  names = [for i in range(var.replication) : "${local.prefix}${var.delim}${local.ids[i]}"]
+  ids       = [for i in range(var.replication) : "${var.subcomponent}${var.id == "" ? i : var.id}"]
+  raw_names = [for i in range(var.replication) : "${local.prefix}${var.delim}${local.ids[i]}"]
+
+  names = [for i in range(var.replication) :
+    var.max_length > 0 && length(local.raw_names[i]) > var.max_length
+    ? "${substr(local.prefix, 0, max(0, var.max_length - length(local.ids[i]) - length(var.delim)))}${var.delim}${local.ids[i]}"
+    : local.raw_names[i]
+  ]
 
   id   = var.replication == 1 ? local.ids[0] : null
   name = var.replication == 1 ? local.names[0] : null

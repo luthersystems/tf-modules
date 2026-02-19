@@ -1,22 +1,97 @@
 name: Terraform CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    branches: ["main"]
+    branches: [main]
 
 jobs:
-  check_format_and_validate:
+  discover:
     runs-on: ubuntu-latest
-    container:
-      image: hashicorp/terraform:1.5.7
-    env:
-      TF_PLUGIN_CACHE_DIR: /github/home/.terraform.d/plugin-cache
+    outputs:
+      modules: ${{ steps.find-modules.outputs.dirs }}
+      modules_with_tests: ${{ steps.find-testable.outputs.dirs }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Create Plugin Cache Dir
-        run: mkdir -p $TF_PLUGIN_CACHE_DIR
-      - name: Check format
-        run: terraform fmt -diff=true -check=true
-      - name: Validate
-        run: ./validate.sh
+      - uses: actions/checkout@v4
+
+      - id: find-modules
+        name: Discover modules
+        run: |
+          dirs=$(find . -maxdepth 1 -type d ! -name '.*' | sed 's|^\./||' | sort | while read -r d; do
+            if ls "$d"/*.tf >/dev/null 2>&1; then
+              # Skip modules with .validate-skip or tests/ (tests handle their own validation)
+              [ -f "$d/.validate-skip" ] && continue
+              [ -d "$d/tests" ] && continue
+              echo "$d"
+            fi
+          done | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "dirs=$dirs" >> "$GITHUB_OUTPUT"
+
+      - id: find-testable
+        name: Discover modules with terraform tests
+        run: |
+          dirs=$(find . -maxdepth 1 -type d ! -name '.*' | sed 's|^\./||' | sort | while read -r d; do
+            if ls "$d"/tests/*.tftest.hcl >/dev/null 2>&1 || ls "$d"/*.tftest.hcl >/dev/null 2>&1; then
+              echo "$d"
+            fi
+          done | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "dirs=$dirs" >> "$GITHUB_OUTPUT"
+
+  validate-modules:
+    needs: discover
+    if: ${{ needs.discover.outputs.modules != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: ${{ fromJson(needs.discover.outputs.modules) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+
+      - name: Terraform Init
+        run: terraform init -backend=false -input=false
+        working-directory: ${{ matrix.dir }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{ matrix.dir }}
+
+  test-modules:
+    needs: discover
+    if: ${{ needs.discover.outputs.modules_with_tests != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: ${{ fromJson(needs.discover.outputs.modules_with_tests) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+
+      - name: Terraform Init
+        run: terraform init -backend=false -input=false
+        working-directory: ${{ matrix.dir }}
+
+      - name: Terraform Test
+        run: terraform test -no-color
+        working-directory: ${{ matrix.dir }}
+
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
