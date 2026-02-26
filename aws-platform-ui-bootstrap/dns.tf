@@ -1,6 +1,18 @@
+module "luthername_dns_zone" {
+  source         = "../luthername"
+  count          = var.create_dns ? 1 : 0
+  luther_project = var.project
+  aws_region     = local.region
+  luther_env     = var.env
+  org_name       = var.org_name
+  component      = "dns"
+  resource       = "zone"
+}
+
 resource "aws_route53_zone" "main" {
-  count = var.create_dns ? 1 : 0 # Only create the resource if var.create_dns is true
+  count = var.create_dns ? 1 : 0
   name  = var.domain
+  tags  = module.luthername_dns_zone[0].tags
 }
 
 output "domain" {

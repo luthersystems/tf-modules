@@ -30,6 +30,10 @@ resource "aws_s3_bucket" "bucket" {
   )
 
   force_destroy = var.force_destroy
+
+  lifecycle {
+    ignore_changes = [server_side_encryption_configuration, versioning]
+  }
 }
 
 resource "aws_s3_bucket_ownership_controls" "bucket" {
@@ -44,6 +48,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bucket" {
   bucket = aws_s3_bucket.bucket.id
 
   rule {
+    bucket_key_enabled = false
+
     apply_server_side_encryption_by_default {
       kms_master_key_id = var.aws_kms_key_arn
       sse_algorithm     = "aws:kms"
