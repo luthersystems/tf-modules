@@ -60,6 +60,12 @@ variable "origin_routes" {
   default     = {}
 }
 
+variable "grpc_routes" {
+  type        = map(string)
+  default     = {}
+  description = "Path-pattern => origin URL map for gRPC cache behaviors. Each entry registers an ordered_cache_behavior with grpc_config { enabled = true }. When non-empty, distribution http_version is automatically promoted to http2and3 (gRPC requires HTTP/2)."
+}
+
 variable "use_cors" {
   type    = bool
   default = false

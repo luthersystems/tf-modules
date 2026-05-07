@@ -22,6 +22,26 @@ locals {
     }
   }
 
+  grpc_origin_configs = {
+    for path, url in var.grpc_routes :
+    path => {
+      origin_id     = "origin-grpc-${replace(trim(path, "/*"), "[^a-zA-Z0-9]", "-")}"
+      origin_domain = regex("^https?://([^/]+)", url)[0]
+      origin_path   = try(regex("^https?://[^/]+(/.*)", url)[0], null)
+    }
+  }
+
+  # Combined origin set used by the distribution. gRPC entries get distinct
+  # origin_ids ("origin-grpc-...") so they never collide with HTTP origins,
+  # even when the underlying origin URL is the same ALB.
+  all_origin_configs = merge(
+    local.origin_configs,
+    {
+      for path, cfg in local.grpc_origin_configs :
+      "__grpc__${path}" => cfg
+    },
+  )
+
   random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
 
   app_route53_zone_name = var.app_route53_zone_name != "" ? var.app_route53_zone_name : var.app_naked_domain
@@ -96,12 +116,14 @@ resource "aws_route53_record" "site" {
 }
 
 resource "aws_cloudfront_distribution" "site" {
-  enabled      = true
-  price_class  = "PriceClass_200"
-  http_version = "http2"
+  enabled     = true
+  price_class = "PriceClass_200"
+  # gRPC requires HTTP/2 end-to-end. Promote http_version only when there is
+  # at least one gRPC route, so existing distributions stay byte-identical.
+  http_version = length(var.grpc_routes) > 0 ? "http2and3" : "http2"
 
   dynamic "origin" {
-    for_each = local.origin_configs
+    for_each = local.all_origin_configs
     content {
       origin_id   = origin.value.origin_id
       domain_name = origin.value.origin_domain
@@ -141,6 +163,28 @@ resource "aws_cloudfront_distribution" "site" {
       cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
 
       response_headers_policy_id = local.use_cors ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
+    }
+  }
+
+  dynamic "ordered_cache_behavior" {
+    for_each = local.grpc_origin_configs
+
+    content {
+      path_pattern           = ordered_cache_behavior.key
+      target_origin_id       = ordered_cache_behavior.value.origin_id
+      viewer_protocol_policy = "redirect-to-https"
+
+      # CloudFront gRPC behaviors require the full method set.
+      allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+      cached_methods  = ["GET", "HEAD"]
+
+      cache_policy_id = aws_cloudfront_cache_policy.respect_origin_headers.id
+
+      response_headers_policy_id = local.use_cors ? aws_cloudfront_response_headers_policy.allow_specified_origins[0].id : null
+
+      grpc_config {
+        enabled = true
+      }
     }
   }
 
