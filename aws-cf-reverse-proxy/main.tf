@@ -13,33 +13,49 @@ locals {
 
   merged_origin_routes = merge(local.base_routes, var.origin_routes)
 
+  # Locals are keyed by a stable hash-prefix of the path_pattern (rather than
+  # the raw path) so that adding a new route doesn't shift the index of
+  # existing entries. CloudFront's ordered_cache_behavior and origin blocks
+  # are TypeList in the provider schema and diff by index — when these maps
+  # were keyed by raw path, inserting a path that sorted earlier than an
+  # existing key (e.g. "/.well-known/agent-card.json" < "/.well-known/agent.json"
+  # because "-" < ".") shifted every later entry down by one and produced
+  # cosmetic ~ diffs across every behavior. Hash-prefixed keys spread entries
+  # over the keyspace so insertions land at their hash position without
+  # moving siblings. The path is appended after the hash purely so that the
+  # generated keys remain human-readable in plan output. path_pattern is
+  # carried as a value field for use inside the dynamic blocks.
   origin_configs = {
     for path, url in local.merged_origin_routes :
-    path => {
+    "${substr(sha256(path), 0, 8)}-${path}" => {
+      path_pattern  = path
       origin_id     = "origin-${path == "/*" ? "site" : replace(trim(path, "/*"), "[^a-zA-Z0-9]", "-")}"
       origin_domain = regex("^https?://([^/]+)", url)[0]
       origin_path   = try(regex("^https?://[^/]+(/.*)", url)[0], null)
     }
   }
 
+  # gRPC keys are namespaced with a "grpc-" prefix so they never collide with
+  # HTTP origin_configs entries (HTTP and gRPC routes can share the same
+  # path_pattern but must produce distinct CloudFront origins).
   grpc_origin_configs = {
     for path, url in var.grpc_routes :
-    path => {
+    "grpc-${substr(sha256(path), 0, 8)}-${path}" => {
+      path_pattern  = path
       origin_id     = "origin-grpc-${replace(trim(path, "/*"), "[^a-zA-Z0-9]", "-")}"
       origin_domain = regex("^https?://([^/]+)", url)[0]
       origin_path   = try(regex("^https?://[^/]+(/.*)", url)[0], null)
     }
   }
 
-  # Combined origin set used by the distribution. gRPC entries get distinct
-  # origin_ids ("origin-grpc-...") so they never collide with HTTP origins,
-  # even when the underlying origin URL is the same ALB.
+  # Combined origin set used by the distribution. The "grpc-" key prefix on
+  # grpc_origin_configs keeps HTTP and gRPC entries from colliding even when
+  # they share a path_pattern; gRPC origins additionally use distinct
+  # origin_ids ("origin-grpc-...") so they don't share an origin block with
+  # HTTP routes that point at the same underlying ALB.
   all_origin_configs = merge(
     local.origin_configs,
-    {
-      for path, cfg in local.grpc_origin_configs :
-      "__grpc__${path}" => cfg
-    },
+    local.grpc_origin_configs,
   )
 
   random_id = var.random_identifier == "" ? random_string.id[0].result : var.random_identifier
@@ -146,12 +162,14 @@ resource "aws_cloudfront_distribution" "site" {
   }
 
   dynamic "ordered_cache_behavior" {
+    # Filter on path_pattern (carried in the value) since the map key is now
+    # a hash-prefixed string rather than the raw path.
     for_each = {
-      for k, v in local.origin_configs : k => v if k != "/*"
+      for k, v in local.origin_configs : k => v if v.path_pattern != "/*"
     }
 
     content {
-      path_pattern           = ordered_cache_behavior.key
+      path_pattern           = ordered_cache_behavior.value.path_pattern
       target_origin_id       = ordered_cache_behavior.value.origin_id
       viewer_protocol_policy = "redirect-to-https"
 
@@ -170,7 +188,7 @@ resource "aws_cloudfront_distribution" "site" {
     for_each = local.grpc_origin_configs
 
     content {
-      path_pattern           = ordered_cache_behavior.key
+      path_pattern           = ordered_cache_behavior.value.path_pattern
       target_origin_id       = ordered_cache_behavior.value.origin_id
       viewer_protocol_policy = "redirect-to-https"
 
@@ -330,7 +348,12 @@ resource "aws_s3_bucket_ownership_controls" "cf_logs" {
 }
 
 output "origin_configs" {
-  value = local.origin_configs
+  # Re-key by path_pattern so the public output shape is unchanged for
+  # downstream consumers — only the internal iteration order (and therefore
+  # the hash-prefixed map keys used by the dynamic blocks) is new.
+  value = {
+    for k, v in local.origin_configs : v.path_pattern => v
+  }
 }
 
 resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
