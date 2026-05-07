@@ -66,6 +66,12 @@ variable "grpc_routes" {
   description = "Path-pattern => origin URL map for gRPC cache behaviors. Each entry registers an ordered_cache_behavior with grpc_config { enabled = true }. When non-empty, distribution http_version is automatically promoted to http2and3 (gRPC requires HTTP/2)."
 }
 
+variable "extra_forwarded_headers" {
+  type        = list(string)
+  default     = []
+  description = "Additional request headers to whitelist in the cache policy — included in the cache key and forwarded to origin. Appended to the module defaults (Origin, Authorization, Accept, Content-Type, User-Agent). Use for custom headers like X-A2A-Task-Secret that downstream services depend on."
+}
+
 variable "use_cors" {
   type    = bool
   default = false

@@ -350,7 +350,7 @@ resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
     headers_config {
       header_behavior = "whitelist"
       headers {
-        items = ["Origin", "Authorization", "Accept", "Content-Type", "User-Agent"]
+        items = concat(["Origin", "Authorization", "Accept", "Content-Type", "User-Agent"], var.extra_forwarded_headers)
       }
     }
 
