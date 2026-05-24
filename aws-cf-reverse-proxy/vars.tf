@@ -97,3 +97,9 @@ variable "origin_read_timeout" {
   type        = number
   default     = 60
 }
+
+variable "web_acl_id" {
+  type        = string
+  default     = null
+  description = "Optional WAFv2 Web ACL ARN to attach to the CloudFront distribution. Must be CLOUDFRONT-scope (created in us-east-1). Default null leaves the distribution un-WAFed (existing behaviour)."
+}
