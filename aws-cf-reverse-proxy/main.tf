@@ -138,6 +138,11 @@ resource "aws_cloudfront_distribution" "site" {
   # at least one gRPC route, so existing distributions stay byte-identical.
   http_version = length(var.grpc_routes) > 0 ? "http2and3" : "http2"
 
+  # Optional WAFv2 Web ACL attachment. Null leaves the distribution un-WAFed
+  # (the existing default for all callers), so this remains additive and
+  # backward-compatible.
+  web_acl_id = var.web_acl_id
+
   dynamic "origin" {
     for_each = local.all_origin_configs
     content {
