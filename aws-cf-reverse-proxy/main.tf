@@ -159,9 +159,19 @@ resource "aws_cloudfront_distribution" "site" {
         origin_keepalive_timeout = 60
       }
 
-      custom_header {
-        name  = "User-Agent"
-        value = var.duplicate_content_penalty_secret
+      # Vestigial SEO trick: when set, the module injects this value as the
+      # `User-Agent` header on every CloudFront → origin request so the origin
+      # could distinguish CF-routed traffic from direct hits and respond with
+      # `X-Robots-Tag: noindex` to avoid duplicate-content SEO penalties when
+      # both CF and origin were publicly resolvable. Set to "" to disable for
+      # API/JSON origins where this overrides the real caller's User-Agent
+      # and destroys observability (origin sees the marker, never the peer).
+      dynamic "custom_header" {
+        for_each = var.duplicate_content_penalty_secret == "" ? [] : [1]
+        content {
+          name  = "User-Agent"
+          value = var.duplicate_content_penalty_secret
+        }
       }
     }
   }

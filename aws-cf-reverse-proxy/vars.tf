@@ -17,7 +17,17 @@ variable "app_target_domain" {
 }
 
 variable "duplicate_content_penalty_secret" {
-  type    = string
+  type = string
+  # Static-site era SEO trick: CloudFront injects this string as the
+  # `User-Agent` header on every origin request so the origin can detect
+  # CF-routed traffic and serve `X-Robots-Tag: noindex` to avoid Google
+  # duplicate-content penalties when both the CF domain and origin domain
+  # were publicly indexable.
+  #
+  # Set to "" to skip the injection. Required for API/JSON origins where
+  # the override destroys the real caller's User-Agent header and breaks
+  # downstream observability (server logs show "luthersystems" for every
+  # request regardless of who actually called).
   default = "luthersystems"
 }
 
