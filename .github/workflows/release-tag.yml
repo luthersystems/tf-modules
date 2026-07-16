@@ -1,0 +1,52 @@
+name: Release (tag)
+
+# On-demand release dispatch with an explicit version. tf-modules tags are
+# consumed as pinned `?ref=vX.Y.Z` module sources (sandbox-infrastructure-
+# template, ui-infrastructure/env-bootstrap) — nothing is triggered BY the
+# tag, so the default GITHUB_TOKEN is sufficient here (unlike reliable /
+# lutherauth / buildenv, where a GITHUB_TOKEN-created tag would fail to
+# trigger the downstream tag-push pipeline). Exists because direct tag
+# pushes are blocked from agent sandboxes; this gives operators and agents
+# a validated, auditable release button.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version to tag (vMAJOR.MINOR.PATCH, e.g. v55.23.0). Must be strictly newer than the latest tag; always cut from main HEAD."
+        type: string
+        required: true
+
+permissions:
+  contents: write # gh release create (creates the tag + release)
+
+concurrency:
+  group: release-tag
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Cut release ${{ inputs.version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0 # all tags + history for validation and release notes
+      - name: Validate and cut
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::'$VERSION' is not vMAJOR.MINOR.PATCH"; exit 1; }
+          latest=$(git tag --list 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          echo "latest tag: ${latest:-<none>}"
+          if [ -n "$latest" ]; then
+            newest=$(printf '%s\n%s\n' "$latest" "$VERSION" | sort -V | tail -1)
+            { [ "$newest" = "$VERSION" ] && [ "$VERSION" != "$latest" ]; } || { echo "::error::$VERSION is not strictly newer than $latest"; exit 1; }
+          fi
+          [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || { echo "::error::checkout is not main HEAD"; exit 1; }
+          notes=$(git log "${latest:+$latest..}HEAD" --oneline --no-merges | head -40 | sed 's/^/- /')
+          gh release create "$VERSION" --title "$VERSION" --notes "${notes:-Initial release}"
+          echo "released $VERSION at $(git rev-parse HEAD)"
