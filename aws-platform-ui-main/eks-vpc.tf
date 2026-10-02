@@ -6,8 +6,9 @@ module "eks_vpc" {
   luther_env     = var.luther_env
   component      = "main"
 
-  kubernetes_version   = var.kubernetes_version
-  worker_instance_type = var.eks_worker_instance_type
+  kubernetes_version                = var.kubernetes_version
+  allow_kubernetes_version_rollback = var.allow_kubernetes_version_rollback
+  worker_instance_type              = var.eks_worker_instance_type
 
   aws_account_id = local.account_id
 

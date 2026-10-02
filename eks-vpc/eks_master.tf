@@ -8,6 +8,19 @@ module "luthername_eks_cluster" {
   resource       = "eks"
 }
 
+data "aws_eks_clusters" "existing" {}
+
+data "aws_eks_cluster" "current" {
+  count = contains(data.aws_eks_clusters.existing.names, module.luthername_eks_cluster.names[0]) ? 1 : 0
+  name  = module.luthername_eks_cluster.names[0]
+}
+
+module "kubernetes_version_guard" {
+  source  = "../k8s-version-compare"
+  current = one(data.aws_eks_cluster.current[*].version) == null ? "" : one(data.aws_eks_cluster.current[*].version)
+  desired = local.kubernetes_version
+}
+
 resource "aws_cloudwatch_log_group" "eks_cluster" {
   # Cannot depend on the aws_eks_cluster.app resource.
   name              = "/aws/eks/${module.luthername_eks_cluster.names[0]}/cluster"
@@ -41,6 +54,11 @@ resource "aws_eks_cluster" "app" {
   ]
 
   lifecycle {
+    precondition {
+      condition     = var.allow_kubernetes_version_rollback || !module.kubernetes_version_guard.is_downgrade
+      error_message = "Refusing to roll back EKS Kubernetes version from ${join("", data.aws_eks_cluster.current[*].version)} to ${local.kubernetes_version}. Set allow_kubernetes_version_rollback = true only for an intentional rollback."
+    }
+
     ignore_changes = [
       access_config[0].bootstrap_cluster_creator_admin_permissions
     ]
