@@ -197,6 +197,7 @@ variable "cni_addon_version" {
     "1.32" = "v1.19.2-eksbuild.1"
     "1.33" = "v1.19.5-eksbuild.3"
     "1.34" = "v1.20.3-eksbuild.1"
+    "1.35" = "v1.22.4-eksbuild.3"
   }
 }
 
@@ -218,6 +219,7 @@ variable "csi_addon_version" {
     "1.32" = "v1.45.0-eksbuild.2"
     "1.33" = "v1.45.0-eksbuild.2"
     "1.34" = "v1.48.0-eksbuild.2"
+    "1.35" = "v1.66.0-eksbuild.1"
   }
 }
 
@@ -238,6 +240,7 @@ variable "kubeproxy_addon_version" {
     "1.32" = "v1.32.0-eksbuild.2"
     "1.33" = "v1.33.0-eksbuild.2"
     "1.34" = "v1.34.0-eksbuild.4"
+    "1.35" = "v1.35.3-eksbuild.29"
   }
 }
 
@@ -258,6 +261,7 @@ variable "coredns_addon_version" {
     "1.32" = "v1.11.4-eksbuild.2"
     "1.33" = "v1.12.1-eksbuild.2"
     "1.34" = "v1.12.4-eksbuild.1"
+    "1.35" = "v1.13.2-eksbuild.31"
   }
 }
 
@@ -403,6 +407,12 @@ variable "remote_prom_query_role_arn" {
   description = "ARN of the remote account that will assume the Prometheus query role. If empty, no role is created."
   type        = string
   default     = ""
+}
+
+variable "eks_cluster_log_types" {
+  description = "EKS control-plane log types to send to CloudWatch. Valid values: api, audit, authenticator, controllerManager, scheduler."
+  type        = list(string)
+  default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 }
 
 variable "prom_scrape_interval" {

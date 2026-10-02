@@ -54,6 +54,9 @@ module "eks_vpc" {
 
   coredns_rewrite_rules = var.coredns_rewrite_rules
 
+  eks_cluster_log_types = var.eks_cluster_log_types
+  prom_scrape_interval  = var.prom_scrape_interval
+
   providers = {
     aws           = aws
     aws.us-east-1 = aws.us-east-1
