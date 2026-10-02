@@ -21,6 +21,12 @@ variable "kubernetes_version" {
   default = "1.23"
 }
 
+variable "allow_kubernetes_version_rollback" {
+  description = "Explicit override to allow an intentional rollback to a lower Kubernetes version."
+  type        = bool
+  default     = false
+}
+
 variable "worker_instance_type" {
   type    = string
   default = "m6i.large"

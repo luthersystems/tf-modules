@@ -11,6 +11,12 @@ variable "kubernetes_version" {
   type = string
 }
 
+variable "allow_kubernetes_version_rollback" {
+  description = "Explicit override to allow an intentional rollback to a lower Kubernetes version."
+  type        = bool
+  default     = false
+}
+
 variable "env_static_s3_bucket_arn" {
   type    = string
   default = ""
