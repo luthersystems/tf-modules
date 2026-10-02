@@ -17,7 +17,7 @@ resource "aws_cloudwatch_log_group" "eks_cluster" {
 resource "aws_eks_cluster" "app" {
   name                      = module.luthername_eks_cluster.names[0]
   role_arn                  = aws_iam_role.eks_master.arn
-  enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+  enabled_cluster_log_types = var.eks_cluster_log_types
   version                   = local.kubernetes_version
 
   vpc_config {

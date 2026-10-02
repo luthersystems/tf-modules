@@ -188,3 +188,15 @@ variable "coredns_rewrite_rules" {
     { query = "ca.org2.luther.systems", target = "fabric-ca.fabric-org2.svc.cluster.local" }
   ]
 }
+
+variable "eks_cluster_log_types" {
+  description = "EKS control-plane log types to send to CloudWatch. Valid values: api, audit, authenticator, controllerManager, scheduler."
+  type        = list(string)
+  default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+}
+
+variable "prom_scrape_interval" {
+  description = "Prometheus scrape interval for the in-cluster scraper."
+  type        = string
+  default     = "1m"
+}
