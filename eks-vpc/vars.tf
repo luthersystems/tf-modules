@@ -32,6 +32,17 @@ variable "worker_instance_type" {
   default = "m6i.large"
 }
 
+# Extra instance types a spot managed node group may launch, besides
+# worker_instance_type. EKS then picks the type with the most spot capacity
+# (capacity-optimized), so one type running out of spot capacity in an AZ no
+# longer leaves the group with no node. Every type must have the same CPU
+# architecture as worker_instance_type, because the group uses one AMI.
+# Needs managed nodes and spot_price; empty (the default) changes nothing.
+variable "worker_spot_instance_types" {
+  type    = list(string)
+  default = []
+}
+
 variable "human_domain" {
   type    = string
   default = ""
