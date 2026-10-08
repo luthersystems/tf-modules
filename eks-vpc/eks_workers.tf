@@ -1,5 +1,13 @@
 locals {
   syslog_timestamp_format = "%b %d %H:%M:%S"
+
+  # Instance types for a spot managed node group with more than one type.
+  # Empty means the launch template's single instance type is used.
+  node_group_instance_types = (
+    length(var.worker_spot_instance_types) > 0
+    ? distinct(concat([var.worker_instance_type], var.worker_spot_instance_types))
+    : []
+  )
 }
 
 module "common_userdata" {
@@ -200,8 +208,10 @@ resource "aws_launch_template" "eks_worker" {
     }
   }
 
-  image_id               = local.image_id
-  instance_type          = var.worker_instance_type
+  image_id = local.image_id
+  # A node group with several instance types takes them from instance_types;
+  # EKS refuses an instance type in the launch template as well.
+  instance_type          = length(local.node_group_instance_types) > 0 ? null : var.worker_instance_type
   name_prefix            = module.luthername_eks_worker_launch_template.name
   vpc_security_group_ids = local.managed_nodes ? [aws_security_group.eks_worker.id] : []
   user_data              = terraform_data.worker_user_data.output
@@ -224,6 +234,16 @@ resource "aws_launch_template" "eks_worker" {
     ignore_changes = [
       key_name,
     ]
+
+    precondition {
+      condition     = length(var.worker_spot_instance_types) == 0 || (local.managed_nodes && length(var.spot_price) > 0)
+      error_message = "worker_spot_instance_types needs managed nodes and a spot_price."
+    }
+
+    precondition {
+      condition     = alltrue([for t, g in local.graviton_type : g == local.is_graviton])
+      error_message = "Every worker_spot_instance_types entry must have the same CPU architecture as worker_instance_type."
+    }
   }
 
   monitoring {
@@ -290,7 +310,8 @@ resource "aws_eks_node_group" "eks_worker" {
   node_role_arn = aws_iam_role.eks_worker.arn
   subnet_ids    = slice(aws_subnet.net[*].id, 0, local.num_azs)
 
-  capacity_type = length(var.spot_price) > 0 ? "SPOT" : "ON_DEMAND"
+  capacity_type  = length(var.spot_price) > 0 ? "SPOT" : "ON_DEMAND"
+  instance_types = length(local.node_group_instance_types) > 0 ? local.node_group_instance_types : null
 
   scaling_config {
     desired_size = var.autoscaling_desired

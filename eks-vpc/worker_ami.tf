@@ -3,9 +3,15 @@
 
 locals {
   # Detect architecture from instance type
-  core        = substr(var.worker_instance_type, 0, 3)
-  is_graviton = contains(["a1", "c6g", "m6g", "r6g", "t4g"], local.core)
+  is_graviton = local.graviton_type[var.worker_instance_type]
   arch        = local.is_graviton ? "arm64" : "x86_64"
+
+  # A Graviton type has a "g" right after its generation number (t4g, m7g,
+  # c7gn, x2gd, g5g); a1 is the first-generation Graviton.
+  graviton_type = {
+    for t in distinct(concat([var.worker_instance_type], var.worker_spot_instance_types)) :
+    t => startswith(t, "a1.") || can(regex("^[a-z]+[0-9]+g", t))
+  }
 
   # Track the real control plane version
   k8s_version   = aws_eks_cluster.app.version

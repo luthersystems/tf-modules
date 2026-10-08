@@ -21,7 +21,8 @@ module "eks_vpc" {
 
   storage_s3_bucket_arn = var.env_static_s3_bucket_arn
 
-  spot_price = var.eks_worker_spot_price
+  spot_price                 = var.eks_worker_spot_price
+  worker_spot_instance_types = var.eks_worker_spot_instance_types
 
   public_api = true
 

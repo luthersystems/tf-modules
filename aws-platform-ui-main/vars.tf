@@ -41,6 +41,13 @@ variable "eks_worker_instance_type" {
   default = "t3a.large"
 }
 
+# Extra instance types the spot worker node group may use (see
+# eks-vpc's worker_spot_instance_types). Needs eks_worker_spot_price.
+variable "eks_worker_spot_instance_types" {
+  type    = list(string)
+  default = []
+}
+
 variable "luther_project" {
   type    = string
   default = "plt"
