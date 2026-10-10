@@ -87,6 +87,10 @@ resource "aws_cloudfront_distribution" "site" {
   price_class  = "PriceClass_200"
   http_version = "http1.1"
 
+  # Optional WAFv2 web ACL. Null (the default) attaches none, so callers that
+  # do not set it see no change.
+  web_acl_id = var.web_acl_id
+
   origin {
     origin_id   = "origin-site"
     domain_name = local.origin_domain
