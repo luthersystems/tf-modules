@@ -34,3 +34,9 @@ variable "use_302" {
 variable "random_identifier" {
   default = ""
 }
+
+variable "web_acl_id" {
+  type        = string
+  default     = null
+  description = "Optional WAFv2 web ACL ARN to attach to the distribution. It must be CLOUDFRONT scope (created in us-east-1). Null attaches none."
+}
