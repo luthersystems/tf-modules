@@ -13,9 +13,14 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version to tag (vMAJOR.MINOR.PATCH, e.g. v55.23.0). Must be strictly newer than the latest tag; always cut from main HEAD."
+        description: "Release version to tag (vMAJOR.MINOR.PATCH, e.g. v55.23.0). Without backport_sha: strictly newer than the latest tag, cut from main HEAD."
         type: string
         required: true
+      backport_sha:
+        description: "Patch backport only: full commit SHA built on an older release tag. version must be that tag's next patch (e.g. v52.0.3 on v52.0.2). Leave empty for a normal release."
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: write # gh release create (creates the tag + release)
@@ -37,9 +42,31 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
+          BACKPORT_SHA: ${{ inputs.backport_sha }}
         run: |
           set -euo pipefail
           [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::'$VERSION' is not vMAJOR.MINOR.PATCH"; exit 1; }
+          if [ -n "$BACKPORT_SHA" ]; then
+            # Patch backport for consumers pinned to an older major: tag a
+            # commit that is not on main. The commit must descend from its
+            # nearest release tag, and the version must be exactly that tag's
+            # next patch, so a backport can never claim a new minor or major,
+            # skip a patch, or reuse a tag.
+            [[ "$BACKPORT_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::backport_sha must be a full 40-character commit SHA"; exit 1; }
+            git fetch --no-tags origin "$BACKPORT_SHA"
+            if git rev-parse -q --verify "refs/tags/$VERSION" >/dev/null; then
+              echo "::error::$VERSION already exists"; exit 1
+            fi
+            base=$(git describe --tags --abbrev=0 --match 'v[0-9]*' "$BACKPORT_SHA")
+            [[ "$base" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || { echo "::error::nearest tag '$base' is not vMAJOR.MINOR.PATCH"; exit 1; }
+            want="v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))"
+            [ "$VERSION" = "$want" ] || { echo "::error::a backport on $base must be $want, not $VERSION"; exit 1; }
+            notes=$(git log "$base..$BACKPORT_SHA" --oneline --no-merges | head -40 | sed 's/^/- /')
+            gh release create "$VERSION" --target "$BACKPORT_SHA" --latest=false --title "$VERSION" \
+              --notes "Backport on $base."$'\n\n'"$notes"
+            echo "released $VERSION at $BACKPORT_SHA (backport on $base)"
+            exit 0
+          fi
           latest=$(git tag --list 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
           echo "latest tag: ${latest:-<none>}"
           if [ -n "$latest" ]; then
