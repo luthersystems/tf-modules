@@ -38,6 +38,8 @@ module "eks_vpc" {
 
   preserve_coredns = var.preserve_coredns
 
+  cni_enable_network_policy = var.cni_enable_network_policy
+
   slack_alerts_web_hook_url_secret = var.slack_alerts_web_hook_url_secret
 
   worker_volume_type = var.worker_volume_type

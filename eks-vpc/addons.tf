@@ -143,6 +143,13 @@ resource "aws_eks_addon" "vpc_cni" {
   addon_version               = var.cni_addon_version[local.kubernetes_version]
   resolve_conflicts_on_update = "OVERWRITE"
   service_account_role_arn    = module.eks_node_service_account_iam_role.arn
+
+  # enableNetworkPolicy turns on the network policy controller and the node
+  # agent, so the cluster enforces Kubernetes NetworkPolicy objects. Without
+  # it they are accepted but have no effect.
+  configuration_values = var.cni_enable_network_policy ? jsonencode({
+    enableNetworkPolicy = "true"
+  }) : null
 }
 
 resource "aws_eks_addon" "kube_proxy" {
