@@ -146,10 +146,12 @@ resource "aws_eks_addon" "vpc_cni" {
 
   # enableNetworkPolicy turns on the network policy controller and the node
   # agent, so the cluster enforces Kubernetes NetworkPolicy objects. Without
-  # it they are accepted but have no effect.
-  configuration_values = var.cni_enable_network_policy ? jsonencode({
-    enableNetworkPolicy = "true"
-  }) : null
+  # it they are accepted but have no effect. null leaves the addon's
+  # configuration alone; configuration_values is computed, so going back to
+  # null would not turn enforcement off, which is why false is written out.
+  configuration_values = var.cni_enable_network_policy == null ? null : jsonencode({
+    enableNetworkPolicy = var.cni_enable_network_policy ? "true" : "false"
+  })
 }
 
 resource "aws_eks_addon" "kube_proxy" {
