@@ -178,6 +178,16 @@ variable "cni_addon" {
   default = true
 }
 
+# Enforce Kubernetes NetworkPolicy objects with the VPC CNI's network policy
+# agent. Needs cni_addon. true turns enforcement on, which makes every
+# existing NetworkPolicy in the cluster take effect. false turns it off; use
+# false, not null, to turn it off after it was on. null (the default) leaves
+# the addon's configuration unchanged.
+variable "cni_enable_network_policy" {
+  type    = bool
+  default = null
+}
+
 variable "csi_addon" {
   type    = bool
   default = true

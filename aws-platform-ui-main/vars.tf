@@ -93,6 +93,14 @@ variable "preserve_coredns" {
   default = true
 }
 
+# Enforce Kubernetes NetworkPolicy objects (eks-vpc's
+# cni_enable_network_policy). null (the default) leaves the addon's
+# configuration unchanged; use false to turn enforcement off after it was on.
+variable "cni_enable_network_policy" {
+  type    = bool
+  default = null
+}
+
 variable "slack_alerts_web_hook_url_secret" {
   type    = string
   default = ""
