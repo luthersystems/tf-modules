@@ -24,7 +24,8 @@ module "eks_vpc" {
   spot_price                 = var.eks_worker_spot_price
   worker_spot_instance_types = var.eks_worker_spot_instance_types
 
-  public_api = true
+  public_api          = true
+  public_access_cidrs = var.eks_public_access_cidrs
 
   monitoring                     = var.monitoring
   logs                           = var.logs

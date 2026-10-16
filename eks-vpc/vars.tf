@@ -143,6 +143,17 @@ variable "public_api" {
   default = false
 }
 
+variable "public_access_cidrs" {
+  description = "CIDR blocks allowed to reach the EKS public API endpoint. Used only when public_api is true. The default allows any address, which is what AWS reports for an unrestricted endpoint, so callers that do not set it see no change."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+
+  validation {
+    condition     = length(var.public_access_cidrs) > 0 && alltrue([for c in var.public_access_cidrs : can(cidrhost(c, 0))])
+    error_message = "public_access_cidrs must be a non-empty list of valid CIDR blocks, such as \"203.0.113.0/24\"."
+  }
+}
+
 variable "spot_price" {
   type    = string
   default = ""
