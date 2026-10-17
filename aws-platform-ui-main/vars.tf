@@ -221,3 +221,9 @@ variable "prom_scrape_interval" {
   type        = string
   default     = "1m"
 }
+
+variable "eks_public_access_cidrs" {
+  description = "CIDR blocks allowed to reach the EKS public API endpoint (passed to eks-vpc's public_access_cidrs). The default allows any address, the same as before this variable existed."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
