@@ -7,7 +7,6 @@
 # its row (luthersystems/tf-modules#81). A row for a finding kept on purpose
 # needs a real reason, not the Trivy title.
 AWS-0013 | aws-cf-reverse-proxy/main.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: CloudFront distribution uses outdated SSL/TLS protocols.
-AWS-0030 | aws-ecr-repository/main.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: ECR repository has image scans disabled.
 AWS-0031 | aws-ecr-repository/main.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: ECR images tags shouldn't be mutable.
 AWS-0039 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: EKS should have the encryption of secrets enabled
 AWS-0040 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#81 | CRITICAL: EKS Clusters should have the public access disabled

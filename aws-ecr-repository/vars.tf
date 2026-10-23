@@ -19,3 +19,11 @@ variable "ro_principals" {
 variable "rw_principals" {
   type = list(string)
 }
+
+# scan_on_push scans each image for known CVEs when it is pushed. Set it to
+# false only where a registry-level scanning configuration (which overrides
+# it) is in use.
+variable "scan_on_push" {
+  type    = bool
+  default = true
+}
