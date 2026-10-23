@@ -11,14 +11,6 @@ AWS-0039 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#81 | HI
 AWS-0040 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#81 | CRITICAL: EKS Clusters should have the public access disabled
 AWS-0041 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#81 | CRITICAL: EKS cluster should not have open CIDR range for public access
 AWS-0053 | aws-sftp/transfer_server.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: Load balancer is exposed to the internet.
-AWS-0086 | aws-access-log-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should block public ACL
-AWS-0086 | aws-s3-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should block public ACL
-AWS-0087 | aws-access-log-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should block public policy
-AWS-0087 | aws-s3-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should block public policy
-AWS-0091 | aws-access-log-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access Block should Ignore Public ACL
-AWS-0091 | aws-s3-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access Block should Ignore Public ACL
-AWS-0093 | aws-access-log-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should restrict public bucket to limit access
-AWS-0093 | aws-s3-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should restrict public bucket to limit access
 AWS-0104 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#81 | CRITICAL: A security group rule should not allow unrestricted egress to any IP address.
 AWS-0104 | eks-vpc/eks_workers.tf | 2027-01-31 | luthersystems/tf-modules#81 | CRITICAL: A security group rule should not allow unrestricted egress to any IP address.
 AWS-0130 | eks-vpc/eks_workers.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: aws_instance should activate session tokens for Instance Metadata Service.
