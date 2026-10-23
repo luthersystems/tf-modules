@@ -113,3 +113,9 @@ variable "web_acl_id" {
   default     = null
   description = "Optional WAFv2 Web ACL ARN to attach to the CloudFront distribution. Must be CLOUDFRONT-scope (created in us-east-1). Default null leaves the distribution un-WAFed (existing behaviour)."
 }
+
+variable "minimum_protocol_version" {
+  type        = string
+  default     = "TLSv1.2_2021"
+  description = "CloudFront viewer TLS security policy. TLSv1.2_2021, the policy AWS recommends, allows only ECDHE key exchange with GCM or ChaCha20 suites: it drops the CBC suites and the RSA key exchange suites that TLSv1.2_2018 allows. A client that cannot do ECDHE (an old Java runtime, some TLS-inspecting proxies) then fails the handshake; set TLSv1.2_2018 to keep such clients working."
+}
