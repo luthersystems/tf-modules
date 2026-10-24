@@ -1,32 +1,22 @@
 # Trivy IaC exemptions for the shared security workflow (security / iac).
 # id | path | expires (YYYY-MM-DD) | issue | reason
 #
-# Why these rows: they baseline the High and Critical findings that were on
-# main when the check was turned on, so it can block new ones at once
-# without failing every PR. Each row expires; fix the finding and delete
-# its row (luthersystems/tf-modules#81). A row for a finding kept on purpose
+# Each row is either kept on purpose (the reason says why the finding is
+# true by design; #81, renewed at expiry after a new look) or deferred
+# (the fix is more than a config change; #84, with a short expiry so
+# the gate asks again). Fix a deferred finding and delete its row. A new row
 # needs a real reason, not the Trivy title.
-AWS-0013 | aws-cf-reverse-proxy/main.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: CloudFront distribution uses outdated SSL/TLS protocols.
-AWS-0030 | aws-ecr-repository/main.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: ECR repository has image scans disabled.
-AWS-0031 | aws-ecr-repository/main.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: ECR images tags shouldn't be mutable.
-AWS-0039 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: EKS should have the encryption of secrets enabled
-AWS-0040 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#81 | CRITICAL: EKS Clusters should have the public access disabled
-AWS-0041 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#81 | CRITICAL: EKS cluster should not have open CIDR range for public access
-AWS-0053 | aws-sftp/transfer_server.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: Load balancer is exposed to the internet.
-AWS-0086 | aws-access-log-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should block public ACL
-AWS-0086 | aws-s3-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should block public ACL
-AWS-0087 | aws-access-log-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should block public policy
-AWS-0087 | aws-s3-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should block public policy
-AWS-0091 | aws-access-log-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access Block should Ignore Public ACL
-AWS-0091 | aws-s3-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access Block should Ignore Public ACL
-AWS-0093 | aws-access-log-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should restrict public bucket to limit access
-AWS-0093 | aws-s3-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 Access block should restrict public bucket to limit access
-AWS-0104 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#81 | CRITICAL: A security group rule should not allow unrestricted egress to any IP address.
-AWS-0104 | eks-vpc/eks_workers.tf | 2027-01-31 | luthersystems/tf-modules#81 | CRITICAL: A security group rule should not allow unrestricted egress to any IP address.
-AWS-0130 | eks-vpc/eks_workers.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: aws_instance should activate session tokens for Instance Metadata Service.
-AWS-0132 | aws-access-log-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 encryption should use Customer Managed Keys
-AWS-0132 | aws-cf-reverse-proxy/main.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 encryption should use Customer Managed Keys
-AWS-0132 | aws-s3-bucket/s3_buckets.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: S3 encryption should use Customer Managed Keys
-AWS-0164 | aws-sftp/transfer_server.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: Instances in a subnet should not receive a public IP address by default.
-AWS-0164 | eks-vpc/network.tf | 2027-01-31 | luthersystems/tf-modules#81 | HIGH: Instances in a subnet should not receive a public IP address by default.
-AZU-0012 | az-blob-bucket/bucket.tf | 2027-01-31 | luthersystems/tf-modules#81 | CRITICAL: The default action on Storage account network rules should be set to deny
+AWS-0031 | aws-ecr-repository/main.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: callers may push moving tags (latest, branch tags); immutable tags would fail those pushes, so a caller opts in, not the module default.
+AWS-0039 | eks-vpc/eks_master.tf | 2027-01-31 | luthersystems/tf-modules#84 | Deferred: envelope encryption of secrets needs a KMS key per cluster and cannot be turned off once on, so it is its own reviewed change, not a baseline cleanup.
+AWS-0040 | eks-vpc/eks_master.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: the public endpoint is the public_api variable, which callers set; callers that need it public narrow it with public_access_cidrs.
+AWS-0041 | eks-vpc/eks_master.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: public_access_cidrs defaults to 0.0.0.0/0 so callers that do not set it see no change; callers such as ui-infrastructure set their own CIDRs.
+AWS-0053 | aws-sftp/transfer_server.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: the NLB is the SFTP server's public endpoint for partners outside our network.
+AWS-0104 | eks-vpc/eks_master.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: the control plane and nodes reach AWS APIs, ECR and image registries over the internet; a narrower egress rule breaks node joins and pulls.
+AWS-0104 | eks-vpc/eks_workers.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: the control plane and nodes reach AWS APIs, ECR and image registries over the internet; a narrower egress rule breaks node joins and pulls.
+AWS-0130 | eks-vpc/eks_workers.tf | 2027-01-31 | luthersystems/tf-modules#84 | Deferred: requiring IMDSv2 changes the launch template, which rolls every node, and pods that still call IMDSv1 break; it needs a rollout plan per cluster.
+AWS-0132 | aws-access-log-bucket/s3_buckets.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: ALB access logs can only be delivered to a bucket encrypted with SSE-S3, not SSE-KMS.
+AWS-0132 | aws-cf-reverse-proxy/main.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: a CMK on the access log bucket needs a key policy that admits CloudFront log delivery, for logs that are not sensitive; SSE-S3 already encrypts them.
+AWS-0132 | aws-s3-bucket/s3_buckets.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: the bucket uses SSE-KMS with the caller's aws_kms_key_arn; Trivy flags only the empty default, which falls back to the AWS managed key.
+AWS-0164 | aws-sftp/transfer_server.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: these are the public subnets that hold the internet-facing SFTP NLB and its Elastic IPs.
+AWS-0164 | eks-vpc/network.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: public IPs follow the public_worker_ip variable (default true, for clusters with no NAT gateway); changing the default would cut existing nodes off the internet.
+AZU-0012 | az-blob-bucket/bucket.tf | 2027-10-31 | luthersystems/tf-modules#81 | Kept on purpose: the default action is Deny whenever a subnet_id is given; Allow is only the no-VNet case, where Deny would lock every client out.

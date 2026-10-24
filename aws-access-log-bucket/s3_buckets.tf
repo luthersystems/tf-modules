@@ -36,11 +36,31 @@ resource "aws_s3_bucket" "logs" {
 resource "aws_s3_bucket_acl" "logs" {
   bucket = aws_s3_bucket.logs.id
   acl    = "private"
+
+  # S3 refuses concurrent changes to one bucket's access settings (409
+  # OperationAborted), so apply these after the public access block.
+  depends_on = [aws_s3_bucket_public_access_block.logs]
 }
 
 resource "aws_s3_bucket_policy" "logs" {
   bucket = aws_s3_bucket.logs.id
   policy = data.aws_iam_policy_document.logs_alb.json
+
+  depends_on = [aws_s3_bucket_public_access_block.logs]
+}
+
+# Block every form of public access. The bucket is private by design: log
+# delivery writes through the bucket policy, which names the ALB log account
+# and the delivery.logs.amazonaws.com service, so no public grant is needed. Without this block, one stray
+# ACL or bucket policy could make it public. Adding it creates a new
+# resource and changes nothing on the bucket.
+resource "aws_s3_bucket_public_access_block" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {

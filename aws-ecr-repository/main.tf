@@ -1,5 +1,14 @@
 resource "aws_ecr_repository" "main" {
   name = var.name
+
+  # Scan each image for known CVEs when it is pushed, so a vulnerable image
+  # shows in the ECR console before anything pulls it. Basic scanning is
+  # free, and the setting changes in place on an existing repository. An
+  # account with a registry-level scanning configuration uses that instead,
+  # so a caller there can set scan_on_push = false to match it.
+  image_scanning_configuration {
+    scan_on_push = var.scan_on_push
+  }
 }
 
 output "arn" {

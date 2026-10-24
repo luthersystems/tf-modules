@@ -44,6 +44,18 @@ resource "aws_s3_bucket_ownership_controls" "bucket" {
   }
 }
 
+# Block every form of public access. The bucket is private by design;
+# callers grant access to named principals with their own bucket policy.
+# Without this block, one stray ACL or bucket policy could make it public. Adding it creates a new resource and changes nothing on the bucket.
+resource "aws_s3_bucket_public_access_block" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "bucket" {
   bucket = aws_s3_bucket.bucket.id
 
