@@ -470,3 +470,42 @@ variable "coredns_rewrite_rules" {
   }))
   default = []
 }
+
+# Envelope encryption of Kubernetes secrets (tf-modules#84). Off by default
+# so a consumer that bumps the module ref sees no change to its cluster.
+# A bool turns it on, not a non-empty key ARN, because the ARN is often a
+# key made in the same apply: its value is unknown at plan time, and a
+# count that depends on it fails the plan.
+variable "eks_secrets_encryption" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    Envelope-encrypt Kubernetes secrets with eks_secrets_kms_key_arn.
+    Turning it on for an existing cluster is an in-place update. It cannot
+    be undone: turning it off again replaces the cluster, and EKS cannot
+    change the key after, so pick a key that outlives the cluster. The
+    module grants the cluster role use of the key; the key policy must allow
+    that role too.
+  EOT
+}
+
+variable "eks_secrets_kms_key_arn" {
+  type        = string
+  default     = ""
+  description = "ARN of the KMS key for eks_secrets_encryption. Required when it is true."
+}
+
+# IMDSv2 on worker nodes (tf-modules#84). Off by default because a new
+# launch template version rolls the managed node group, and a pod that
+# still calls IMDSv1 breaks.
+variable "worker_imdsv2_required" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    Require IMDSv2 session tokens on worker nodes, with a hop limit of 2 so
+    pods (one hop past the node) still reach the metadata service. Turning
+    it on makes a new launch template version: a managed node group rolls
+    its nodes, and self-managed (ASG) nodes take it as they are replaced.
+    Check first that no workload still uses IMDSv1.
+  EOT
+}
