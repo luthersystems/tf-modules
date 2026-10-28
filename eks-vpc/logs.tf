@@ -88,8 +88,14 @@ data "aws_iam_policy_document" "mon_fluentbit" {
       "logs:DescribeLogStreams"
     ]
 
+    # The log-stream form covers CreateLogStream and PutLogEvents.
+    # CreateLogGroup and DescribeLogStreams are log-group actions, and from
+    # 2027-04-26 CloudWatch Logs stops granting a log-group action through a
+    # log-stream ARN, so the bare log-group ARN is listed too. It names the
+    # same group, so access does not widen.
     resources = [
-      "${aws_cloudwatch_log_group.main.arn}:log-stream:*"
+      aws_cloudwatch_log_group.main.arn,
+      "${aws_cloudwatch_log_group.main.arn}:log-stream:*",
     ]
   }
 }

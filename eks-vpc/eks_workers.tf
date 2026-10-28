@@ -486,7 +486,16 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
       "logs:PutLogEvents",
     ]
 
-    resources = ["${aws_cloudwatch_log_group.main.arn}:*"]
+    # The ":*" (log-stream) form covers CreateLogStream and PutLogEvents.
+    # DescribeLogStreams is a log-group action, and from 2027-04-26
+    # CloudWatch Logs stops granting a log-group action through a log-stream
+    # ARN, so the bare log-group ARN is listed too. It names the same group,
+    # so access does not widen. DescribeLogGroups has no resource type
+    # (it needs "*"), so neither ARN grants it; that is unchanged.
+    resources = [
+      aws_cloudwatch_log_group.main.arn,
+      "${aws_cloudwatch_log_group.main.arn}:*",
+    ]
   }
 }
 
