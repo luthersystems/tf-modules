@@ -97,9 +97,25 @@ variable "cache_max_ttl" {
   default = 300
 }
 
+# The TTL for a response that sends no Cache-Control or Expires. It is 0
+# because the API and auth routes share the cache policy, and their
+# responses set per-user cookies: a default TTL of 60 cached lutherauth's
+# oauth_login with its Set-Cookie headers, so every login in the window
+# shared one OAuth state (luthersystems/ui-infrastructure#487). A static
+# origin that wants caching sends its own Cache-Control.
 variable "cache_default_ttl" {
   type    = number
-  default = 60
+  default = 0
+}
+
+# The minimum time CloudFront caches a 4xx or 5xx that sends no
+# Cache-Control (CloudFront's own default is 10 s). It is 0 because a cached
+# error goes to every caller with the same cache key: one failed cookie-less
+# login broke every new login in the window. An error that sends its own
+# Cache-Control max-age is still cached for that time.
+variable "error_caching_min_ttl" {
+  type    = number
+  default = 0
 }
 
 variable "origin_read_timeout" {
