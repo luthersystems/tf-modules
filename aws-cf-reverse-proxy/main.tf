@@ -25,6 +25,11 @@ locals {
   # moving siblings. The path is appended after the hash purely so that the
   # generated keys remain human-readable in plan output. path_pattern is
   # carried as a value field for use inside the dynamic blocks.
+  # Every error code CloudFront caches. Each one gets a custom_error_response
+  # that sets only its caching TTL (var.error_caching_min_ttl), so the
+  # origin's error body still goes to the client.
+  uncached_error_codes = [400, 403, 404, 405, 414, 416, 500, 501, 502, 503, 504]
+
   origin_configs = {
     for path, url in local.merged_origin_routes :
     "${substr(sha256(path), 0, 8)}-${path}" => {
@@ -241,6 +246,14 @@ resource "aws_cloudfront_distribution" "site" {
         lambda_arn   = aws_lambda_function.edge_function[0].qualified_arn
         include_body = false
       }
+    }
+  }
+
+  dynamic "custom_error_response" {
+    for_each = toset(local.uncached_error_codes)
+    content {
+      error_code            = custom_error_response.value
+      error_caching_min_ttl = var.error_caching_min_ttl
     }
   }
 

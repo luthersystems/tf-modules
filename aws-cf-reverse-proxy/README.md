@@ -20,3 +20,16 @@ module "cf_reverse_proxy" {
   web_acl_id = aws_wafv2_web_acl.app_domain.arn
 }
 ```
+
+## Caching
+
+The default behavior and every `origin_routes` and `grpc_routes` behavior
+share one cache policy. Two defaults keep per-user responses out of the cache:
+
+| Input | Default | Why |
+|---|---|---|
+| `cache_default_ttl` | `0` | A response without `Cache-Control` or `Expires` is not cached. At `60` CloudFront cached lutherauth's `oauth_login` with its `Set-Cookie` headers, so every login in the window shared one OAuth state (luthersystems/ui-infrastructure#487). |
+| `error_caching_min_ttl` | `0` | A 4xx or 5xx is not cached. CloudFront's own default is 10 s, and a cached error goes to every caller with the same cache key. |
+
+An origin that wants caching (a static site) sends its own `Cache-Control`;
+CloudFront keeps it for at most `cache_max_ttl` (default 300 s).
