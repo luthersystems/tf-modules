@@ -51,10 +51,18 @@ run "errors_not_cached" {
   command = plan
 
   assert {
-    condition = length(setsubtract(
+    # The 4xx and 5xx codes CloudFront caches by default.
+    condition = toset([for e in aws_cloudfront_distribution.site.custom_error_response : e.error_code if e.error_caching_min_ttl == 0]) == toset(
       [400, 403, 404, 405, 414, 416, 500, 501, 502, 503, 504],
-      [for e in aws_cloudfront_distribution.site.custom_error_response : e.error_code if e.error_caching_min_ttl == 0],
-    )) == 0
+    ) && length(aws_cloudfront_distribution.site.custom_error_response) == 11
     error_message = "every 4xx and 5xx code CloudFront caches must have error_caching_min_ttl = 0"
   }
+}
+
+run "min_ttl_above_default_fails" {
+  command = plan
+  variables {
+    cache_min_ttl = 30
+  }
+  expect_failures = [aws_cloudfront_cache_policy.respect_origin_headers]
 }

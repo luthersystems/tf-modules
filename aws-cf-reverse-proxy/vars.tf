@@ -108,9 +108,11 @@ variable "cache_default_ttl" {
   default = 0
 }
 
-# How long CloudFront caches a 4xx or 5xx (CloudFront's own default is 10 s).
-# It is 0 because a cached error goes to every caller with the same cache
-# key: one failed cookie-less login broke every new login in the window.
+# The minimum time CloudFront caches a 4xx or 5xx that sends no
+# Cache-Control (CloudFront's own default is 10 s). It is 0 because a cached
+# error goes to every caller with the same cache key: one failed cookie-less
+# login broke every new login in the window. An error that sends its own
+# Cache-Control max-age is still cached for that time.
 variable "error_caching_min_ttl" {
   type    = number
   default = 0

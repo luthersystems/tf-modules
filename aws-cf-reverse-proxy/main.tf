@@ -13,6 +13,11 @@ locals {
 
   merged_origin_routes = merge(local.base_routes, var.origin_routes)
 
+  # Every error code CloudFront caches. Each one gets a custom_error_response
+  # that sets only its caching TTL (var.error_caching_min_ttl), so the
+  # origin's error body still goes to the client.
+  uncached_error_codes = [400, 403, 404, 405, 414, 416, 500, 501, 502, 503, 504]
+
   # Locals are keyed by a stable hash-prefix of the path_pattern (rather than
   # the raw path) so that adding a new route doesn't shift the index of
   # existing entries. CloudFront's ordered_cache_behavior and origin blocks
@@ -25,11 +30,6 @@ locals {
   # moving siblings. The path is appended after the hash purely so that the
   # generated keys remain human-readable in plan output. path_pattern is
   # carried as a value field for use inside the dynamic blocks.
-  # Every error code CloudFront caches. Each one gets a custom_error_response
-  # that sets only its caching TTL (var.error_caching_min_ttl), so the
-  # origin's error body still goes to the client.
-  uncached_error_codes = [400, 403, 404, 405, 414, 416, 500, 501, 502, 503, 504]
-
   origin_configs = {
     for path, url in local.merged_origin_routes :
     "${substr(sha256(path), 0, 8)}-${path}" => {
@@ -250,7 +250,7 @@ resource "aws_cloudfront_distribution" "site" {
   }
 
   dynamic "custom_error_response" {
-    for_each = toset(local.uncached_error_codes)
+    for_each = local.uncached_error_codes
     content {
       error_code            = custom_error_response.value
       error_caching_min_ttl = var.error_caching_min_ttl
@@ -393,6 +393,16 @@ resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
   min_ttl     = var.cache_min_ttl
   default_ttl = var.cache_default_ttl
   max_ttl     = var.cache_max_ttl
+
+  lifecycle {
+    precondition {
+      # CloudFront refuses the policy at apply time otherwise. A caller
+      # that raised cache_min_ttl under the old default of 60 must now
+      # raise cache_default_ttl too.
+      condition     = var.cache_min_ttl <= var.cache_default_ttl && var.cache_default_ttl <= var.cache_max_ttl
+      error_message = "need cache_min_ttl <= cache_default_ttl <= cache_max_ttl."
+    }
+  }
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
