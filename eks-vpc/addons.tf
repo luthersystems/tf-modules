@@ -181,13 +181,15 @@ resource "aws_eks_addon" "coredns" {
 }
 
 locals {
-  # k8sTagClusterId makes the driver tag each new volume with
-  # KubernetesCluster=<cluster> and kubernetes.io/cluster/<cluster>=owned.
-  # The DLM snapshot policy in aws-platform-ui-main selects volumes by
-  # KubernetesCluster. The driver does not tag volumes it created before.
+  # extraVolumeTags makes the driver tag each new volume with
+  # KubernetesCluster=<cluster>. The DLM snapshot policy in
+  # aws-platform-ui-main selects volumes by KubernetesCluster. The driver
+  # does not tag volumes it created before. Not k8sTagClusterId: the Helm
+  # chart has it, but the EKS add-on schema does not, and UpdateAddon
+  # refuses it (InvalidParameterException).
   csi_controller_config = merge(
     var.enable_csi_vol_mod ? { volumeModificationFeature = { enabled = true } } : {},
-    var.csi_tag_cluster_id ? { k8sTagClusterId = aws_eks_cluster.app.name } : {},
+    var.csi_tag_cluster_id ? { extraVolumeTags = { KubernetesCluster = aws_eks_cluster.app.name } } : {},
   )
 }
 
