@@ -46,15 +46,35 @@ resource "aws_eks_cluster" "app" {
     bootstrap_cluster_creator_admin_permissions = true
   }
 
+  # Opt-in (var.eks_secrets_encryption), so the default plan has no block
+  # and an existing cluster is unchanged. Adding the block later associates
+  # the key in place; removing it replaces the cluster.
+  dynamic "encryption_config" {
+    for_each = var.eks_secrets_encryption ? [true] : []
+
+    content {
+      provider {
+        key_arn = var.eks_secrets_kms_key_arn
+      }
+      resources = ["secrets"]
+    }
+  }
+
   tags = module.luthername_eks_cluster.tags
 
   depends_on = [
     aws_iam_role_policy_attachment.eks_master_AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.eks_master_AmazonEKSServicePolicy,
+    aws_iam_role_policy.eks_master_secrets_kms,
     aws_cloudwatch_log_group.eks_cluster,
   ]
 
   lifecycle {
+    precondition {
+      condition     = !var.eks_secrets_encryption || var.eks_secrets_kms_key_arn != ""
+      error_message = "eks_secrets_encryption needs eks_secrets_kms_key_arn."
+    }
+
     precondition {
       condition     = var.allow_kubernetes_version_rollback || !module.kubernetes_version_guard.is_downgrade
       error_message = "Refusing to roll back EKS Kubernetes version from ${join("", data.aws_eks_cluster.current[*].version)} to ${local.kubernetes_version}. Set allow_kubernetes_version_rollback = true only for an intentional rollback."
@@ -149,6 +169,32 @@ resource "aws_iam_role_policy_attachment" "eks_master_AmazonEKSClusterPolicy" {
 resource "aws_iam_role_policy_attachment" "eks_master_AmazonEKSServicePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
   role       = aws_iam_role.eks_master.name
+}
+
+# EKS encrypts and decrypts secrets with the cluster role, and neither
+# managed policy above grants KMS, so the role needs these on the key
+# (the actions the EKS secrets encryption guide lists). Only made when
+# secrets encryption is on.
+data "aws_iam_policy_document" "eks_master_secrets_kms" {
+  count = var.eks_secrets_encryption ? 1 : 0
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ListGrants",
+      "kms:DescribeKey",
+    ]
+    resources = [var.eks_secrets_kms_key_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "eks_master_secrets_kms" {
+  count  = var.eks_secrets_encryption ? 1 : 0
+  name   = "eks-secrets-kms"
+  role   = aws_iam_role.eks_master.id
+  policy = data.aws_iam_policy_document.eks_master_secrets_kms[0].json
 }
 
 data "aws_kms_key" "volumes" {

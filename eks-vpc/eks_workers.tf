@@ -250,6 +250,20 @@ resource "aws_launch_template" "eks_worker" {
     enabled = true
   }
 
+  # Opt-in (var.worker_imdsv2_required): with no block the launch template
+  # keeps the AWS default (IMDSv1 allowed), so the default plan makes no new
+  # template version and rolls no node. Hop limit 2 because a pod's request
+  # crosses one more hop than the node's own.
+  dynamic "metadata_options" {
+    for_each = var.worker_imdsv2_required ? [true] : []
+
+    content {
+      http_endpoint               = "enabled"
+      http_tokens                 = "required"
+      http_put_response_hop_limit = 2
+    }
+  }
+
   block_device_mappings {
     device_name = "/dev/xvda"
 
@@ -472,7 +486,16 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
       "logs:PutLogEvents",
     ]
 
-    resources = ["${aws_cloudwatch_log_group.main.arn}:*"]
+    # The ":*" (log-stream) form covers CreateLogStream and PutLogEvents.
+    # DescribeLogStreams is a log-group action, and from 2027-04-26
+    # CloudWatch Logs stops granting a log-group action through a log-stream
+    # ARN, so the bare log-group ARN is listed too. It names the same group,
+    # so access does not widen. DescribeLogGroups has no resource type
+    # (it needs "*"), so neither ARN grants it; that is unchanged.
+    resources = [
+      aws_cloudwatch_log_group.main.arn,
+      "${aws_cloudwatch_log_group.main.arn}:*",
+    ]
   }
 }
 
