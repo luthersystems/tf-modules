@@ -27,6 +27,10 @@ module "eks_vpc" {
   public_api          = true
   public_access_cidrs = var.eks_public_access_cidrs
 
+  eks_secrets_encryption  = var.eks_secrets_encryption
+  eks_secrets_kms_key_arn = var.eks_secrets_kms_key_arn
+  worker_imdsv2_required  = var.eks_worker_imdsv2_required
+
   monitoring                     = var.monitoring
   logs                           = var.logs
   aws_cloudwatch_retention_days  = var.aws_cloudwatch_retention_days
