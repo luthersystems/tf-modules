@@ -1,6 +1,8 @@
 locals {
+  # The EBS CSI driver tags each volume it creates with
+  # KubernetesCluster=<cluster> (csi_tag_cluster_id). A volume created before
+  # that needs the tag added once, or DLM does not snapshot it.
   snapshot_tags = {
-    # TODO: add per vol snapshot enabled tags
     KubernetesCluster = module.eks_vpc.aws_eks_cluster_name
   }
 }
@@ -30,7 +32,8 @@ module "fabric_snapshots" {
 resource "aws_iam_role" "dlm_snapshots" {
   count = var.enable_dlm_snapshots ? 1 : 0
 
-  name               = "dlm-lifecycle"
+  # IAM role names are unique per account: name it after the cluster.
+  name               = "${module.eks_vpc.aws_eks_cluster_name}-dlm"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
