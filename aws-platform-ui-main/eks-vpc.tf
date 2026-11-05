@@ -48,6 +48,7 @@ module "eks_vpc" {
   awslogs_driver = false
 
   enable_csi_vol_mod = var.enable_csi_vol_mod
+  csi_tag_cluster_id = var.csi_tag_cluster_id
 
   disable_s3_node_role = true
 
