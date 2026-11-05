@@ -400,7 +400,7 @@ variable "enable_csi_vol_mod" {
 }
 
 variable "csi_tag_cluster_id" {
-  description = "Tag each new EBS volume with KubernetesCluster=<cluster name> (EBS CSI driver k8sTagClusterId)"
+  description = "Tag each new EBS volume with KubernetesCluster=<cluster name> (EBS CSI driver extraVolumeTags)"
   type        = bool
   default     = true
 }
