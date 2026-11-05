@@ -246,7 +246,15 @@ variable "eks_secrets_encryption" {
 variable "eks_secrets_kms_key_arn" {
   type        = string
   default     = ""
-  description = "KMS key for eks_secrets_encryption, for example aws-platform-ui-storage's kms_key_eks_secrets_arn. Use a key that outlives the cluster. Required when eks_secrets_encryption is true."
+  description = "KMS key ARN for eks_secrets_encryption, for example aws-platform-ui-storage's kms_key_eks_secrets_arn. Use a key that outlives the cluster. Required when eks_secrets_encryption is true."
+
+  # A key ARN, not an alias or key ID: eks-vpc grants the cluster role KMS
+  # use on exactly this ARN, and a grant on an alias ARN does not cover the
+  # key, so EKS would fail at apply time instead of here.
+  validation {
+    condition     = var.eks_secrets_kms_key_arn == "" ? true : can(regex("^arn:aws[a-z-]*:kms:[a-z0-9-]+:[0-9]{12}:key/[a-zA-Z0-9-]+$", var.eks_secrets_kms_key_arn))
+    error_message = "eks_secrets_kms_key_arn must be a KMS key ARN (arn:aws:kms:<region>:<account>:key/<id>), not an alias or key ID."
+  }
 }
 
 variable "eks_worker_imdsv2_required" {

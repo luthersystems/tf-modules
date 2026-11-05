@@ -23,6 +23,9 @@ module "test" {
 
   ci_github_repos = []
 
+  # Exercise the EKS secrets key (tf-modules#84).
+  eks_secrets_kms_key = true
+
   providers = {
     aws    = aws
     aws.dr = aws.dr
