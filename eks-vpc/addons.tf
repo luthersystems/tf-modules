@@ -180,6 +180,17 @@ resource "aws_eks_addon" "coredns" {
   depends_on = [time_sleep.k8s_ready_wait]
 }
 
+locals {
+  # k8sTagClusterId makes the driver tag each new volume with
+  # KubernetesCluster=<cluster> and kubernetes.io/cluster/<cluster>=owned.
+  # The DLM snapshot policy in aws-platform-ui-main selects volumes by
+  # KubernetesCluster. The driver does not tag volumes it created before.
+  csi_controller_config = merge(
+    var.enable_csi_vol_mod ? { volumeModificationFeature = { enabled = true } } : {},
+    var.csi_tag_cluster_id ? { k8sTagClusterId = aws_eks_cluster.app.name } : {},
+  )
+}
+
 resource "aws_eks_addon" "ebs-csi" {
   count = local.csi_addon ? 1 : 0
 
@@ -189,13 +200,9 @@ resource "aws_eks_addon" "ebs-csi" {
   resolve_conflicts_on_update = "OVERWRITE"
   service_account_role_arn    = module.ebs_csi_controller_service_account_iam_role.arn
 
-  configuration_values = var.enable_csi_vol_mod ? jsonencode({
-    controller = {
-      volumeModificationFeature = {
-        enabled = true
-      }
-    }
-  }) : null
+  configuration_values = length(local.csi_controller_config) == 0 ? null : jsonencode({
+    controller = local.csi_controller_config
+  })
 
   depends_on = [time_sleep.k8s_ready_wait]
 }

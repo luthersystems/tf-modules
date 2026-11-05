@@ -116,6 +116,12 @@ variable "enable_csi_vol_mod" {
   default = true
 }
 
+variable "csi_tag_cluster_id" {
+  description = "Tag each new EBS volume with KubernetesCluster=<cluster name>, which the DLM snapshot policy selects"
+  type        = bool
+  default     = true
+}
+
 variable "common_static_s3_bucket_arn" {
   type    = string
   default = ""

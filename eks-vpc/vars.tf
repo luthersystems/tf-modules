@@ -399,6 +399,12 @@ variable "enable_csi_vol_mod" {
   default = true
 }
 
+variable "csi_tag_cluster_id" {
+  description = "Tag each new EBS volume with KubernetesCluster=<cluster name> (EBS CSI driver k8sTagClusterId)"
+  type        = bool
+  default     = true
+}
+
 variable "bastion_ssh_whitelist" {
   type    = list(string)
   default = ["0.0.0.0/0"]
