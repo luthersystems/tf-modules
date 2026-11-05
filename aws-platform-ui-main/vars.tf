@@ -233,3 +233,32 @@ variable "eks_public_access_cidrs" {
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }
+
+# EKS secrets encryption and IMDSv2 on nodes (tf-modules#84). Both are off
+# by default so that a ref bump changes no cluster: each needs a planned
+# turn-on per cluster. See the eks-vpc variables of the same names.
+variable "eks_secrets_encryption" {
+  type        = bool
+  default     = false
+  description = "Envelope-encrypt Kubernetes secrets with eks_secrets_kms_key_arn (eks-vpc eks_secrets_encryption). An in-place update; it cannot be undone, since turning it off replaces the cluster."
+}
+
+variable "eks_secrets_kms_key_arn" {
+  type        = string
+  default     = ""
+  description = "KMS key ARN for eks_secrets_encryption, for example aws-platform-ui-storage's kms_key_eks_secrets_arn. Use a key that outlives the cluster. Required when eks_secrets_encryption is true."
+
+  # A key ARN, not an alias or key ID: eks-vpc grants the cluster role KMS
+  # use on exactly this ARN, and a grant on an alias ARN does not cover the
+  # key, so EKS would fail at apply time instead of here.
+  validation {
+    condition     = var.eks_secrets_kms_key_arn == "" ? true : can(regex("^arn:aws[a-z-]*:kms:[a-z0-9-]+:[0-9]{12}:key/[a-zA-Z0-9-]+$", var.eks_secrets_kms_key_arn))
+    error_message = "eks_secrets_kms_key_arn must be a KMS key ARN (arn:aws:kms:<region>:<account>:key/<id>), not an alias or key ID."
+  }
+}
+
+variable "eks_worker_imdsv2_required" {
+  type        = bool
+  default     = false
+  description = "Require IMDSv2 on worker nodes, hop limit 2 (eks-vpc worker_imdsv2_required). Rolls every node; check first that no pod calls IMDSv1."
+}

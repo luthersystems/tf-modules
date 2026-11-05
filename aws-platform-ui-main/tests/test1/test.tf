@@ -40,6 +40,11 @@ module "test" {
   kubernetes_version  = "1.23"
   storage_kms_key_arn = ""
 
+  # Exercise the opt-in pass-through to eks-vpc (tf-modules#84).
+  eks_secrets_encryption     = true
+  eks_secrets_kms_key_arn    = "arn:aws:kms:us-west-2:123456789012:key/00000000-0000-0000-0000-000000000000"
+  eks_worker_imdsv2_required = true
+
   monitoring = false
 
   providers = {

@@ -70,3 +70,12 @@ variable "enable_dr" {
   type    = bool
   default = false
 }
+
+# Opt-in, so a ref bump adds no key to an env that has no EKS cluster or
+# does not encrypt its secrets. Turn it on before aws-platform-ui-main's
+# eks_secrets_encryption.
+variable "eks_secrets_kms_key" {
+  type        = bool
+  default     = false
+  description = "Make a KMS key for EKS secrets encryption (output kms_key_eks_secrets_arn). Once a cluster uses the key, do not turn this off: that schedules the key for deletion, and the cluster's secrets become unreadable when it is deleted."
+}
