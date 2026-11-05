@@ -70,3 +70,12 @@ variable "enable_dr" {
   type    = bool
   default = false
 }
+
+# On by default: the key alone changes no cluster, costs one KMS key a
+# month, and having it ready lets a cluster turn on secrets encryption
+# (aws-platform-ui-main eks_secrets_encryption) with no storage change.
+variable "eks_secrets_kms_key" {
+  type        = bool
+  default     = true
+  description = "Make a KMS key for EKS secrets encryption (output kms_key_eks_secrets_arn). Turning it off schedules the key for deletion, which makes the secrets of any cluster that uses it unreadable."
+}
