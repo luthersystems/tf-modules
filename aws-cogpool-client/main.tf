@@ -8,7 +8,7 @@ module "luthername_cogpool_client" {
   resource       = "cogclient"
 }
 
-# BUG:  Updates to user pool clients don't work well with terraform aws
+# Note: updates to user pool clients don't work well with terraform aws
 # provider version 1.13.  If you want to change something about the user pool
 # client you probably have to taint to client and recreate it for the settings
 # to be applied correctly.  If you don't want to do that (because you will have

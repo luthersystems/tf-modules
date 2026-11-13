@@ -108,7 +108,7 @@ resource "aws_api_gateway_deployment" "transfer_auth" {
   lifecycle {
     create_before_destroy = true
   }
-  # TODO - update on dependency change
+  # TODO(#99): redeploy when the API methods or integrations change
 }
 
 resource "aws_api_gateway_stage" "transfer_auth" {
