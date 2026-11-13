@@ -51,7 +51,7 @@ output "env_admin_role_arn" {
 resource "aws_iam_openid_connect_provider" "github" {
   count = local.has_github ? 1 : 0
 
-  # TODO: this is globally unique across the account. 
+  # TODO(#98): this is globally unique across the account.
   # we need to handle multiple deployments in a single account.
   url = "https://token.actions.githubusercontent.com"
 
