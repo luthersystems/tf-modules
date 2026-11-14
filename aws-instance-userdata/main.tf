@@ -55,15 +55,14 @@ locals {
 
   cloudwatch_config = merge(local.cloudwatch_agent_config, local.cloudwatch_logs_config)
 
-  inspector_gpg_key  = file("${path.module}/files/inspector.gpg")
   cloudwatch_gpg_key = file("${path.module}/files/cloudwatch.gpg")
 
   user_data_vars = {
-    inspector_gpg_key_base64  = base64encode(local.inspector_gpg_key),
     cloudwatch_gpg_key_base64 = base64encode(local.cloudwatch_gpg_key),
     cloudwatch_config_base64  = base64encode(jsonencode(local.cloudwatch_config)),
     cloudwatch_package_source = local.cloudwatch_sources[var.distro]
     package_install           = local.package_install[var.distro]
+    distro                    = var.distro
     custom_script             = var.custom_script
   }
 }
