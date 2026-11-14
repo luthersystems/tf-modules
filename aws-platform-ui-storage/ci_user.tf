@@ -50,7 +50,11 @@ output "env_admin_role_arn" {
 
 # An account holds one OIDC provider per URL. The first deployment in an
 # account creates it; each later one passes its ARN in
-# github_oidc_provider_arn and creates none.
+# github_oidc_provider_arn and creates none. The deployment that created
+# the provider owns it: destroying that deployment, or setting
+# github_oidc_provider_arn on it, deletes the provider the others trust.
+# Where that matters, create the provider outside this module and pass its
+# ARN to every deployment.
 resource "aws_iam_openid_connect_provider" "github" {
   count = local.create_github_oidc_provider ? 1 : 0
 

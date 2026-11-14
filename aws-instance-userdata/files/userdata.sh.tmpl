@@ -1,18 +1,3 @@
-# Make sure the SSM agent is installed and running. Amazon Inspector (v2)
-# scans EC2 instances through it; Inspector Classic and its own agent are
-# retired. The instance role also needs AmazonSSMManagedInstanceCore.
-%{ if distro == "ubuntu" ~}
-if ! snap list amazon-ssm-agent >/dev/null 2>&1; then
-  snap install amazon-ssm-agent --classic
-fi
-systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service
-%{ else ~}
-if ! rpm -q amazon-ssm-agent >/dev/null 2>&1; then
-  yum install -y amazon-ssm-agent
-fi
-systemctl enable --now amazon-ssm-agent.service
-%{ endif ~}
-
 # Install CloudWatch Agent
 pkgfile="$(basename '${cloudwatch_package_source}')"
 curl -o "$${pkgfile}" '${cloudwatch_package_source}'
@@ -26,6 +11,28 @@ echo '${cloudwatch_config_base64}' | base64 -d > cloudwatch-agent.json
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:cloudwatch-agent.json
 systemctl start amazon-cloudwatch-agent.service
 systemctl enable amazon-cloudwatch-agent.service
+
+# Make sure the SSM agent is installed and running. Amazon Inspector (v2)
+# scans EC2 instances through it; Inspector Classic and its own agent are
+# retired. The instance role also needs AmazonSSMManagedInstanceCore.
+# Best effort: callers run this under set -e, and a failure here must not
+# stop the custom script.
+%{ if distro == "ubuntu" ~}
+if ! {
+  snap wait system seed.loaded &&
+    { snap list amazon-ssm-agent >/dev/null 2>&1 || snap install amazon-ssm-agent --classic; } &&
+    systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service
+}; then
+  echo "WARNING: could not start the SSM agent; Amazon Inspector cannot scan this instance" >&2
+fi
+%{ else ~}
+if ! {
+  { rpm -q amazon-ssm-agent >/dev/null 2>&1 || yum install -y amazon-ssm-agent; } &&
+    systemctl enable --now amazon-ssm-agent.service
+}; then
+  echo "WARNING: could not start the SSM agent; Amazon Inspector cannot scan this instance" >&2
+fi
+%{ endif ~}
 %{ if custom_script != "" }
 ${custom_script}
-%{ endif ~}
+%{ endif }

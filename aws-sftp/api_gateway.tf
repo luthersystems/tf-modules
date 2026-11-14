@@ -105,19 +105,28 @@ resource "aws_api_gateway_deployment" "transfer_auth" {
   rest_api_id = aws_api_gateway_rest_api.transfer_auth.id
 
   # A deployment is a snapshot of the API. Replace it when a resource, method
-  # or integration changes, so the change reaches the stage.
+  # or integration changes, so the change reaches the stage. The hash covers
+  # the ids, which change on a replacement, and the fields that an in-place
+  # update can change. Whole resource objects would also take in computed
+  # attributes, and redeploy on changes that do not touch the API.
   triggers = {
     redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.transfer_auth_servers,
-      aws_api_gateway_resource.transfer_auth_server_id,
-      aws_api_gateway_resource.transfer_auth_users,
-      aws_api_gateway_resource.transfer_auth_username,
-      aws_api_gateway_resource.transfer_auth_user_config,
-      aws_api_gateway_method.transfer_auth_get_config,
-      aws_api_gateway_model.transfer_auth_response_model,
-      aws_api_gateway_method_response.transfer_auth_get_config_200,
-      aws_api_gateway_integration.transfer_auth_lambda,
-      aws_api_gateway_integration_response.transfer_auth_lambda_response,
+      aws_api_gateway_resource.transfer_auth_servers.id,
+      aws_api_gateway_resource.transfer_auth_server_id.id,
+      aws_api_gateway_resource.transfer_auth_users.id,
+      aws_api_gateway_resource.transfer_auth_username.id,
+      aws_api_gateway_resource.transfer_auth_user_config.id,
+      aws_api_gateway_method.transfer_auth_get_config.id,
+      aws_api_gateway_method.transfer_auth_get_config.authorization,
+      aws_api_gateway_method.transfer_auth_get_config.request_parameters,
+      aws_api_gateway_model.transfer_auth_response_model.id,
+      aws_api_gateway_model.transfer_auth_response_model.schema,
+      aws_api_gateway_method_response.transfer_auth_get_config_200.id,
+      aws_api_gateway_method_response.transfer_auth_get_config_200.response_models,
+      aws_api_gateway_integration.transfer_auth_lambda.id,
+      aws_api_gateway_integration.transfer_auth_lambda.uri,
+      aws_api_gateway_integration.transfer_auth_lambda.request_templates,
+      aws_api_gateway_integration_response.transfer_auth_lambda_response.id,
     ]))
   }
 
