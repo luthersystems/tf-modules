@@ -102,13 +102,28 @@ resource "aws_api_gateway_integration_response" "transfer_auth_lambda_response" 
 }
 
 resource "aws_api_gateway_deployment" "transfer_auth" {
-  depends_on  = [aws_api_gateway_integration.transfer_auth_lambda]
   rest_api_id = aws_api_gateway_rest_api.transfer_auth.id
+
+  # A deployment is a snapshot of the API. Replace it when a resource, method
+  # or integration changes, so the change reaches the stage.
+  triggers = {
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_resource.transfer_auth_servers,
+      aws_api_gateway_resource.transfer_auth_server_id,
+      aws_api_gateway_resource.transfer_auth_users,
+      aws_api_gateway_resource.transfer_auth_username,
+      aws_api_gateway_resource.transfer_auth_user_config,
+      aws_api_gateway_method.transfer_auth_get_config,
+      aws_api_gateway_model.transfer_auth_response_model,
+      aws_api_gateway_method_response.transfer_auth_get_config_200,
+      aws_api_gateway_integration.transfer_auth_lambda,
+      aws_api_gateway_integration_response.transfer_auth_lambda_response,
+    ]))
+  }
 
   lifecycle {
     create_before_destroy = true
   }
-  # TODO(#99): redeploy when the API methods or integrations change
 }
 
 resource "aws_api_gateway_stage" "transfer_auth" {

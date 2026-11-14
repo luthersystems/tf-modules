@@ -1,4 +1,17 @@
-# TODO(#97): set up the Amazon Inspector v2 agent
+# Make sure the SSM agent is installed and running. Amazon Inspector (v2)
+# scans EC2 instances through it; Inspector Classic and its own agent are
+# retired. The instance role also needs AmazonSSMManagedInstanceCore.
+%{ if distro == "ubuntu" ~}
+if ! snap list amazon-ssm-agent >/dev/null 2>&1; then
+  snap install amazon-ssm-agent --classic
+fi
+systemctl enable --now snap.amazon-ssm-agent.amazon-ssm-agent.service
+%{ else ~}
+if ! rpm -q amazon-ssm-agent >/dev/null 2>&1; then
+  yum install -y amazon-ssm-agent
+fi
+systemctl enable --now amazon-ssm-agent.service
+%{ endif ~}
 
 # Install CloudWatch Agent
 pkgfile="$(basename '${cloudwatch_package_source}')"
@@ -15,4 +28,4 @@ systemctl start amazon-cloudwatch-agent.service
 systemctl enable amazon-cloudwatch-agent.service
 %{ if custom_script != "" }
 ${custom_script}
-%{ endif }
+%{ endif ~}
