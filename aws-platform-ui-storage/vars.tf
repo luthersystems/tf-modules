@@ -46,6 +46,17 @@ variable "has_vault" {
   default = false
 }
 
+variable "github_oidc_provider_arn" {
+  description = "ARN of an existing GitHub Actions OIDC provider (https://token.actions.githubusercontent.com) in the account. Set it for a second deployment in the same account; null creates the provider."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.github_oidc_provider_arn == null ? true : can(regex("^arn:aws[a-z-]*:iam::[0-9]{12}:oidc-provider/token\\.actions\\.githubusercontent\\.com$", var.github_oidc_provider_arn))
+    error_message = "github_oidc_provider_arn must be the ARN of the token.actions.githubusercontent.com OIDC provider."
+  }
+}
+
 variable "ci_github_repos" {
   description = "An array of GitHub org, repo, and environment combinations."
   type = list(object({

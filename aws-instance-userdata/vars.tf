@@ -27,6 +27,11 @@ variable "run_as_user" {
 
 variable "distro" {
   type = string
+
+  validation {
+    condition     = contains(["amazon_linux", "ubuntu"], var.distro)
+    error_message = "distro must be \"amazon_linux\" or \"ubuntu\"."
+  }
 }
 
 variable "log_namespace" {

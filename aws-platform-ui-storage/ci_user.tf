@@ -48,11 +48,16 @@ output "env_admin_role_arn" {
   value = var.has_env_admin ? aws_iam_role.env_admin_role[0].arn : null
 }
 
+# An account holds one OIDC provider per URL. The first deployment in an
+# account creates it; each later one passes its ARN in
+# github_oidc_provider_arn and creates none. The deployment that created
+# the provider owns it: destroying that deployment, or setting
+# github_oidc_provider_arn on it, deletes the provider the others trust.
+# Where that matters, create the provider outside this module and pass its
+# ARN to every deployment.
 resource "aws_iam_openid_connect_provider" "github" {
-  count = local.has_github ? 1 : 0
+  count = local.create_github_oidc_provider ? 1 : 0
 
-  # TODO(#98): this is globally unique across the account.
-  # we need to handle multiple deployments in a single account.
   url = "https://token.actions.githubusercontent.com"
 
   client_id_list = [
@@ -64,6 +69,14 @@ resource "aws_iam_openid_connect_provider" "github" {
 
 locals {
   has_github = var.has_github && length(var.ci_github_repos) > 0
+
+  create_github_oidc_provider = local.has_github && var.github_oidc_provider_arn == null
+
+  github_oidc_provider_arn = (
+    var.github_oidc_provider_arn != null
+    ? var.github_oidc_provider_arn
+    : one(aws_iam_openid_connect_provider.github[*].arn)
+  )
 
   ci_github_sub_strs = [for sub in var.ci_github_repos : "repo:${sub.org}/${sub.repo}:environment:${sub.env}"]
 
@@ -95,7 +108,7 @@ data "aws_iam_policy_document" "ci_assume_role" {
 
       principals {
         type        = "Federated"
-        identifiers = [aws_iam_openid_connect_provider.github[0].arn]
+        identifiers = [local.github_oidc_provider_arn]
       }
 
       actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -113,6 +126,11 @@ data "aws_iam_policy_document" "ci_assume_role" {
       }
     }
   }
+}
+
+output "github_oidc_provider_arn" {
+  description = "ARN of the GitHub Actions OIDC provider the CI role trusts, whether this module created it or was given it. Null without GitHub."
+  value       = local.has_github ? local.github_oidc_provider_arn : null
 }
 
 module "luthername_ci_role" {
