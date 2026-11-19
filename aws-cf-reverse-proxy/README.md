@@ -41,3 +41,22 @@ origin that wants caching sends its own `Cache-Control`.
 that sends no `Cache-Control` is no longer cached; set `cache_default_ttl` to
 keep the old behaviour. A caller with `cache_min_ttl` above 0 must also raise
 `cache_default_ttl`, or the plan fails its precondition.
+
+## Forwarded headers
+
+The cache policy forwards the module's five headers (`Origin`,
+`Authorization`, `Accept`, `Content-Type`, `User-Agent`) and
+`extra_forwarded_headers` to the origin, and puts them all in the cache key.
+CloudFront allows 10 headers per cache policy by default, so the list can
+fill up.
+
+`origin_request_headers` forwards more headers through an origin request
+policy, without putting them in the cache key. luthersystems/ui-infrastructure#624
+needed this: the cache policy was full, so CloudFront dropped
+`X-A2A-Task-Kind` and insideout-mcp's `ListTasks` ignored its kind filter.
+
+Requests that differ only in an `origin_request_headers` header share a
+cached response. With `cache_default_ttl = 0` that matters only for a
+response that sends `Cache-Control: max-age`, so put a header that changes a
+cacheable response in `extra_forwarded_headers`. `Authorization` must stay in
+the cache policy (CloudFront refuses it in an origin request policy).

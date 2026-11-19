@@ -82,6 +82,17 @@ variable "extra_forwarded_headers" {
   description = "Additional request headers to whitelist in the cache policy — included in the cache key and forwarded to origin. Appended to the module defaults (Origin, Authorization, Accept, Content-Type, User-Agent). Use for custom headers like X-A2A-Task-Secret that downstream services depend on."
 }
 
+variable "origin_request_headers" {
+  type        = list(string)
+  default     = []
+  description = "Request headers to forward to the origin without putting them in the cache key, through an origin request policy. Use when the cache policy is full (10 headers by default). Requests that differ only in these headers share a cached response, so name only headers that do not change a cacheable response. Authorization cannot go here (CloudFront allows it only in the cache policy)."
+
+  validation {
+    condition     = length(var.origin_request_headers) <= 10 && !contains([for h in var.origin_request_headers : lower(h)], "authorization")
+    error_message = "origin_request_headers takes at most 10 headers (CloudFront's default quota) and not Authorization."
+  }
+}
+
 variable "use_cors" {
   type    = bool
   default = false
