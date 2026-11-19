@@ -61,7 +61,6 @@ module "aws_bastion" {
   aws_ssh_key_name                     = var.aws_ssh_key_name
   ssh_whitelist_ingress                = var.bastion_ssh_whitelist
   prometheus_server_security_group_id  = aws_security_group.monitoring_temp.id
-  authorized_key_sync_s3_bucket_arn    = var.ssh_public_keys_s3_bucket_arn
   common_static_asset_s3_bucket_arn    = var.common_static_s3_bucket_arn
   aws_kms_key_arns                     = var.aws_kms_key_arns
   aws_cloudwatch_alarm_actions_enabled = var.aws_cloudwatch_alarm_actions_enabled

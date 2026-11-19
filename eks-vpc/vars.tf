@@ -102,11 +102,6 @@ variable "aws_autorecovery_sns_arn" {
   default = ""
 }
 
-variable "ssh_public_keys_s3_bucket_arn" {
-  type    = string
-  default = ""
-}
-
 variable "common_static_s3_bucket_arn" {
   type    = string
   default = "arn:aws:s3:::luther-common-ln-common-static-s3-b5oc"

@@ -187,15 +187,6 @@ resource "aws_security_group_rule" "ingress_prometheus_server" {
   security_group_id        = aws_security_group.service.id
 }
 
-resource "aws_security_group_rule" "ingress_prometheus_server_pubkey" {
-  type                     = "ingress"
-  from_port                = var.authorized_key_sync_metrics_port
-  to_port                  = var.authorized_key_sync_metrics_port
-  protocol                 = "tcp"
-  source_security_group_id = var.prometheus_server_security_group_id
-  security_group_id        = aws_security_group.service.id
-}
-
 resource "aws_security_group_rule" "ingress_ssh" {
   type              = "ingress"
   from_port         = var.ssh_port
@@ -274,31 +265,6 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
       var.cloudwatch_log_group_arn,
       "${var.cloudwatch_log_group_arn}:*",
     ]
-  }
-}
-
-resource "aws_iam_role_policy" "authorized_key_sync" {
-  name   = "authorized-key-sync"
-  role   = aws_iam_role.service.id
-  policy = data.aws_iam_policy_document.authorized_key_sync.json
-}
-
-data "aws_iam_policy_document" "authorized_key_sync" {
-  statement {
-    sid       = "LutherListAuthorizedKeys"
-    actions   = ["s3:ListBucket"]
-    resources = [var.authorized_key_sync_s3_bucket_arn]
-  }
-
-  statement {
-    sid = "LutherGetAuthorizedKeys"
-
-    actions = [
-      "s3:HeadObject",
-      "s3:GetObject",
-    ]
-
-    resources = ["${var.authorized_key_sync_s3_bucket_arn}${var.authorized_key_sync_s3_key_prefix}*"]
   }
 }
 

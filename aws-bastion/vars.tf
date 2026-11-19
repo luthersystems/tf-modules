@@ -59,20 +59,6 @@ variable "prometheus_node_exporter_metrics_port" {
   default = "9111"
 }
 
-variable "authorized_key_sync_metrics_port" {
-  type    = string
-  default = "9112"
-}
-
-variable "authorized_key_sync_s3_bucket_arn" {
-  type = string
-}
-
-variable "authorized_key_sync_s3_key_prefix" {
-  type    = string
-  default = "/"
-}
-
 variable "aws_kms_key_arns" {
   type        = list(string)
   description = "KMS used to encrypt objects in the buckets accessed by the ASG"
