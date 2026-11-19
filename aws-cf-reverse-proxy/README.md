@@ -56,7 +56,8 @@ needed this: the cache policy was full, so CloudFront dropped
 `X-A2A-Task-Kind` and insideout-mcp's `ListTasks` ignored its kind filter.
 
 Requests that differ only in an `origin_request_headers` header share a
-cached response. With `cache_default_ttl = 0` that matters only for a
-response that sends `Cache-Control: max-age`, so put a header that changes a
-cacheable response in `extra_forwarded_headers`. `Authorization` must stay in
+cached response. So the module requires `cache_min_ttl = 0` and
+`cache_default_ttl = 0` with it: then only a response that sends
+`Cache-Control` max-age or s-maxage, or `Expires`, is cached. Put a header
+that changes a cacheable response in `extra_forwarded_headers` (at most 5). `Authorization` must stay in
 the cache policy (CloudFront refuses it in an origin request policy).

@@ -18,6 +18,9 @@ locals {
   # origin's error body still goes to the client.
   uncached_error_codes = [400, 403, 404, 405, 414, 416, 500, 501, 502, 503, 504]
 
+  # The headers of the cache policy: in the cache key and sent to the origin.
+  cache_policy_headers = concat(["Origin", "Authorization", "Accept", "Content-Type", "User-Agent"], var.extra_forwarded_headers)
+
   # Null when the caller names no origin_request_headers: the behaviors then
   # have no origin request policy, as before.
   origin_request_policy_id = length(var.origin_request_headers) > 0 ? aws_cloudfront_origin_request_policy.extra_headers[0].id : null
@@ -419,7 +422,7 @@ resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
     headers_config {
       header_behavior = "whitelist"
       headers {
-        items = concat(["Origin", "Authorization", "Accept", "Content-Type", "User-Agent"], var.extra_forwarded_headers)
+        items = local.cache_policy_headers
       }
     }
 
@@ -443,9 +446,10 @@ resource "aws_cloudfront_cache_policy" "respect_origin_headers" {
 #
 # A header here is not in the cache key, so two requests that differ only in
 # it share a cached response. That is safe only while such responses are not
-# cached: cache_default_ttl is 0, so a response is cached only when the
-# origin sends Cache-Control with a max-age. Keep a header that changes a
-# cacheable response in extra_forwarded_headers instead.
+# cached, so the policy needs cache_min_ttl and cache_default_ttl at 0: then a
+# response is cached only when the origin sends Cache-Control max-age or
+# s-maxage, or Expires. Keep a header that changes a cacheable response in
+# extra_forwarded_headers instead.
 resource "aws_cloudfront_origin_request_policy" "extra_headers" {
   count = length(var.origin_request_headers) > 0 ? 1 : 0
 
@@ -469,8 +473,16 @@ resource "aws_cloudfront_origin_request_policy" "extra_headers" {
   lifecycle {
     precondition {
       # A header in both lists is already forwarded by the cache policy.
-      condition     = length(setintersection([for h in var.origin_request_headers : lower(h)], [for h in concat(["Origin", "Authorization", "Accept", "Content-Type", "User-Agent"], var.extra_forwarded_headers) : lower(h)])) == 0
+      condition     = length(setintersection([for h in var.origin_request_headers : lower(h)], [for h in local.cache_policy_headers : lower(h)])) == 0
       error_message = "origin_request_headers must not repeat a header of the cache policy (the module's 5 or extra_forwarded_headers)."
+    }
+
+    precondition {
+      # With a TTL above 0, CloudFront caches a response the origin did not
+      # mark cacheable (with cache_min_ttl, even one marked no-store), and
+      # requests that differ only in these headers would get each other's.
+      condition     = var.cache_min_ttl == 0 && var.cache_default_ttl == 0
+      error_message = "origin_request_headers needs cache_min_ttl = 0 and cache_default_ttl = 0: the headers are not in the cache key."
     }
   }
 }
